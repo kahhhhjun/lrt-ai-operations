@@ -1,0 +1,114 @@
+[
+  {
+    "name": "Coldplay concert at Bukit Jalil, rainy Saturday evening",
+    "inputs": {
+      "datetime": "2026-04-25T19:00",
+      "day": "weekend",
+      "weather": "rainy",
+      "events": [
+        {"name": "Coldplay", "venue": "Bukit Jalil National Stadium", "expected_attendance": 80000}
+      ],
+      "is_holiday": false,
+      "emergency": null,
+      "line": "Sri Petaling",
+      "current_frequency_per_hr": 6,
+      "train_capacity": 600,
+      "running_cost_per_train_hr": 350
+    },
+    "expected": {
+      "frequency_should_increase": true,
+      "congestion_should_decrease": true
+    }
+  },
+  {
+    "name": "Normal Tuesday morning peak, clear weather",
+    "inputs": {
+      "datetime": "2026-04-21T08:00",
+      "day": "weekday",
+      "weather": "clear",
+      "events": [],
+      "is_holiday": false,
+      "emergency": null,
+      "line": "Kelana Jaya",
+      "current_frequency_per_hr": 12,
+      "train_capacity": 600,
+      "running_cost_per_train_hr": 350
+    },
+    "expected": {
+      "frequency_should_stay_similar": true
+    }
+  },
+  {
+    "name": "Public holiday afternoon, low demand",
+    "inputs": {
+      "datetime": "2026-05-01T14:00",
+      "day": "weekday",
+      "weather": "clear",
+      "events": [],
+      "is_holiday": true,
+      "emergency": null,
+      "line": "Ampang",
+      "current_frequency_per_hr": 8,
+      "train_capacity": 600,
+      "running_cost_per_train_hr": 350
+    },
+    "expected": {
+      "frequency_should_decrease": true,
+      "cost_should_decrease": true
+    }
+  },
+  {
+    "name": "Emergency: signal failure on adjacent line, rerouting passengers",
+    "inputs": {
+      "datetime": "2026-04-22T17:30",
+      "day": "weekday",
+      "weather": "cloudy",
+      "events": [],
+      "is_holiday": false,
+      "emergency": "signal_failure_adjacent_line",
+      "line": "Kajang",
+      "current_frequency_per_hr": 10,
+      "train_capacity": 600,
+      "running_cost_per_train_hr": 350
+    },
+    "expected": {
+      "frequency_should_increase": true
+    }
+  },
+  {
+    "name": "Late-night low demand, clear weather, no events",
+    "inputs": {
+      "datetime": "2026-04-23T23:30",
+      "day": "weekday",
+      "weather": "clear",
+      "events": [],
+      "is_holiday": false,
+      "emergency": null,
+      "line": "Putrajaya",
+      "current_frequency_per_hr": 6,
+      "train_capacity": 600,
+      "running_cost_per_train_hr": 350
+    },
+    "expected": {
+      "frequency_should_decrease": true
+    }
+  },
+  {
+    "name": "Quiet Sunday afternoon, no events",
+    "inputs": {
+      "datetime": "2026-04-26T15:00",
+      "day": "weekend",
+      "weather": "clear",
+      "events": [],
+      "is_holiday": false,
+      "emergency": null,
+      "line": "Kelana Jaya",
+      "current_frequency_per_hr": 8,
+      "train_capacity": 600,
+      "running_cost_per_train_hr": 350
+    },
+    "expected": {
+      "frequency_should_decrease": true
+    }
+  }
+]
