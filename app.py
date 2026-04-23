@@ -8,8 +8,8 @@ import pandas as pd
 import streamlit as st
 
 from core.calculator import WEATHER_MAX_FREQ, TRAIN_CAPACITY, compute_options, default_frequency as _dfreq
-from core.glm_client import extract_inputs_from_text
-from core.recommender import get_glm_recommendation, recommend_daily
+from core.glm_client import extract_inputs_from_image, extract_inputs_from_text
+from core.recommender import get_glm_recommendation, get_glm_recommendation_stream, recommend_daily
 
 st.set_page_config(page_title="LRT AI Operations", layout="wide")
 st.title("LRT AI Operations — Decision Support")
@@ -59,17 +59,10 @@ def _apply_option_to_window(schedule, chosen, tune_s, tune_e, cost_per_hr, weath
 # ═══════════════════════════════════════════════════════════════════════════════
 st.subheader("Full Day Schedule")
 
-c1, c2 = st.columns([2, 1])
-with c1:
-    sch_date = st.date_input("Date", value=date_type.today(), key="sch_date")
-    sch_line = st.selectbox("LRT line", LINES, key="sch_line")
-with c2:
-    sch_weekday  = sch_date.weekday()
-    sch_day_name = DAYS[sch_weekday]
-    st.info(
-        f"**{sch_day_name}** — {'Weekend' if sch_weekday >= 5 else 'Weekday'}\n\n"
-        f"{sch_date.strftime('%d %b %Y')} follows the **{sch_day_name}** timetable."
-    )
+sch_date = st.date_input("Date", value=date_type.today(), key="sch_date")
+sch_line = st.selectbox("LRT line", LINES, key="sch_line")
+sch_weekday  = sch_date.weekday()
+sch_day_name = DAYS[sch_weekday]
 
 # Auto-load default schedule when date or line changes
 _key = f"{sch_date}_{sch_line}"
@@ -101,7 +94,7 @@ if result is None:
 
 schedule = result["schedule"]
 
-title = f"### {sch_day_name} Schedule — {sch_line} ({sch_date.strftime('%d %b %Y')})"
+title = f"### {sch_date.strftime('%d %b %Y')} ({sch_day_name}) — {sch_line} Line"
 if mode == "updated" and ev_active:
     title += f"  *(with {ev_active[0]['name']})*"
 st.markdown(title)
@@ -147,7 +140,7 @@ df = pd.DataFrame(rows)
 
 def _style_rows(row):
     if mode == "updated" and tune_s <= schedule[row.name]["hour"] <= tune_e:
-        return ["background-color: #fff3cd; font-weight: bold"] * len(row)
+        return ["background-color: #1a3a5c; color: #ffffff; font-weight: bold"] * len(row)
     return [""] * len(row)
 
 st.dataframe(df.style.apply(_style_rows, axis=1), use_container_width=True, hide_index=True)
@@ -200,21 +193,18 @@ st.markdown("### Adjust schedule")
 st.markdown("**Step 1 — Select time window to adjust**")
 tw1, tw2 = st.columns(2)
 with tw1:
-    tune_start = st.slider("From", 6, 23, 6,  format="%d:00", key="tune_start")
+    tune_start = st.slider("From", 6, 22, 6,  format="%d:00", key="tune_start")
 with tw2:
-    tune_end   = st.slider("To",   6, 23, 23, format="%d:00", key="tune_end")
+    tune_end   = st.slider("To",   7, 23, 23, format="%d:00", key="tune_end")
 st.caption(
     f"Only **{tune_start:02d}:00 – {tune_end:02d}:00** will be adjusted. "
     "The rest of the day stays on the standard timetable."
 )
 
-# Running cost (always visible)
-sch_cost = st.number_input("Running cost / train-hour (RM)", 50, 2000, 350, key="sch_cost")
-
 # Step 2 — situation input
 st.markdown("**Step 2 — Describe the situation**")
 input_method = st.radio(
-    "", ["Manual inputs", "Describe in text (GLM extracts)"],
+    "", ["Manual inputs", "Describe in text (GLM extracts)", "Upload image / poster (GLM reads)"],
     horizontal=True, key="input_method", label_visibility="collapsed",
 )
 
@@ -222,22 +212,35 @@ if input_method == "Manual inputs":
     ai1, ai2 = st.columns(2)
     with ai1:
         sch_weather = st.selectbox("Weather", ["clear", "cloudy", "rainy", "stormy"], key="sch_weather")
+        sch_cost    = st.number_input("Running cost / train-hour (RM)", 50, 2000, 350, key="sch_cost")
     with ai2:
         ev_name = st.text_input("Event name (leave blank if none)", key="ev_name")
         ev_pax  = st.number_input("Extra passengers/hr at station", 0, 30_000, 0, key="ev_pax")
-else:
+
+elif input_method == "Describe in text (GLM extracts)":
     sit_text = st.text_area(
         "Describe the situation",
         height=100,
         placeholder='e.g. "Blackpink concert tonight at 8pm, around 4,000 extra passengers per hour. Heavy rain since afternoon."',
         key="sit_text",
     )
+    sch_cost = st.session_state.get("sch_cost", 350)
+
+else:  # Upload image
+    uploaded_file = st.file_uploader(
+        "Upload a concert poster, event flyer, or news screenshot",
+        type=["jpg", "jpeg", "png", "webp"],
+        key="uploaded_image",
+    )
+    if uploaded_file:
+        st.image(uploaded_file, caption=uploaded_file.name, width=300)
+    sch_cost = st.session_state.get("sch_cost", 350)
 
 # Step 3 — Analyse
 st.markdown("**Step 3 — Analyse options**")
 if st.button("Analyse", type="primary", key="analyse_btn"):
-    if tune_end < tune_start:
-        st.warning("'To' hour must be equal to or after 'From' hour.")
+    if tune_end <= tune_start:
+        st.warning(f"'To' must be after 'From'. Minimum window is 1 hour (e.g. {tune_start:02d}:00 – {tune_start+1:02d}:00).")
         st.stop()
 
     # Midpoint of window as the representative hour for single-hour analysis
@@ -259,21 +262,59 @@ if st.button("Analyse", type="primary", key="analyse_btn"):
                 st.warning(f"GLM unavailable ({_ex}) — using keyword fallback.")
                 from core.glm_client import _placeholder_extract
                 extracted = _placeholder_extract(raw_text)
-        a_weather   = extracted.get("weather", "clear")
-        a_ev_raw    = extracted.get("events", [])
-        a_line      = extracted.get("line") or sch_line
+        a_weather = extracted.get("weather", "clear")
+        a_ev_raw  = extracted.get("events", [])
+        a_line    = extracted.get("line") or sch_line
         st.info(f"GLM extracted — weather: **{a_weather}** | events: {[e['name'] for e in a_ev_raw] or ['none']}")
-    else:
+
+    elif input_method == "Upload image / poster (GLM reads)":
+        uploaded_file = st.session_state.get("uploaded_image")
+        if not uploaded_file:
+            st.warning("Please upload an image first.")
+            st.stop()
+        mime_type = uploaded_file.type or "image/jpeg"
+        with st.spinner("Reading image with OCR, then extracting details..."):
+            try:
+                extracted = extract_inputs_from_image(uploaded_file.getvalue(), mime_type)
+            except Exception as _ex:
+                st.error(f"Could not read image: {_ex}")
+                st.stop()
+        a_weather = extracted.get("weather", "clear")
+        a_ev_raw  = extracted.get("events", [])
+        a_line    = extracted.get("line") or sch_line
+        st.info(f"GLM read image — weather: **{a_weather}** | events: {[e['name'] for e in a_ev_raw] or ['none']}")
+
+    else:  # Manual inputs
         a_weather = st.session_state.get("sch_weather", "clear")
         a_ev_raw  = [{"name": ev_name, "passengers_per_hr": int(ev_pax)}] \
                     if ev_name.strip() and ev_pax > 0 else []
         a_line    = sch_line
 
+    # Pull emergency fields from extraction (text/image) or default None for manual
+    a_emergency      = extracted.get("emergency")      if input_method != "Manual inputs" else None
+    a_emergency_type = extracted.get("emergency_type") if input_method != "Manual inputs" else None
+
+    # Show emergency banner immediately so duty manager sees it before GLM finishes
+    _EMERGENCY_LABELS = {
+        "track_incident":  ("🚨 TRACK INCIDENT — Service suspended. Maximum frequency required on resumption.", "error"),
+        "signal_failure":  ("⚠️ SIGNAL FAILURE — Reduce frequency for safety.", "warning"),
+        "power_failure":   ("⚠️ POWER FAILURE — Service disrupted. Reduce frequency.", "warning"),
+        "breakdown":       ("🔧 TRAIN BREAKDOWN — One train out of service.", "warning"),
+        "evacuation":      ("🚨 EVACUATION — Maximum frequency to clear stations.", "error"),
+        "overcrowding":    ("⚠️ OVERCROWDING EMERGENCY — Add trains urgently.", "warning"),
+    }
+    if a_emergency_type and a_emergency_type in _EMERGENCY_LABELS:
+        msg, level = _EMERGENCY_LABELS[a_emergency_type]
+        getattr(st, level)(f"{msg}\n\nDetected: *{a_emergency}*")
+    elif a_emergency:
+        st.warning(f"⚠️ Emergency detected: *{a_emergency}*")
+
     inputs = {
         "datetime":                 datetime.combine(sch_date, time(hour=rep_hour)).isoformat(timespec="minutes"),
         "weather":                  a_weather,
         "events":                   a_ev_raw,
-        "emergency":                None,
+        "emergency":                a_emergency,
+        "emergency_type":           a_emergency_type,
         "line":                     a_line,
         "current_frequency_per_hr": _dfreq(rep_hour, sch_date.weekday(), sch_line),
         "train_capacity":           TRAIN_CAPACITY,
@@ -323,32 +364,64 @@ if analysis and analysis.get("options"):
                 st.success(f"**{opt['label'].upper()}** ✅ GLM pick")
             else:
                 st.info(f"**{opt['label'].upper()}**")
-            st.metric("Frequency",   f"{opt['recommended_frequency_per_hr']}/hr", delta=freq_delta)
-            st.metric("Load factor", f"{opt['load_factor_pct']}%",
-                      delta=opt["congestion_change_pct"], delta_color="inverse")
-            st.metric("Cost delta",  f"RM {opt['cost_delta_rm']:,.0f}",
-                      delta=opt["cost_delta_rm"], delta_color="inverse")
-            st.metric("Pax served",  f"{opt['passengers_served_per_hr']:,}/hr",
-                      delta=opt["passengers_served_delta"])
+            freq_val = opt["recommended_frequency_per_hr"]
+            st.metric(
+                "Frequency",
+                "SUSPENDED" if freq_val == 0 else f"{freq_val}/hr",
+                delta=freq_delta,
+                help="Trains running per hour. Arrow shows change vs current schedule. More trains = shorter wait time between arrivals.",
+            )
+            st.metric(
+                "Load factor",
+                f"{opt['load_factor_pct']}%",
+                delta=opt["congestion_change_pct"],
+                delta_color="inverse",
+                help="How full the trains will be. 75% = comfortable target. 100% = completely full. Above 100% = passengers left behind on the platform.",
+            )
+            st.metric(
+                "Cost delta",
+                f"RM {opt['cost_delta_rm']:,.0f}",
+                delta=opt["cost_delta_rm"],
+                delta_color="inverse",
+                help="Extra operating cost per hour vs current schedule. Positive = more spending to add trains. Negative = saving by reducing trains.",
+            )
+            st.metric(
+                "Pax served",
+                f"{opt['passengers_served_per_hr']:,}/hr",
+                delta=opt["passengers_served_delta"],
+                help="Passengers who can actually board trains per hour. Capped by total train capacity — when load factor exceeds 100%, not everyone can board.",
+            )
 
-    # ── Phase 2: auto-trigger GLM reasoning (runs on the same render as cards) ─
+    # ── Phase 2: stream GLM reasoning live (animated status + live text) ────────
     if not reasoning_done:
         glm_inputs = st.session_state.get("_glm_inputs")
         if glm_inputs:
-            with st.spinner("GLM reasoning... (this may take a few seconds)"):
+            from core.recommender import _parse_recommendation
+            try:
+                with st.status("GLM is reasoning...", expanded=True) as glm_status:
+                    full_text = st.write_stream(
+                        get_glm_recommendation_stream(glm_inputs, options)
+                    )
+                    glm_status.update(label="Reasoning complete", state="complete", expanded=True)
+            except Exception as _stream_err:
+                # Streaming failed (connection dropped) — retry with a regular blocking call
+                st.warning(f"Streaming interrupted ({type(_stream_err).__name__}) — retrying without streaming...")
                 try:
-                    choice, explanation = get_glm_recommendation(glm_inputs, options)
+                    with st.spinner("GLM reasoning..."):
+                        _choice, _expl = get_glm_recommendation(glm_inputs, options)
+                    full_text = _expl + f"\n\nRECOMMENDATION: {_choice}"
                 except (TimeoutError, ConnectionError) as exc:
                     moderate = next(o for o in options if o["label"] == "moderate")
                     lf = moderate["load_factor_pct"]
                     hw = round(60 / max(moderate["recommended_frequency_per_hr"], 1), 1)
-                    choice = "moderate"
-                    explanation = (
+                    full_text = (
                         f"⚠ GLM unavailable ({exc}).\n\n"
-                        f"**Math-based: Moderate** — {moderate['recommended_frequency_per_hr']}/hr "
-                        f"(every {hw} min), load factor {lf}%. "
-                        "Meets demand without over- or under-provisioning."
+                        f"Math-based recommendation: Moderate — {moderate['recommended_frequency_per_hr']}/hr "
+                        f"(every {hw} min), load factor {lf}%. Meets demand without over-provisioning.\n\n"
+                        f"RECOMMENDATION: moderate"
                     )
+                    st.warning(full_text)
+            choice, explanation = _parse_recommendation(full_text)
             st.session_state["_analysis"]["chosen_option"] = choice
             st.session_state["_analysis"]["explanation"]   = explanation
             st.session_state.pop("_glm_inputs", None)

@@ -1,7 +1,8 @@
 """Rule-based math layer grounded in LRT system assumptions:
   - Train capacity (normal): 600 pax | max: 900 pax
   - Standard headway schedule (Mon–Fri / Sat / Sun) defined in _*_SCHEDULE tables
-  - Bad weather: reduces demand AND caps max frequency (trains slow down for safety)
+  - Bad weather: reduces BASELINE demand but increases EVENT ridership (people take LRT instead of driving)
+  - Bad weather also caps max frequency (trains slow down for safety)
 """
 
 from datetime import datetime
@@ -59,12 +60,22 @@ _SCHEDULES = {
     },
 }
 
-# Weather — effect on passenger demand (bad weather → people stay home / drive less)
+# Weather — effect on BASELINE demand (bad weather → people stay home / make fewer trips)
 WEATHER_PAX_MULT = {
     "clear":  1.00,
     "cloudy": 0.95,
-    "rainy":  0.85,
+    "rainy":  0.88,
     "stormy": 0.70,
+}
+
+# Weather — effect on EVENT passenger load at station.
+# Rain pushes event-goers onto LRT instead of driving or walking.
+# Source: Malaysia Cup 2024 verdict — "rainy weather consistently adds 15-20% more passengers than forecast"
+WEATHER_EVENT_MULT = {
+    "clear":  1.00,
+    "cloudy": 1.05,   # slight shift to LRT
+    "rainy":  1.20,   # +20% — empirically validated
+    "stormy": 0.85,   # fewer people attend outdoor events in a storm
 }
 
 # Weather — max allowed frequency (trains must slow down in bad weather)
@@ -136,25 +147,24 @@ def _option_metrics(inputs: dict, freq: int, expected: int, max_freq: int) -> di
     cost_per_hr = inputs.get("running_cost_per_train_hr", 350)
 
     curr_capacity = curr_freq * capacity
-    new_capacity  = freq * capacity
+    new_capacity  = freq * capacity   # will be 0 if freq=0 (service suspended)
 
     curr_served = min(expected, curr_capacity)
-    new_served  = min(expected, new_capacity)
+    new_served  = min(expected, new_capacity)  # 0 if suspended
 
     cost_delta = (freq - curr_freq) * cost_per_hr
 
-    # Productivity: how many passengers can actually be served per hour
-    passengers_served     = new_served
-    passengers_served_delta = new_served - curr_served
+    passengers_served        = new_served
+    passengers_served_delta  = new_served - curr_served
 
-    # Load factor as percentage (75% = target, 100% = normal capacity full, >100% = overcrowded)
-    load_before       = round(min(expected / max(curr_capacity, 1), 2.0) * 100, 1)
-    load_after        = round(min(expected / max(new_capacity, 1), 2.0) * 100, 1)
-    congestion_change = round(load_after - load_before, 1)
+    load_before_raw   = expected / max(curr_capacity, 1)
+    load_after_raw    = expected / max(new_capacity, 1) if new_capacity > 0 else float("inf")
+    load_after        = 300.0 if load_after_raw == float("inf") else round(min(load_after_raw, 3.0) * 100, 1)
+    congestion_change = round((min(load_after_raw, 9.99) - load_before_raw) * 100, 1)
 
     wait_before = round(60 / max(curr_freq, 1) / 2, 1)
-    wait_after  = round(60 / max(freq, 1) / 2, 1)
-    time_saved  = round(wait_before - wait_after, 1)
+    wait_after  = round(60 / max(freq, 1) / 2, 1) if freq > 0 else None
+    time_saved  = round(wait_before - wait_after, 1) if wait_after is not None else None
 
     return {
         "recommended_frequency_per_hr":  freq,
@@ -179,12 +189,13 @@ def compute_options(inputs: dict) -> list[dict]:
     # Step 1: baseline passengers from time of day
     baseline = _baseline_pax(hour, is_wknd)
 
-    # Step 2: add event passengers (directly specified as pax/hr at station)
-    event_pax = sum(e.get("passengers_per_hr", 0) for e in events)
+    # Step 2: event passengers — rain pushes attendees to take LRT instead of driving
+    raw_event_pax = sum(e.get("passengers_per_hr", 0) for e in events)
+    event_pax = int(raw_event_pax * WEATHER_EVENT_MULT.get(weather, 1.0))
 
-    # Step 3: weather reduces total demand (people less likely to travel)
+    # Step 3: weather reduces baseline travel only (people stay home, unrelated to events)
     pax_mult = WEATHER_PAX_MULT.get(weather, 1.0)
-    expected = int((baseline + event_pax) * pax_mult)
+    expected = int(baseline * pax_mult + event_pax)
 
     # Step 4: compute needed frequency for target load factor
     capacity = inputs.get("train_capacity", TRAIN_CAPACITY)
@@ -194,17 +205,39 @@ def compute_options(inputs: dict) -> list[dict]:
     max_freq = WEATHER_MAX_FREQ.get(weather, 20)
     needed   = min(needed, max_freq)
 
-    # Step 6: emergency bumps minimum frequency
-    if inputs.get("emergency"):
+    # Step 6: emergency — behaviour depends on type
+    emergency_type = inputs.get("emergency_type") or ("overcrowding" if inputs.get("emergency") else None)
+    if emergency_type:
         curr = inputs["current_frequency_per_hr"]
-        needed = min(max(needed, curr + 2), max_freq)
+        if emergency_type in ("signal_failure", "power_failure"):
+            # Infrastructure problem — must run slower/fewer trains for safety
+            needed = min(needed, max(1, curr - 2))
+            max_freq = min(max_freq, max(1, curr - 1))
+        elif emergency_type == "breakdown":
+            # One train lost — slight reduction, but passengers need rerouting
+            needed = min(max(needed, curr + 1), max_freq)
+        elif emergency_type == "evacuation":
+            # Clear stations fast — maximum frequency to move people out
+            needed = min(max_freq, curr + 4)
+        elif emergency_type != "track_incident":
+            # overcrowding / generic — add trains
+            needed = min(max(needed, curr + 2), max_freq)
+        # track_incident handled separately in Step 7
 
     # Step 7: three options
-    freq_map = {
-        "conservative": max(1, needed - 2),
-        "moderate":     needed,
-        "aggressive":   min(needed + 3, max_freq),
-    }
+    if emergency_type == "track_incident":
+        # Service suspended NOW. Options represent resumption strategy after clearance.
+        freq_map = {
+            "conservative": 0,                  # remain suspended, wait for full all-clear
+            "moderate":     min(5, max_freq),   # cautious resumption at reduced speed
+            "aggressive":   max_freq,            # immediate full resumption to clear backlog
+        }
+    else:
+        freq_map = {
+            "conservative": max(1, needed - 2),
+            "moderate":     needed,
+            "aggressive":   min(needed + 3, max_freq),
+        }
 
     return [
         {"label": label, **_option_metrics(inputs, freq, expected, max_freq)}
@@ -268,7 +301,7 @@ def compute_daily_schedule(
 
         expected_pax      = moderate["expected_passengers_per_hr"]
         std_capacity      = std_freq * train_capacity
-        std_load_factor   = round(min(expected_pax / max(std_capacity, 1), 2.0) * 100, 1)
+        std_load_factor   = round(min(expected_pax / max(std_capacity, 1), 3.0) * 100, 1)
 
         schedule.append({
             "hour":                     hour,

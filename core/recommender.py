@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 from core.calculator import compute_options, compute_daily_schedule
-from core.glm_client import GLM_API_KEY, call_glm
+from core.glm_client import GLM_API_KEY, call_glm, call_glm_stream
 
 _HISTORY_PATH = Path(__file__).parent.parent / "data" / "history.json"
 
@@ -47,6 +47,12 @@ Key facts you must use in your reasoning:
 - Peak hours (7-9am, 5-7pm weekdays): highest commuter volume.
 - Cost increases with every extra train deployed — minimising cost while maintaining service quality is the goal.
 - The goal is NOT to maximise revenue — this is a public service. Move the most people comfortably at the lowest cost.
+- EMERGENCY TYPES and how they affect recommendations:
+  * track_incident (person/suicide on track): service is SUSPENDED. On resumption, maximum frequency needed to clear platform backlog. Safety is absolute priority.
+  * signal_failure / power_failure: infrastructure problem — REDUCE frequency for safety, not increase.
+  * breakdown: one fewer train available — slight reduction, manage passenger flow.
+  * evacuation (fire/bomb): maximum frequency to clear stations rapidly.
+  * overcrowding: add trains urgently.
 
 Your task:
 1. Identify the PRIMARY factor(s) driving demand in this specific situation.
@@ -55,8 +61,11 @@ Your task:
 4. Explain why the other two options are either insufficient (too few trains) or wasteful (too many trains).
 5. End with one clear action sentence for the duty manager.
 
-Return ONLY valid JSON (no markdown, no extra text):
-{"choice": "conservative" | "moderate" | "aggressive", "explanation": "your detailed reasoning here"}"""
+Write your reasoning as plain paragraphs. Do NOT use JSON, bullet points, or markdown headers.
+On the very last line write exactly one of these (nothing else on that line):
+RECOMMENDATION: conservative
+RECOMMENDATION: moderate
+RECOMMENDATION: aggressive"""
 
 
 def _build_options_prompt(inputs: dict, options: list[dict]) -> str:
@@ -87,7 +96,11 @@ def _build_options_prompt(inputs: dict, options: list[dict]) -> str:
     if not events_text:
         events_text = "\n    - None"
 
-    emergency_text = f"\n    ⚠ EMERGENCY: {inputs['emergency']}" if inputs.get("emergency") else "\n    - None"
+    if inputs.get("emergency"):
+        etype = inputs.get("emergency_type", "")
+        emergency_text = f"\n    ⚠ EMERGENCY ({etype}): {inputs['emergency']}"
+    else:
+        emergency_text = "\n    - None"
 
     options_lines = ""
     for opt in options:
@@ -138,25 +151,29 @@ Based on the situation and historical precedents above, which option should the 
 Reference past incidents where relevant. Cite load factor, headway, cost vs revenue in your reasoning."""
 
 
-def _extract_json(text: str) -> dict:
-    """Try to pull a JSON object out of the GLM response, even if it has
-    markdown code fences or extra text around it."""
-    cleaned = text.strip()
-    # Strip markdown code fences: ```json ... ``` or ``` ... ```
-    if "```" in cleaned:
-        parts = cleaned.split("```")
-        for part in parts:
-            part = part.strip()
-            if part.startswith("json"):
-                part = part[4:].strip()
-            if part.startswith("{"):
-                cleaned = part
-                break
-    start = cleaned.find("{")
-    end   = cleaned.rfind("}") + 1
-    if start == -1 or end == 0:
-        raise ValueError("no JSON object in response")
-    return json.loads(cleaned[start:end])
+def _parse_recommendation(text: str) -> tuple[str, str]:
+    """Extract choice from 'RECOMMENDATION: X' tag and return (choice, explanation_without_tag)."""
+    choice = "moderate"
+    explanation_lines = []
+    for line in text.strip().split("\n"):
+        if line.strip().upper().startswith("RECOMMENDATION:"):
+            raw = line.split(":", 1)[1].strip().lower()
+            for opt in ("conservative", "moderate", "aggressive"):
+                if opt in raw:
+                    choice = opt
+                    break
+        else:
+            explanation_lines.append(line)
+    explanation = "\n".join(explanation_lines).strip()
+    # Fallback: if GLM ignored the tag entirely, keyword-detect from full text
+    if not explanation:
+        explanation = text.strip()
+        lower = text.lower()
+        if "conservative" in lower and "aggressive" not in lower:
+            choice = "conservative"
+        elif "aggressive" in lower and "conservative" not in lower:
+            choice = "aggressive"
+    return choice, explanation
 
 
 def _get_glm_decision(inputs: dict, options: list[dict]) -> tuple[str, str]:
@@ -168,8 +185,7 @@ def _get_glm_decision(inputs: dict, options: list[dict]) -> tuple[str, str]:
             "It meets the mathematically optimal frequency to handle the predicted demand "
             "without over-provisioning. The conservative option risks platform overcrowding "
             "during peak load, while the aggressive option increases cost beyond what the "
-            "demand level justifies. Duty manager should action the moderate schedule "
-            "immediately.",
+            "demand level justifies. Duty manager should action the moderate schedule immediately.",
         )
 
     prompt = _build_options_prompt(inputs, options)
@@ -182,32 +198,36 @@ def _get_glm_decision(inputs: dict, options: list[dict]) -> tuple[str, str]:
         return (
             "moderate",
             f"⚠ GLM unavailable ({exc}).\n\n"
-            f"**Math-based recommendation: Moderate**\n"
-            f"Run {moderate['recommended_frequency_per_hr']} trains/hr (every {hw} min). "
-            f"Projected load factor: {lf}%. "
-            f"This meets calculated demand without over- or under-provisioning. "
-            f"Conservative risks overcrowding; aggressive adds unnecessary cost at current demand levels.",
+            f"Math-based recommendation: Moderate — run {moderate['recommended_frequency_per_hr']} trains/hr "
+            f"(every {hw} min). Projected load factor: {lf}%. Meets calculated demand without "
+            f"over- or under-provisioning. Conservative risks overcrowding; aggressive adds "
+            f"unnecessary cost at current demand levels.",
         )
 
-    # Attempt 1: parse as JSON {"choice": ..., "explanation": ...}
-    try:
-        parsed = _extract_json(response)
-        choice = parsed.get("choice", "moderate")
-        explanation = parsed.get("explanation", response)
-        if choice not in ("conservative", "moderate", "aggressive"):
-            choice = "moderate"
-        return choice, explanation
-    except Exception:
-        pass
+    return _parse_recommendation(response)
 
-    # Attempt 2: GLM ignored JSON format — keyword-detect the choice
-    choice = "moderate"
-    lower = response.lower()
-    if "conservative" in lower and "aggressive" not in lower:
-        choice = "conservative"
-    elif "aggressive" in lower and "conservative" not in lower:
-        choice = "aggressive"
-    return choice, response
+
+def get_glm_recommendation_stream(inputs: dict, options: list[dict]):
+    """Generator: yields GLM reasoning as text chunks (for st.write_stream).
+    Last chunk will include 'RECOMMENDATION: <choice>' on its own line."""
+    if not GLM_API_KEY:
+        moderate = next(o for o in options if o["label"] == "moderate")
+        lf = moderate["load_factor_pct"]
+        hw = round(60 / max(moderate["recommended_frequency_per_hr"], 1), 1)
+        placeholder = (
+            "[PLACEHOLDER — set GLM_API_KEY in .env for real reasoning]\n\n"
+            f"The moderate option offers the best balance. Running {moderate['recommended_frequency_per_hr']} "
+            f"trains/hr (every {hw} min) achieves a {lf}% load factor, meeting demand without "
+            f"over-provisioning. Conservative risks overcrowding; aggressive adds unnecessary cost "
+            f"at current demand levels. Deploy the moderate schedule immediately.\n\n"
+            f"RECOMMENDATION: moderate"
+        )
+        for char in placeholder:
+            yield char
+        return
+
+    prompt = _build_options_prompt(inputs, options)
+    yield from call_glm_stream(prompt, system=_OPTIONS_SYSTEM, temperature=0.3)
 
 
 def get_glm_recommendation(inputs: dict, options: list[dict]) -> tuple[str, str]:
