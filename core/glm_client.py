@@ -22,29 +22,29 @@ _EXTRACT_SYSTEM = """You are a data extraction assistant for a Malaysian LRT ope
 Read the situation description and extract operational factors.
 Return ONLY a valid JSON object with exactly these fields:
 {
-  "day": "weekday" or "weekend",
   "weather": "clear", "cloudy", "rainy", or "stormy",
-  "is_holiday": true or false,
   "emergency": a short string describing the emergency, or null,
-  "line": one of ["Kelana Jaya", "Ampang", "Sri Petaling", "Kajang", "Putrajaya"] or null,
-  "events": [{"name": string, "expected_attendance": integer}]
+  "line": one of ["Kelana Jaya", "Ampang", "Sri Petaling"] or null,
+  "events": [{"name": string, "passengers_per_hr": integer}]
 }
+"passengers_per_hr" means extra passengers arriving at the station per hour due to the event.
+Events include concerts, sports matches, public holidays, festivals, marathons — anything that draws extra people.
 If a field cannot be determined from the text, use sensible defaults:
-day="weekday", weather="clear", is_holiday=false, emergency=null, line=null, events=[].
+weather="clear", emergency=null, line=null, events=[].
 Return ONLY the JSON. No explanation, no markdown, no code block."""
 
 
 def _placeholder_extract(text: str) -> dict:
     """Keyword-based fallback when no API key is set."""
+    import re
     t = text.lower()
     result = {
-        "day": "weekday",
-        "weather": "clear",
-        "is_holiday": False,
+        "weather":   "clear",
         "emergency": None,
-        "line": None,
-        "events": [],
+        "line":      None,
+        "events":    [],
     }
+
     if any(w in t for w in ["storm", "thunderstorm"]):
         result["weather"] = "stormy"
     elif any(w in t for w in ["rain", "rainy", "raining", "wet", "drizzle"]):
@@ -52,33 +52,27 @@ def _placeholder_extract(text: str) -> dict:
     elif any(w in t for w in ["cloud", "cloudy", "overcast"]):
         result["weather"] = "cloudy"
 
-    if any(w in t for w in ["weekend", "saturday", "sunday"]):
-        result["day"] = "weekend"
-
-    if any(w in t for w in ["public holiday", "holiday", "hari raya", "chinese new year", "deepavali", "merdeka"]):
-        result["is_holiday"] = True
-
     if any(w in t for w in ["emergency", "accident", "breakdown", "failure", "incident", "evacuation"]):
         result["emergency"] = "emergency situation detected"
 
-    for line in ["kelana jaya", "ampang", "sri petaling", "kajang", "putrajaya"]:
+    for line in ["kelana jaya", "ampang", "sri petaling"]:
         if line in t:
             result["line"] = " ".join(w.capitalize() for w in line.split())
             break
 
-    # Rough attendance extraction: look for numbers near concert/event keywords
-    import re
-    event_keywords = ["concert", "match", "game", "festival", "rally", "marathon", "event", "show", "gig"]
+    event_keywords = ["concert", "match", "game", "festival", "rally", "marathon",
+                      "event", "show", "gig", "holiday"]
     if any(k in t for k in event_keywords):
-        numbers = re.findall(r"(\d[\d,]*)\s*(?:fans?|people|attendees?|audience|spectators?|crowd|visitors?|pax)?", t)
-        attendance = 0
+        # Extract passenger numbers from text (e.g. "4,000 extra passengers")
+        numbers = re.findall(r"(\d[\d,]*)\s*(?:extra\s+)?(?:passengers?|pax|people|fans?|crowd)?", t)
+        pax_hr = 2_000  # default if no number found
         for n in numbers:
             val = int(n.replace(",", ""))
-            if 1_000 <= val <= 200_000:
-                attendance = val
+            if 500 <= val <= 30_000:
+                pax_hr = val
                 break
         event_name = next((k.capitalize() for k in event_keywords if k in t), "Event")
-        result["events"] = [{"name": event_name, "expected_attendance": attendance or 30_000}]
+        result["events"] = [{"name": event_name, "passengers_per_hr": pax_hr}]
 
     return result
 
@@ -98,17 +92,22 @@ def call_glm(prompt: str, system: str | None = None, temperature: float = 0.3) -
         messages.append({"role": "system", "content": system})
     messages.append({"role": "user", "content": prompt})
 
-    resp = requests.post(
-        GLM_ENDPOINT,
-        headers={
-            "Authorization": f"Bearer {GLM_API_KEY}",
-            "Content-Type": "application/json",
-        },
-        json={"model": GLM_MODEL, "messages": messages, "temperature": temperature},
-        timeout=30,
-    )
-    resp.raise_for_status()
-    return resp.json()["choices"][0]["message"]["content"]
+    try:
+        resp = requests.post(
+            GLM_ENDPOINT,
+            headers={
+                "Authorization": f"Bearer {GLM_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={"model": GLM_MODEL, "messages": messages, "temperature": temperature},
+            timeout=60,
+        )
+        resp.raise_for_status()
+        return resp.json()["choices"][0]["message"]["content"]
+    except requests.exceptions.Timeout:
+        raise TimeoutError("GLM API timed out. The server took too long to respond.")
+    except requests.exceptions.ConnectionError:
+        raise ConnectionError("Cannot reach GLM API. Check your internet connection and endpoint URL.")
 
 
 def extract_inputs_from_text(text: str) -> dict:
@@ -116,11 +115,12 @@ def extract_inputs_from_text(text: str) -> dict:
     if not GLM_API_KEY:
         return _placeholder_extract(text)
 
-    response = call_glm(text, system=_EXTRACT_SYSTEM, temperature=0.1)
     try:
+        response = call_glm(text, system=_EXTRACT_SYSTEM, temperature=0.1)
         start = response.find("{")
-        end = response.rfind("}") + 1
+        end   = response.rfind("}") + 1
         return json.loads(response[start:end])
+    except (TimeoutError, ConnectionError):
+        raise
     except Exception:
-        # If GLM returns malformed JSON, fall back to keyword extraction
         return _placeholder_extract(text)

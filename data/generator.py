@@ -7,8 +7,18 @@ from pathlib import Path
 
 random.seed(42)
 
-WEATHERS = ["clear", "clear", "clear", "cloudy", "rainy", "stormy"]
-LINES = ["Kelana Jaya", "Ampang", "Sri Petaling", "Kajang", "Putrajaya"]
+WEATHERS  = ["clear", "clear", "clear", "cloudy", "rainy", "stormy"]
+LINES     = ["Kelana Jaya", "Ampang", "Sri Petaling"]
+EVENTS    = ["Coldplay Concert", "Football Match", "Public Holiday", "Marathon", "Festival"]
+
+PAX_PEAK        = 5_000
+PAX_OFF_PEAK    = 2_500
+PAX_NIGHT       =   800
+PAX_WEEKEND_DAY = 2_000
+PAX_WEEKEND_LOW =   600
+
+WEATHER_PAX_MULT = {"clear": 1.0, "cloudy": 0.95, "rainy": 0.85, "stormy": 0.70}
+PEAK_HOURS = {7, 8, 17, 18}
 
 
 def generate(rows: int = 500, output: str = "data/synthetic.csv") -> None:
@@ -19,39 +29,37 @@ def generate(rows: int = 500, output: str = "data/synthetic.csv") -> None:
     with out_path.open("w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow([
-            "datetime", "day", "line", "weather", "is_holiday",
-            "event_nearby", "expected_attendance", "passengers"
+            "datetime", "day_type", "line", "weather",
+            "event_name", "event_passengers_per_hr", "expected_passengers_per_hr"
         ])
+
         for i in range(rows):
-            ts = start + timedelta(hours=i)
-            hour = ts.hour
-            is_weekend = ts.weekday() >= 5
-            day_label = "weekend" if is_weekend else "weekday"
-            is_peak = (not is_weekend) and hour in {7, 8, 9, 17, 18, 19}
-            is_holiday = random.random() < 0.1
-            weather = random.choice(WEATHERS)
-            line = random.choice(LINES)
-            event_nearby = random.random() < 0.08
-            attendance = random.randint(10_000, 80_000) if event_nearby else 0
+            ts      = start + timedelta(hours=i)
+            hour    = ts.hour
+            is_wknd = ts.weekday() >= 5
+            day_type = "weekend" if is_wknd else "weekday"
+            weather  = random.choice(WEATHERS)
+            line     = random.choice(LINES)
 
-            if is_holiday:
-                base = 2_500
-            elif is_weekend:
-                base = 3_500 if 11 <= hour <= 21 else 800
-            elif is_peak:
-                base = 8_000
+            has_event    = random.random() < 0.08
+            event_name   = random.choice(EVENTS) if has_event else ""
+            event_pax_hr = random.randint(1_000, 5_000) if has_event else 0
+
+            if is_wknd:
+                base = PAX_WEEKEND_DAY if 11 <= hour <= 19 else PAX_WEEKEND_LOW
+            elif hour in PEAK_HOURS:
+                base = PAX_PEAK
             elif 6 <= hour <= 22:
-                base = 4_000
+                base = PAX_OFF_PEAK
             else:
-                base = 800
+                base = PAX_NIGHT
 
-            mult = {"clear": 1.0, "cloudy": 1.05, "rainy": 1.20, "stormy": 1.35}[weather]
-            event_mult = 1.0 + min(attendance / 100_000, 1.5)
-            passengers = int(base * mult * event_mult * random.uniform(0.9, 1.1))
+            mult     = WEATHER_PAX_MULT[weather]
+            expected = int((base + event_pax_hr) * mult * random.uniform(0.9, 1.1))
 
             writer.writerow([
-                ts.isoformat(timespec="minutes"), day_label, line, weather, is_holiday,
-                event_nearby, attendance, passengers
+                ts.isoformat(timespec="minutes"), day_type, line, weather,
+                event_name, event_pax_hr, expected
             ])
 
     print(f"Wrote {rows} rows to {out_path}")

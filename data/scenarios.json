@@ -1,114 +1,80 @@
 [
   {
-    "name": "Coldplay concert at Bukit Jalil, rainy Saturday evening",
+    "name": "Coldplay concert, Sri Petaling, rainy Saturday 7pm",
     "inputs": {
       "datetime": "2026-04-25T19:00",
-      "day": "weekend",
       "weather": "rainy",
-      "events": [
-        {"name": "Coldplay", "venue": "Bukit Jalil National Stadium", "expected_attendance": 80000}
-      ],
-      "is_holiday": false,
+      "events": [{"name": "Coldplay Concert (Bukit Jalil)", "passengers_per_hr": 4000}],
       "emergency": null,
       "line": "Sri Petaling",
-      "current_frequency_per_hr": 6,
+      "current_frequency_per_hr": 4,
       "train_capacity": 600,
       "running_cost_per_train_hr": 350
-    },
-    "expected": {
-      "frequency_should_increase": true,
-      "congestion_should_decrease": true
     }
   },
   {
-    "name": "Normal Tuesday morning peak, clear weather",
+    "name": "Weekday morning peak, Kelana Jaya, clear Tuesday 8am",
     "inputs": {
       "datetime": "2026-04-21T08:00",
-      "day": "weekday",
       "weather": "clear",
       "events": [],
-      "is_holiday": false,
       "emergency": null,
       "line": "Kelana Jaya",
-      "current_frequency_per_hr": 12,
+      "current_frequency_per_hr": 15,
       "train_capacity": 600,
       "running_cost_per_train_hr": 350
-    },
-    "expected": {
-      "frequency_should_stay_similar": true
     }
   },
   {
-    "name": "Public holiday afternoon, low demand",
+    "name": "Public holiday, Ampang, clear Friday 2pm",
     "inputs": {
       "datetime": "2026-05-01T14:00",
-      "day": "weekday",
       "weather": "clear",
-      "events": [],
-      "is_holiday": true,
+      "events": [{"name": "Public Holiday (Labour Day)", "passengers_per_hr": 1500}],
       "emergency": null,
       "line": "Ampang",
       "current_frequency_per_hr": 8,
       "train_capacity": 600,
       "running_cost_per_train_hr": 350
-    },
-    "expected": {
-      "frequency_should_decrease": true,
-      "cost_should_decrease": true
     }
   },
   {
-    "name": "Emergency: signal failure on adjacent line, rerouting passengers",
+    "name": "Emergency: signal failure, Kelana Jaya, cloudy Wednesday 5:30pm",
     "inputs": {
-      "datetime": "2026-04-22T17:30",
-      "day": "weekday",
+      "datetime": "2026-04-22T17:00",
       "weather": "cloudy",
       "events": [],
-      "is_holiday": false,
-      "emergency": "signal_failure_adjacent_line",
-      "line": "Kajang",
-      "current_frequency_per_hr": 10,
+      "emergency": "Signal failure on adjacent line — passengers rerouting to Kelana Jaya",
+      "line": "Kelana Jaya",
+      "current_frequency_per_hr": 15,
       "train_capacity": 600,
       "running_cost_per_train_hr": 350
-    },
-    "expected": {
-      "frequency_should_increase": true
     }
   },
   {
-    "name": "Late-night low demand, clear weather, no events",
+    "name": "Late night, Sri Petaling, clear Thursday 11pm",
     "inputs": {
-      "datetime": "2026-04-23T23:30",
-      "day": "weekday",
+      "datetime": "2026-04-23T23:00",
       "weather": "clear",
       "events": [],
-      "is_holiday": false,
       "emergency": null,
-      "line": "Putrajaya",
-      "current_frequency_per_hr": 6,
+      "line": "Sri Petaling",
+      "current_frequency_per_hr": 4,
       "train_capacity": 600,
       "running_cost_per_train_hr": 350
-    },
-    "expected": {
-      "frequency_should_decrease": true
     }
   },
   {
-    "name": "Quiet Sunday afternoon, no events",
+    "name": "Football match, Ampang, stormy Saturday 3pm",
     "inputs": {
       "datetime": "2026-04-26T15:00",
-      "day": "weekend",
-      "weather": "clear",
-      "events": [],
-      "is_holiday": false,
+      "weather": "stormy",
+      "events": [{"name": "Malaysia Cup Football Match", "passengers_per_hr": 2500}],
       "emergency": null,
-      "line": "Kelana Jaya",
-      "current_frequency_per_hr": 8,
+      "line": "Ampang",
+      "current_frequency_per_hr": 4,
       "train_capacity": 600,
       "running_cost_per_train_hr": 350
-    },
-    "expected": {
-      "frequency_should_decrease": true
     }
   }
 ]

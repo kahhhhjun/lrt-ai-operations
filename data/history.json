@@ -1,0 +1,114 @@
+[
+  {
+    "date": "2024-11-22",
+    "line": "Sri Petaling",
+    "situation": "Coldplay Music of the Spheres concert at Bukit Jalil National Stadium. Saturday evening, clear weather. Estimated 80,000 attendance.",
+    "event_passengers_per_hr": 4500,
+    "weather": "clear",
+    "frequency_deployed": 14,
+    "outcome": {
+      "peak_load_factor_pct": 84,
+      "passengers_served_per_hr": 8400,
+      "platform_incidents": "minor crowding at Bukit Jalil station during 9pm exodus",
+      "verdict": "Successful. 14 trains/hr was sufficient. Could have managed with 12 during first half, but surge at concert end justified full deployment throughout."
+    }
+  },
+  {
+    "date": "2024-04-10",
+    "line": "Sri Petaling",
+    "situation": "Hari Raya Aidilfitri eve. Wednesday evening. Clear weather. Mass outstation travel, unusually high ridership across all lines.",
+    "event_passengers_per_hr": 3200,
+    "weather": "clear",
+    "frequency_deployed": 12,
+    "outcome": {
+      "peak_load_factor_pct": 101,
+      "passengers_served_per_hr": 7200,
+      "platform_incidents": "significant queuing at Masjid Jamek interchange — bottleneck point",
+      "verdict": "Insufficient. 12 trains/hr caused overflow at interchange stations. Should have deployed 15 trains/hr from 4pm onwards. Key lesson: holiday eve traffic peaks earlier than expected (4pm not 5pm)."
+    }
+  },
+  {
+    "date": "2024-08-31",
+    "line": "Kelana Jaya",
+    "situation": "Merdeka Day national celebration at Dataran Merdeka. Saturday. Cloudy. 60,000 expected at parade, heavy pedestrian flow toward city centre.",
+    "event_passengers_per_hr": 2800,
+    "weather": "cloudy",
+    "frequency_deployed": 10,
+    "outcome": {
+      "peak_load_factor_pct": 78,
+      "passengers_served_per_hr": 6000,
+      "platform_incidents": "none",
+      "verdict": "Well managed. 10 trains/hr kept load factor at comfortable 78%. Conservative approach worked because crowd dispersal was gradual (not a single post-event exodus)."
+    }
+  },
+  {
+    "date": "2024-12-31",
+    "line": "Kelana Jaya",
+    "situation": "New Year's Eve countdown event at KLCC and Dataran Merdeka. Tuesday night, 9pm to 1am. Clear weather.",
+    "event_passengers_per_hr": 3800,
+    "weather": "clear",
+    "frequency_deployed": 8,
+    "outcome": {
+      "peak_load_factor_pct": 158,
+      "passengers_served_per_hr": 4800,
+      "platform_incidents": "severe overcrowding at KL Sentral and Dang Wangi — passengers waited 3+ trains to board. Complaints filed.",
+      "verdict": "Failed. 8 trains/hr severely inadequate for NYE demand. Should have deployed maximum 20 trains/hr. Lesson: late-night events require aggressive frequency even if cost is high, as stranded passengers create safety and reputational risk."
+    }
+  },
+  {
+    "date": "2024-09-14",
+    "line": "Ampang",
+    "situation": "Malaysia Cup football final at Bukit Jalil. Saturday afternoon. Heavy rain. 50,000 attendance.",
+    "event_passengers_per_hr": 2500,
+    "weather": "rainy",
+    "frequency_deployed": 11,
+    "outcome": {
+      "peak_load_factor_pct": 91,
+      "passengers_served_per_hr": 6600,
+      "platform_incidents": "moderate crowding — rain pushed more fans onto LRT instead of driving",
+      "verdict": "Adequate but tight. Rain increased LRT ridership beyond prediction — rainy weather consistently adds 15-20% more passengers than forecast. Recommend adding 2 extra trains on top of model prediction whenever weather is rainy for outdoor events."
+    }
+  },
+  {
+    "date": "2024-03-15",
+    "line": "Kelana Jaya",
+    "situation": "Normal Friday morning peak hour, no events. Clear weather.",
+    "event_passengers_per_hr": 0,
+    "weather": "clear",
+    "frequency_deployed": 15,
+    "outcome": {
+      "peak_load_factor_pct": 72,
+      "passengers_served_per_hr": 9000,
+      "platform_incidents": "none",
+      "verdict": "Standard operation. 15 trains/hr maintains comfortable 72% load factor during peak. This is the validated baseline for weekday peak hours."
+    }
+  },
+  {
+    "date": "2024-07-07",
+    "line": "Sri Petaling",
+    "situation": "Signal failure on Ampang line caused passenger rerouting to Sri Petaling. Sunday afternoon. Clear weather.",
+    "event_passengers_per_hr": 1800,
+    "weather": "clear",
+    "frequency_deployed": 9,
+    "outcome": {
+      "peak_load_factor_pct": 96,
+      "passengers_served_per_hr": 5400,
+      "platform_incidents": "queuing at Sri Petaling and Bukit Jalil stations for ~45 minutes until Ampang line restored",
+      "verdict": "Marginal. 9 trains/hr nearly reached capacity. Should have immediately deployed 12 trains/hr upon receiving emergency alert. Key lesson: emergency rerouting adds demand faster than standard event surges — act fast."
+    }
+  },
+  {
+    "date": "2024-01-25",
+    "line": "Ampang",
+    "situation": "Chinese New Year eve. Thursday evening. Clear weather. High outstation travel volume, many workers heading home early.",
+    "event_passengers_per_hr": 2600,
+    "weather": "clear",
+    "frequency_deployed": 13,
+    "outcome": {
+      "peak_load_factor_pct": 69,
+      "passengers_served_per_hr": 7800,
+      "platform_incidents": "none",
+      "verdict": "Comfortable. 13 trains/hr was slightly more than needed — could have used 11. However, the conservative choice was justified given uncertainty around exact travel timing during festive periods."
+    }
+  }
+]

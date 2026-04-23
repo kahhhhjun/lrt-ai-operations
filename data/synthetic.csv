@@ -1,501 +1,501 @@
-datetime,day,line,weather,is_holiday,event_nearby,expected_attendance,passengers
-2026-01-01T06:00,weekday,Sri Petaling,clear,False,False,0,3711
-2026-01-01T07:00,weekday,Putrajaya,stormy,False,False,0,10631
-2026-01-01T08:00,weekday,Ampang,clear,True,False,0,2263
-2026-01-01T09:00,weekday,Putrajaya,stormy,False,False,0,10690
-2026-01-01T10:00,weekday,Ampang,clear,False,False,0,3872
-2026-01-01T11:00,weekday,Kelana Jaya,clear,False,False,0,3677
-2026-01-01T12:00,weekday,Sri Petaling,rainy,False,False,0,5020
-2026-01-01T13:00,weekday,Kelana Jaya,cloudy,False,False,0,4476
-2026-01-01T14:00,weekday,Putrajaya,clear,False,False,0,3655
-2026-01-01T15:00,weekday,Kelana Jaya,clear,False,False,0,4293
-2026-01-01T16:00,weekday,Sri Petaling,cloudy,False,False,0,4078
-2026-01-01T17:00,weekday,Kelana Jaya,stormy,False,False,0,10089
-2026-01-01T18:00,weekday,Kajang,clear,False,False,0,8783
-2026-01-01T19:00,weekday,Ampang,rainy,False,False,0,10258
-2026-01-01T20:00,weekday,Kelana Jaya,clear,False,False,0,3920
-2026-01-01T21:00,weekday,Sri Petaling,rainy,True,False,0,2999
-2026-01-01T22:00,weekday,Kajang,stormy,False,False,0,5010
-2026-01-01T23:00,weekday,Sri Petaling,rainy,False,False,0,946
-2026-01-02T00:00,weekday,Ampang,clear,False,False,0,742
-2026-01-02T01:00,weekday,Kelana Jaya,clear,False,False,0,745
-2026-01-02T02:00,weekday,Kelana Jaya,rainy,False,False,0,978
-2026-01-02T03:00,weekday,Putrajaya,clear,False,False,0,721
-2026-01-02T04:00,weekday,Putrajaya,stormy,False,False,0,1138
-2026-01-02T05:00,weekday,Kajang,clear,False,False,0,720
-2026-01-02T06:00,weekday,Sri Petaling,stormy,False,False,0,5682
-2026-01-02T07:00,weekday,Sri Petaling,clear,False,False,0,8012
-2026-01-02T08:00,weekday,Ampang,clear,False,False,0,8445
-2026-01-02T09:00,weekday,Putrajaya,clear,False,False,0,7231
-2026-01-02T10:00,weekday,Ampang,clear,False,True,20322,4414
-2026-01-02T11:00,weekday,Putrajaya,clear,False,False,0,3702
-2026-01-02T12:00,weekday,Ampang,rainy,False,False,0,5157
-2026-01-02T13:00,weekday,Putrajaya,clear,False,False,0,4151
-2026-01-02T14:00,weekday,Sri Petaling,cloudy,False,False,0,4214
-2026-01-02T15:00,weekday,Kelana Jaya,clear,False,False,0,4070
-2026-01-02T16:00,weekday,Kelana Jaya,clear,False,True,17716,4453
-2026-01-02T17:00,weekday,Kelana Jaya,clear,False,False,0,7645
-2026-01-02T18:00,weekday,Ampang,rainy,False,False,0,10334
-2026-01-02T19:00,weekday,Kajang,clear,False,False,0,7504
-2026-01-02T20:00,weekday,Sri Petaling,cloudy,True,False,0,2607
-2026-01-02T21:00,weekday,Kelana Jaya,stormy,False,True,54473,8843
-2026-01-02T22:00,weekday,Ampang,clear,False,False,0,3712
-2026-01-02T23:00,weekday,Ampang,cloudy,False,False,0,768
-2026-01-03T00:00,weekend,Kelana Jaya,rainy,False,True,11934,1175
-2026-01-03T01:00,weekend,Ampang,clear,False,False,0,797
-2026-01-03T02:00,weekend,Ampang,clear,False,False,0,877
-2026-01-03T03:00,weekend,Sri Petaling,cloudy,False,False,0,916
-2026-01-03T04:00,weekend,Kajang,rainy,False,False,0,920
-2026-01-03T05:00,weekend,Putrajaya,rainy,False,True,51104,1322
-2026-01-03T06:00,weekend,Putrajaya,rainy,False,False,0,1048
-2026-01-03T07:00,weekend,Kelana Jaya,clear,True,False,0,2587
-2026-01-03T08:00,weekend,Putrajaya,clear,False,False,0,815
-2026-01-03T09:00,weekend,Putrajaya,cloudy,False,False,0,809
-2026-01-03T10:00,weekend,Sri Petaling,stormy,False,False,0,1057
-2026-01-03T11:00,weekend,Kajang,clear,False,False,0,3676
-2026-01-03T12:00,weekend,Putrajaya,cloudy,True,False,0,2885
-2026-01-03T13:00,weekend,Putrajaya,clear,True,False,0,2716
-2026-01-03T14:00,weekend,Sri Petaling,clear,False,False,0,3456
-2026-01-03T15:00,weekend,Putrajaya,clear,False,False,0,3714
-2026-01-03T16:00,weekend,Putrajaya,stormy,False,False,0,4879
-2026-01-03T17:00,weekend,Sri Petaling,clear,False,False,0,3224
-2026-01-03T18:00,weekend,Sri Petaling,clear,False,False,0,3652
-2026-01-03T19:00,weekend,Sri Petaling,stormy,False,False,0,4489
-2026-01-03T20:00,weekend,Kelana Jaya,clear,False,False,0,3730
-2026-01-03T21:00,weekend,Ampang,clear,True,False,0,2380
-2026-01-03T22:00,weekend,Kajang,rainy,False,False,0,885
-2026-01-03T23:00,weekend,Ampang,stormy,False,False,0,1152
-2026-01-04T00:00,weekend,Kajang,clear,False,False,0,769
-2026-01-04T01:00,weekend,Sri Petaling,clear,False,False,0,759
-2026-01-04T02:00,weekend,Kajang,rainy,False,False,0,1007
-2026-01-04T03:00,weekend,Ampang,clear,False,False,0,849
-2026-01-04T04:00,weekend,Ampang,clear,False,False,0,773
-2026-01-04T05:00,weekend,Ampang,stormy,False,False,0,1142
-2026-01-04T06:00,weekend,Kajang,clear,False,False,0,850
-2026-01-04T07:00,weekend,Ampang,clear,False,False,0,825
-2026-01-04T08:00,weekend,Kelana Jaya,clear,False,False,0,764
-2026-01-04T09:00,weekend,Putrajaya,cloudy,False,False,0,760
-2026-01-04T10:00,weekend,Ampang,clear,False,False,0,877
-2026-01-04T11:00,weekend,Kajang,rainy,True,False,0,3171
-2026-01-04T12:00,weekend,Kelana Jaya,rainy,False,False,0,4264
-2026-01-04T13:00,weekend,Kajang,stormy,False,True,35825,6243
-2026-01-04T14:00,weekend,Sri Petaling,stormy,True,False,0,3485
-2026-01-04T15:00,weekend,Putrajaya,clear,False,False,0,3435
-2026-01-04T16:00,weekend,Putrajaya,clear,False,False,0,3444
-2026-01-04T17:00,weekend,Ampang,stormy,False,False,0,4536
-2026-01-04T18:00,weekend,Sri Petaling,clear,False,False,0,3450
-2026-01-04T19:00,weekend,Sri Petaling,stormy,False,False,0,4670
-2026-01-04T20:00,weekend,Ampang,cloudy,False,False,0,3516
-2026-01-04T21:00,weekend,Sri Petaling,rainy,False,False,0,4579
-2026-01-04T22:00,weekend,Ampang,clear,False,False,0,743
-2026-01-04T23:00,weekend,Putrajaya,cloudy,True,False,0,2400
-2026-01-05T00:00,weekday,Putrajaya,stormy,False,False,0,1122
-2026-01-05T01:00,weekday,Ampang,clear,False,False,0,720
-2026-01-05T02:00,weekday,Kajang,clear,False,False,0,848
-2026-01-05T03:00,weekday,Kelana Jaya,cloudy,False,False,0,910
-2026-01-05T04:00,weekday,Kajang,clear,False,False,0,878
-2026-01-05T05:00,weekday,Putrajaya,cloudy,False,False,0,905
-2026-01-05T06:00,weekday,Kajang,rainy,False,False,0,5033
-2026-01-05T07:00,weekday,Ampang,clear,False,False,0,7643
-2026-01-05T08:00,weekday,Ampang,cloudy,False,False,0,7690
-2026-01-05T09:00,weekday,Sri Petaling,clear,False,False,0,8064
-2026-01-05T10:00,weekday,Kajang,clear,False,False,0,4165
-2026-01-05T11:00,weekday,Sri Petaling,cloudy,True,False,0,2580
-2026-01-05T12:00,weekday,Kajang,cloudy,False,False,0,4270
-2026-01-05T13:00,weekday,Kajang,rainy,False,False,0,5225
-2026-01-05T14:00,weekday,Kajang,cloudy,False,False,0,4397
-2026-01-05T15:00,weekday,Kajang,clear,False,False,0,3948
-2026-01-05T16:00,weekday,Kajang,clear,True,False,0,2670
-2026-01-05T17:00,weekday,Putrajaya,rainy,False,True,61645,15803
-2026-01-05T18:00,weekday,Kajang,clear,False,False,0,7938
-2026-01-05T19:00,weekday,Sri Petaling,cloudy,True,False,0,2534
-2026-01-05T20:00,weekday,Sri Petaling,cloudy,False,False,0,4478
-2026-01-05T21:00,weekday,Kajang,clear,False,True,16826,5140
-2026-01-05T22:00,weekday,Kelana Jaya,stormy,False,False,0,5563
-2026-01-05T23:00,weekday,Ampang,clear,False,False,0,819
-2026-01-06T00:00,weekday,Kelana Jaya,cloudy,False,False,0,792
-2026-01-06T01:00,weekday,Ampang,clear,False,False,0,874
-2026-01-06T02:00,weekday,Sri Petaling,clear,False,False,0,724
-2026-01-06T03:00,weekday,Kajang,stormy,False,False,0,1126
-2026-01-06T04:00,weekday,Ampang,stormy,True,False,0,3558
-2026-01-06T05:00,weekday,Kelana Jaya,rainy,False,False,0,972
-2026-01-06T06:00,weekday,Kajang,rainy,True,False,0,2741
-2026-01-06T07:00,weekday,Kajang,clear,False,False,0,7368
-2026-01-06T08:00,weekday,Kajang,stormy,False,False,0,10660
-2026-01-06T09:00,weekday,Sri Petaling,stormy,False,False,0,11706
-2026-01-06T10:00,weekday,Kajang,cloudy,False,False,0,4277
-2026-01-06T11:00,weekday,Kelana Jaya,clear,False,False,0,3960
-2026-01-06T12:00,weekday,Putrajaya,rainy,False,False,0,4642
-2026-01-06T13:00,weekday,Ampang,clear,False,False,0,3883
-2026-01-06T14:00,weekday,Putrajaya,clear,False,False,0,3821
-2026-01-06T15:00,weekday,Kelana Jaya,clear,True,False,0,2453
-2026-01-06T16:00,weekday,Kajang,clear,False,False,0,3992
-2026-01-06T17:00,weekday,Sri Petaling,clear,False,False,0,8306
-2026-01-06T18:00,weekday,Sri Petaling,rainy,False,False,0,9659
-2026-01-06T19:00,weekday,Putrajaya,stormy,False,False,0,11238
-2026-01-06T20:00,weekday,Ampang,clear,False,False,0,3754
-2026-01-06T21:00,weekday,Ampang,rainy,False,False,0,5029
-2026-01-06T22:00,weekday,Putrajaya,rainy,False,False,0,5261
-2026-01-06T23:00,weekday,Ampang,clear,False,False,0,768
-2026-01-07T00:00,weekday,Sri Petaling,clear,False,True,17146,947
-2026-01-07T01:00,weekday,Kajang,clear,False,False,0,721
-2026-01-07T02:00,weekday,Kajang,cloudy,False,False,0,918
-2026-01-07T03:00,weekday,Kelana Jaya,cloudy,False,False,0,823
-2026-01-07T04:00,weekday,Kelana Jaya,stormy,True,False,0,3585
-2026-01-07T05:00,weekday,Ampang,clear,False,False,0,842
-2026-01-07T06:00,weekday,Ampang,rainy,False,False,0,4685
-2026-01-07T07:00,weekday,Putrajaya,clear,False,False,0,7688
-2026-01-07T08:00,weekday,Kelana Jaya,rainy,False,False,0,9038
-2026-01-07T09:00,weekday,Kelana Jaya,stormy,False,False,0,10095
-2026-01-07T10:00,weekday,Kajang,clear,True,False,0,2546
-2026-01-07T11:00,weekday,Sri Petaling,clear,False,False,0,4162
-2026-01-07T12:00,weekday,Ampang,stormy,False,False,0,5710
-2026-01-07T13:00,weekday,Ampang,stormy,False,False,0,5448
-2026-01-07T14:00,weekday,Ampang,clear,False,True,31747,5578
-2026-01-07T15:00,weekday,Sri Petaling,rainy,False,False,0,4769
-2026-01-07T16:00,weekday,Sri Petaling,cloudy,False,False,0,4194
-2026-01-07T17:00,weekday,Kajang,clear,True,False,0,2551
-2026-01-07T18:00,weekday,Putrajaya,clear,True,False,0,2260
-2026-01-07T19:00,weekday,Putrajaya,clear,False,True,32962,10574
-2026-01-07T20:00,weekday,Ampang,clear,False,False,0,3948
-2026-01-07T21:00,weekday,Kajang,clear,False,False,0,3866
-2026-01-07T22:00,weekday,Sri Petaling,clear,False,False,0,3996
-2026-01-07T23:00,weekday,Putrajaya,cloudy,False,True,21542,983
-2026-01-08T00:00,weekday,Putrajaya,cloudy,False,False,0,756
-2026-01-08T01:00,weekday,Kajang,cloudy,False,True,77952,1453
-2026-01-08T02:00,weekday,Kajang,stormy,False,False,0,1015
-2026-01-08T03:00,weekday,Kajang,clear,False,False,0,797
-2026-01-08T04:00,weekday,Putrajaya,stormy,True,False,0,3516
-2026-01-08T05:00,weekday,Putrajaya,clear,False,False,0,755
-2026-01-08T06:00,weekday,Kajang,clear,False,False,0,4118
-2026-01-08T07:00,weekday,Sri Petaling,stormy,False,False,0,10310
-2026-01-08T08:00,weekday,Ampang,cloudy,False,False,0,7802
-2026-01-08T09:00,weekday,Putrajaya,rainy,False,False,0,8902
-2026-01-08T10:00,weekday,Sri Petaling,cloudy,True,False,0,2629
-2026-01-08T11:00,weekday,Sri Petaling,clear,False,False,0,4063
-2026-01-08T12:00,weekday,Kajang,clear,False,False,0,3876
-2026-01-08T13:00,weekday,Kajang,rainy,False,False,0,4628
-2026-01-08T14:00,weekday,Ampang,stormy,False,False,0,5112
-2026-01-08T15:00,weekday,Sri Petaling,clear,False,False,0,4164
-2026-01-08T16:00,weekday,Ampang,cloudy,False,False,0,3811
-2026-01-08T17:00,weekday,Sri Petaling,rainy,False,False,0,10318
-2026-01-08T18:00,weekday,Kajang,rainy,False,True,28894,12151
-2026-01-08T19:00,weekday,Kelana Jaya,clear,False,False,0,8750
-2026-01-08T20:00,weekday,Kajang,stormy,False,False,0,5779
-2026-01-08T21:00,weekday,Kajang,rainy,False,False,0,4921
-2026-01-08T22:00,weekday,Putrajaya,cloudy,False,True,18968,4731
-2026-01-08T23:00,weekday,Ampang,clear,False,False,0,789
-2026-01-09T00:00,weekday,Kelana Jaya,stormy,True,False,0,3505
-2026-01-09T01:00,weekday,Sri Petaling,clear,False,False,0,766
-2026-01-09T02:00,weekday,Ampang,clear,False,False,0,810
-2026-01-09T03:00,weekday,Ampang,clear,False,True,60140,1311
-2026-01-09T04:00,weekday,Ampang,rainy,False,False,0,986
-2026-01-09T05:00,weekday,Kelana Jaya,stormy,False,False,0,1072
-2026-01-09T06:00,weekday,Ampang,rainy,False,True,55293,8181
-2026-01-09T07:00,weekday,Sri Petaling,cloudy,False,False,0,8067
-2026-01-09T08:00,weekday,Kelana Jaya,cloudy,False,False,0,8520
-2026-01-09T09:00,weekday,Sri Petaling,stormy,False,True,61879,16694
-2026-01-09T10:00,weekday,Kelana Jaya,stormy,False,False,0,5664
-2026-01-09T11:00,weekday,Ampang,clear,False,False,0,3881
-2026-01-09T12:00,weekday,Sri Petaling,rainy,False,False,0,5012
-2026-01-09T13:00,weekday,Kelana Jaya,clear,False,False,0,4117
-2026-01-09T14:00,weekday,Kelana Jaya,cloudy,False,False,0,4395
-2026-01-09T15:00,weekday,Sri Petaling,clear,True,False,0,2337
-2026-01-09T16:00,weekday,Sri Petaling,rainy,False,False,0,5196
-2026-01-09T17:00,weekday,Kajang,clear,False,False,0,7672
-2026-01-09T18:00,weekday,Kajang,clear,False,False,0,7425
-2026-01-09T19:00,weekday,Kajang,stormy,False,False,0,11457
-2026-01-09T20:00,weekday,Kelana Jaya,cloudy,False,False,0,3883
-2026-01-09T21:00,weekday,Sri Petaling,stormy,False,False,0,5748
-2026-01-09T22:00,weekday,Ampang,clear,False,False,0,4095
-2026-01-09T23:00,weekday,Putrajaya,clear,False,False,0,730
-2026-01-10T00:00,weekend,Sri Petaling,stormy,False,False,0,997
-2026-01-10T01:00,weekend,Sri Petaling,clear,True,False,0,2308
-2026-01-10T02:00,weekend,Ampang,rainy,False,False,0,935
-2026-01-10T03:00,weekend,Putrajaya,stormy,False,False,0,1132
-2026-01-10T04:00,weekend,Kelana Jaya,cloudy,False,False,0,859
-2026-01-10T05:00,weekend,Kelana Jaya,clear,False,False,0,754
-2026-01-10T06:00,weekend,Sri Petaling,clear,False,False,0,829
-2026-01-10T07:00,weekend,Sri Petaling,stormy,False,True,46160,1480
-2026-01-10T08:00,weekend,Kelana Jaya,cloudy,False,False,0,863
-2026-01-10T09:00,weekend,Kelana Jaya,clear,False,False,0,758
-2026-01-10T10:00,weekend,Ampang,rainy,False,True,37152,1339
-2026-01-10T11:00,weekend,Sri Petaling,clear,False,False,0,3702
-2026-01-10T12:00,weekend,Ampang,clear,False,False,0,3528
-2026-01-10T13:00,weekend,Kelana Jaya,clear,False,False,0,3400
-2026-01-10T14:00,weekend,Sri Petaling,rainy,False,True,44782,5536
-2026-01-10T15:00,weekend,Kelana Jaya,rainy,False,False,0,4180
-2026-01-10T16:00,weekend,Putrajaya,rainy,False,False,0,4203
-2026-01-10T17:00,weekend,Putrajaya,clear,False,False,0,3600
-2026-01-10T18:00,weekend,Kajang,cloudy,True,False,0,2419
-2026-01-10T19:00,weekend,Kelana Jaya,cloudy,False,False,0,3544
-2026-01-10T20:00,weekend,Sri Petaling,clear,False,False,0,3559
-2026-01-10T21:00,weekend,Putrajaya,cloudy,False,False,0,3640
-2026-01-10T22:00,weekend,Kelana Jaya,clear,False,False,0,824
-2026-01-10T23:00,weekend,Ampang,stormy,False,False,0,1163
-2026-01-11T00:00,weekend,Kajang,cloudy,False,False,0,771
-2026-01-11T01:00,weekend,Sri Petaling,stormy,False,False,0,1004
-2026-01-11T02:00,weekend,Kelana Jaya,clear,False,False,0,734
-2026-01-11T03:00,weekend,Sri Petaling,stormy,True,False,0,3413
-2026-01-11T04:00,weekend,Putrajaya,rainy,False,False,0,887
-2026-01-11T05:00,weekend,Kajang,stormy,False,False,0,1127
-2026-01-11T06:00,weekend,Sri Petaling,rainy,False,False,0,974
-2026-01-11T07:00,weekend,Kajang,stormy,False,False,0,995
-2026-01-11T08:00,weekend,Kelana Jaya,clear,False,False,0,811
-2026-01-11T09:00,weekend,Putrajaya,rainy,False,False,0,987
-2026-01-11T10:00,weekend,Sri Petaling,stormy,True,True,45818,5120
-2026-01-11T11:00,weekend,Sri Petaling,clear,False,True,28776,4566
-2026-01-11T12:00,weekend,Kelana Jaya,clear,False,False,0,3521
-2026-01-11T13:00,weekend,Sri Petaling,cloudy,False,False,0,3536
-2026-01-11T14:00,weekend,Putrajaya,rainy,False,False,0,3824
-2026-01-11T15:00,weekend,Kelana Jaya,rainy,False,False,0,4008
-2026-01-11T16:00,weekend,Putrajaya,cloudy,False,False,0,3508
-2026-01-11T17:00,weekend,Sri Petaling,clear,False,False,0,3348
-2026-01-11T18:00,weekend,Putrajaya,cloudy,False,False,0,3340
-2026-01-11T19:00,weekend,Kelana Jaya,rainy,False,True,49507,6838
-2026-01-11T20:00,weekend,Sri Petaling,clear,False,False,0,3155
-2026-01-11T21:00,weekend,Ampang,clear,False,False,0,3642
-2026-01-11T22:00,weekend,Sri Petaling,stormy,False,True,15544,1231
-2026-01-11T23:00,weekend,Sri Petaling,clear,False,False,0,811
-2026-01-12T00:00,weekday,Sri Petaling,cloudy,False,False,0,759
-2026-01-12T01:00,weekday,Kajang,rainy,False,False,0,1040
-2026-01-12T02:00,weekday,Ampang,clear,True,False,0,2450
-2026-01-12T03:00,weekday,Sri Petaling,clear,True,False,0,2639
-2026-01-12T04:00,weekday,Kelana Jaya,stormy,True,False,0,3168
-2026-01-12T05:00,weekday,Ampang,clear,False,False,0,743
-2026-01-12T06:00,weekday,Ampang,rainy,False,False,0,4949
-2026-01-12T07:00,weekday,Kajang,stormy,False,False,0,10937
-2026-01-12T08:00,weekday,Putrajaya,stormy,False,False,0,11850
-2026-01-12T09:00,weekday,Sri Petaling,stormy,False,False,0,9867
-2026-01-12T10:00,weekday,Sri Petaling,clear,False,False,0,3881
-2026-01-12T11:00,weekday,Kajang,cloudy,True,True,58331,4431
-2026-01-12T12:00,weekday,Putrajaya,clear,True,False,0,2442
-2026-01-12T13:00,weekday,Kelana Jaya,stormy,False,False,0,5734
-2026-01-12T14:00,weekday,Putrajaya,clear,False,False,0,3720
-2026-01-12T15:00,weekday,Sri Petaling,clear,True,False,0,2292
-2026-01-12T16:00,weekday,Ampang,clear,False,False,0,4392
-2026-01-12T17:00,weekday,Ampang,rainy,False,False,0,10402
-2026-01-12T18:00,weekday,Putrajaya,clear,False,True,53863,11240
-2026-01-12T19:00,weekday,Kajang,stormy,True,False,0,3526
-2026-01-12T20:00,weekday,Ampang,rainy,False,False,0,4879
-2026-01-12T21:00,weekday,Sri Petaling,clear,False,False,0,4158
-2026-01-12T22:00,weekday,Kelana Jaya,rainy,False,False,0,4681
-2026-01-12T23:00,weekday,Putrajaya,clear,False,False,0,827
-2026-01-13T00:00,weekday,Sri Petaling,clear,False,False,0,872
-2026-01-13T01:00,weekday,Ampang,cloudy,False,False,0,779
-2026-01-13T02:00,weekday,Putrajaya,clear,True,False,0,2667
-2026-01-13T03:00,weekday,Sri Petaling,clear,False,False,0,818
-2026-01-13T04:00,weekday,Ampang,clear,False,False,0,830
-2026-01-13T05:00,weekday,Kajang,clear,False,True,57749,1306
-2026-01-13T06:00,weekday,Putrajaya,cloudy,False,False,0,4408
-2026-01-13T07:00,weekday,Ampang,rainy,False,False,0,10192
-2026-01-13T08:00,weekday,Sri Petaling,clear,False,False,0,8112
-2026-01-13T09:00,weekday,Kajang,clear,False,False,0,7869
-2026-01-13T10:00,weekday,Putrajaya,clear,False,False,0,3800
-2026-01-13T11:00,weekday,Putrajaya,clear,False,False,0,4169
-2026-01-13T12:00,weekday,Sri Petaling,clear,False,False,0,3728
-2026-01-13T13:00,weekday,Ampang,rainy,False,False,0,4408
-2026-01-13T14:00,weekday,Sri Petaling,cloudy,False,False,0,4128
-2026-01-13T15:00,weekday,Ampang,clear,False,False,0,3665
-2026-01-13T16:00,weekday,Kelana Jaya,clear,False,False,0,4119
-2026-01-13T17:00,weekday,Kelana Jaya,clear,False,False,0,8527
-2026-01-13T18:00,weekday,Kajang,clear,False,False,0,7208
-2026-01-13T19:00,weekday,Ampang,clear,True,False,0,2524
-2026-01-13T20:00,weekday,Kajang,rainy,False,False,0,4596
-2026-01-13T21:00,weekday,Ampang,clear,False,False,0,4235
-2026-01-13T22:00,weekday,Kajang,clear,False,False,0,3613
-2026-01-13T23:00,weekday,Ampang,clear,False,False,0,720
-2026-01-14T00:00,weekday,Kajang,rainy,False,False,0,992
-2026-01-14T01:00,weekday,Kelana Jaya,clear,False,False,0,807
-2026-01-14T02:00,weekday,Putrajaya,rainy,False,True,71621,1497
-2026-01-14T03:00,weekday,Sri Petaling,clear,False,False,0,777
-2026-01-14T04:00,weekday,Kelana Jaya,clear,True,False,0,2617
-2026-01-14T05:00,weekday,Sri Petaling,clear,False,False,0,850
-2026-01-14T06:00,weekday,Kajang,stormy,False,False,0,5376
-2026-01-14T07:00,weekday,Kelana Jaya,clear,False,False,0,8709
-2026-01-14T08:00,weekday,Kelana Jaya,clear,True,False,0,2692
-2026-01-14T09:00,weekday,Putrajaya,clear,False,False,0,8504
-2026-01-14T10:00,weekday,Ampang,clear,False,False,0,4289
-2026-01-14T11:00,weekday,Sri Petaling,stormy,True,False,0,3577
-2026-01-14T12:00,weekday,Kajang,cloudy,False,False,0,4104
-2026-01-14T13:00,weekday,Kajang,cloudy,False,False,0,4449
-2026-01-14T14:00,weekday,Kajang,clear,False,True,33652,5394
-2026-01-14T15:00,weekday,Sri Petaling,clear,False,False,0,3845
-2026-01-14T16:00,weekday,Ampang,cloudy,False,False,0,4075
-2026-01-14T17:00,weekday,Putrajaya,clear,True,False,0,2387
-2026-01-14T18:00,weekday,Kelana Jaya,clear,False,False,0,7849
-2026-01-14T19:00,weekday,Ampang,stormy,False,False,0,10028
-2026-01-14T20:00,weekday,Kelana Jaya,cloudy,False,False,0,3978
-2026-01-14T21:00,weekday,Kajang,clear,False,False,0,3625
-2026-01-14T22:00,weekday,Sri Petaling,cloudy,False,False,0,4420
-2026-01-14T23:00,weekday,Sri Petaling,rainy,False,False,0,988
-2026-01-15T00:00,weekday,Kelana Jaya,clear,False,False,0,799
-2026-01-15T01:00,weekday,Kelana Jaya,rainy,False,False,0,913
-2026-01-15T02:00,weekday,Sri Petaling,rainy,False,False,0,1055
-2026-01-15T03:00,weekday,Kelana Jaya,clear,False,False,0,863
-2026-01-15T04:00,weekday,Sri Petaling,clear,False,False,0,833
-2026-01-15T05:00,weekday,Sri Petaling,clear,False,False,0,833
-2026-01-15T06:00,weekday,Ampang,stormy,False,False,0,5409
-2026-01-15T07:00,weekday,Ampang,clear,False,False,0,7990
-2026-01-15T08:00,weekday,Sri Petaling,rainy,False,False,0,10527
-2026-01-15T09:00,weekday,Kelana Jaya,clear,False,False,0,8799
-2026-01-15T10:00,weekday,Kajang,rainy,False,False,0,5110
-2026-01-15T11:00,weekday,Kelana Jaya,clear,True,False,0,2590
-2026-01-15T12:00,weekday,Putrajaya,rainy,False,False,0,5247
-2026-01-15T13:00,weekday,Kelana Jaya,clear,False,False,0,3843
-2026-01-15T14:00,weekday,Ampang,stormy,False,False,0,5876
-2026-01-15T15:00,weekday,Sri Petaling,clear,False,False,0,4365
-2026-01-15T16:00,weekday,Sri Petaling,stormy,False,False,0,4960
-2026-01-15T17:00,weekday,Putrajaya,rainy,False,False,0,9904
-2026-01-15T18:00,weekday,Sri Petaling,rainy,False,False,0,9722
-2026-01-15T19:00,weekday,Kelana Jaya,clear,False,True,44688,11924
-2026-01-15T20:00,weekday,Putrajaya,cloudy,False,False,0,4198
-2026-01-15T21:00,weekday,Sri Petaling,clear,False,False,0,4243
-2026-01-15T22:00,weekday,Kajang,clear,False,True,17852,4391
-2026-01-15T23:00,weekday,Ampang,cloudy,False,False,0,780
-2026-01-16T00:00,weekday,Sri Petaling,clear,False,False,0,740
-2026-01-16T01:00,weekday,Kelana Jaya,rainy,False,False,0,953
-2026-01-16T02:00,weekday,Ampang,clear,False,False,0,766
-2026-01-16T03:00,weekday,Kajang,rainy,False,False,0,1030
-2026-01-16T04:00,weekday,Putrajaya,clear,False,False,0,750
-2026-01-16T05:00,weekday,Kajang,rainy,False,False,0,923
-2026-01-16T06:00,weekday,Putrajaya,cloudy,True,False,0,2488
-2026-01-16T07:00,weekday,Kelana Jaya,clear,False,False,0,8156
-2026-01-16T08:00,weekday,Kajang,stormy,False,False,0,9737
-2026-01-16T09:00,weekday,Sri Petaling,clear,False,False,0,8422
-2026-01-16T10:00,weekday,Kelana Jaya,cloudy,False,False,0,3943
-2026-01-16T11:00,weekday,Kajang,clear,False,False,0,4211
-2026-01-16T12:00,weekday,Putrajaya,rainy,False,False,0,5256
-2026-01-16T13:00,weekday,Putrajaya,clear,False,False,0,4203
-2026-01-16T14:00,weekday,Kajang,rainy,False,False,0,4363
-2026-01-16T15:00,weekday,Kajang,clear,False,False,0,3719
-2026-01-16T16:00,weekday,Sri Petaling,clear,False,False,0,3854
-2026-01-16T17:00,weekday,Sri Petaling,rainy,False,False,0,9614
-2026-01-16T18:00,weekday,Putrajaya,cloudy,False,False,0,8930
-2026-01-16T19:00,weekday,Kelana Jaya,stormy,False,False,0,10980
-2026-01-16T20:00,weekday,Kelana Jaya,stormy,False,False,0,5146
-2026-01-16T21:00,weekday,Putrajaya,rainy,False,False,0,4369
-2026-01-16T22:00,weekday,Putrajaya,rainy,False,False,0,4684
-2026-01-16T23:00,weekday,Kelana Jaya,clear,False,False,0,832
-2026-01-17T00:00,weekend,Sri Petaling,cloudy,False,False,0,825
-2026-01-17T01:00,weekend,Putrajaya,rainy,False,False,0,1031
-2026-01-17T02:00,weekend,Ampang,clear,False,False,0,809
-2026-01-17T03:00,weekend,Putrajaya,cloudy,False,False,0,916
-2026-01-17T04:00,weekend,Sri Petaling,rainy,False,False,0,993
-2026-01-17T05:00,weekend,Sri Petaling,stormy,False,False,0,1013
-2026-01-17T06:00,weekend,Sri Petaling,rainy,False,False,0,1050
-2026-01-17T07:00,weekend,Ampang,clear,False,False,0,798
-2026-01-17T08:00,weekend,Sri Petaling,rainy,False,False,0,974
-2026-01-17T09:00,weekend,Sri Petaling,cloudy,False,False,0,891
-2026-01-17T10:00,weekend,Kelana Jaya,clear,False,False,0,790
-2026-01-17T11:00,weekend,Ampang,cloudy,False,False,0,3703
-2026-01-17T12:00,weekend,Sri Petaling,stormy,False,False,0,4834
-2026-01-17T13:00,weekend,Kelana Jaya,clear,False,False,0,3521
-2026-01-17T14:00,weekend,Kelana Jaya,clear,False,False,0,3652
-2026-01-17T15:00,weekend,Kelana Jaya,clear,False,False,0,3834
-2026-01-17T16:00,weekend,Kajang,stormy,False,False,0,4440
-2026-01-17T17:00,weekend,Sri Petaling,clear,False,False,0,3785
-2026-01-17T18:00,weekend,Ampang,rainy,True,False,0,3133
-2026-01-17T19:00,weekend,Kajang,clear,False,False,0,3273
-2026-01-17T20:00,weekend,Kajang,cloudy,False,False,0,3858
-2026-01-17T21:00,weekend,Kelana Jaya,clear,False,True,24064,4714
-2026-01-17T22:00,weekend,Putrajaya,cloudy,False,False,0,905
-2026-01-17T23:00,weekend,Kajang,rainy,False,False,0,1019
-2026-01-18T00:00,weekend,Kajang,stormy,False,False,0,1127
-2026-01-18T01:00,weekend,Sri Petaling,clear,True,False,0,2628
-2026-01-18T02:00,weekend,Kajang,stormy,False,False,0,1083
-2026-01-18T03:00,weekend,Kelana Jaya,stormy,True,False,0,3132
-2026-01-18T04:00,weekend,Kelana Jaya,clear,False,False,0,757
-2026-01-18T05:00,weekend,Sri Petaling,clear,False,False,0,811
-2026-01-18T06:00,weekend,Ampang,clear,False,True,25495,997
-2026-01-18T07:00,weekend,Putrajaya,stormy,False,False,0,1163
-2026-01-18T08:00,weekend,Kelana Jaya,stormy,False,False,0,1175
-2026-01-18T09:00,weekend,Ampang,clear,False,False,0,796
-2026-01-18T10:00,weekend,Sri Petaling,rainy,False,False,0,969
-2026-01-18T11:00,weekend,Ampang,rainy,False,False,0,4351
-2026-01-18T12:00,weekend,Putrajaya,clear,False,False,0,3642
-2026-01-18T13:00,weekend,Kelana Jaya,rainy,True,True,76255,4972
-2026-01-18T14:00,weekend,Sri Petaling,clear,False,False,0,3459
-2026-01-18T15:00,weekend,Putrajaya,stormy,False,False,0,5101
-2026-01-18T16:00,weekend,Kajang,clear,False,False,0,3440
-2026-01-18T17:00,weekend,Kajang,rainy,False,False,0,4038
-2026-01-18T18:00,weekend,Kelana Jaya,clear,True,False,0,2539
-2026-01-18T19:00,weekend,Kelana Jaya,clear,True,False,0,2280
-2026-01-18T20:00,weekend,Kelana Jaya,cloudy,False,False,0,3439
-2026-01-18T21:00,weekend,Kajang,stormy,False,False,0,5094
-2026-01-18T22:00,weekend,Kajang,cloudy,False,False,0,917
-2026-01-18T23:00,weekend,Sri Petaling,clear,False,False,0,878
-2026-01-19T00:00,weekday,Ampang,clear,False,False,0,840
-2026-01-19T01:00,weekday,Putrajaya,cloudy,False,False,0,819
-2026-01-19T02:00,weekday,Sri Petaling,cloudy,False,False,0,787
-2026-01-19T03:00,weekday,Kelana Jaya,clear,False,False,0,787
-2026-01-19T04:00,weekday,Ampang,clear,False,False,0,736
-2026-01-19T05:00,weekday,Kelana Jaya,rainy,True,False,0,2726
-2026-01-19T06:00,weekday,Ampang,rainy,False,False,0,5065
-2026-01-19T07:00,weekday,Ampang,clear,False,False,0,8370
-2026-01-19T08:00,weekday,Sri Petaling,rainy,False,False,0,10322
-2026-01-19T09:00,weekday,Ampang,rainy,False,False,0,9168
-2026-01-19T10:00,weekday,Ampang,rainy,False,False,0,4730
-2026-01-19T11:00,weekday,Kajang,clear,False,False,0,3854
-2026-01-19T12:00,weekday,Sri Petaling,clear,False,False,0,4203
-2026-01-19T13:00,weekday,Sri Petaling,clear,False,False,0,3715
-2026-01-19T14:00,weekday,Putrajaya,clear,False,False,0,3933
-2026-01-19T15:00,weekday,Ampang,cloudy,False,False,0,4057
-2026-01-19T16:00,weekday,Sri Petaling,cloudy,True,False,0,2742
-2026-01-19T17:00,weekday,Kajang,clear,False,False,0,8164
-2026-01-19T18:00,weekday,Putrajaya,clear,False,False,0,8094
-2026-01-19T19:00,weekday,Sri Petaling,clear,False,False,0,7224
-2026-01-19T20:00,weekday,Kelana Jaya,stormy,False,False,0,5674
-2026-01-19T21:00,weekday,Putrajaya,stormy,False,False,0,5288
-2026-01-19T22:00,weekday,Sri Petaling,clear,False,False,0,4026
-2026-01-19T23:00,weekday,Sri Petaling,clear,False,False,0,799
-2026-01-20T00:00,weekday,Kajang,stormy,True,False,0,3253
-2026-01-20T01:00,weekday,Kajang,clear,False,True,39002,1165
-2026-01-20T02:00,weekday,Putrajaya,rainy,True,False,0,2950
-2026-01-20T03:00,weekday,Ampang,clear,False,False,0,853
-2026-01-20T04:00,weekday,Sri Petaling,stormy,False,False,0,1149
-2026-01-20T05:00,weekday,Kajang,stormy,False,False,0,1130
-2026-01-20T06:00,weekday,Putrajaya,clear,False,False,0,4333
-2026-01-20T07:00,weekday,Kelana Jaya,stormy,False,False,0,11532
-2026-01-20T08:00,weekday,Kelana Jaya,stormy,True,False,0,3315
-2026-01-20T09:00,weekday,Kelana Jaya,clear,False,False,0,7214
-2026-01-20T10:00,weekday,Kelana Jaya,clear,False,False,0,4133
-2026-01-20T11:00,weekday,Kajang,cloudy,False,True,79758,7627
-2026-01-20T12:00,weekday,Sri Petaling,rainy,True,False,0,2872
-2026-01-20T13:00,weekday,Kajang,stormy,False,False,0,5842
-2026-01-20T14:00,weekday,Putrajaya,clear,False,False,0,3753
-2026-01-20T15:00,weekday,Sri Petaling,clear,False,False,0,3663
-2026-01-20T16:00,weekday,Putrajaya,cloudy,False,False,0,4365
-2026-01-20T17:00,weekday,Kelana Jaya,clear,False,False,0,7806
-2026-01-20T18:00,weekday,Kelana Jaya,clear,False,False,0,7332
-2026-01-20T19:00,weekday,Sri Petaling,stormy,False,False,0,11573
-2026-01-20T20:00,weekday,Kelana Jaya,rainy,True,False,0,3240
-2026-01-20T21:00,weekday,Kajang,rainy,False,False,0,5207
-2026-01-20T22:00,weekday,Putrajaya,clear,False,False,0,3626
-2026-01-20T23:00,weekday,Kelana Jaya,clear,False,False,0,813
-2026-01-21T00:00,weekday,Kajang,stormy,False,False,0,1036
-2026-01-21T01:00,weekday,Kajang,rainy,False,False,0,967
-2026-01-21T02:00,weekday,Ampang,stormy,False,False,0,1120
-2026-01-21T03:00,weekday,Sri Petaling,stormy,True,True,67290,5343
-2026-01-21T04:00,weekday,Putrajaya,rainy,True,False,0,2938
-2026-01-21T05:00,weekday,Sri Petaling,clear,False,False,0,792
-2026-01-21T06:00,weekday,Kajang,rainy,False,False,0,4972
-2026-01-21T07:00,weekday,Putrajaya,clear,False,False,0,7594
-2026-01-21T08:00,weekday,Ampang,clear,True,False,0,2641
-2026-01-21T09:00,weekday,Sri Petaling,cloudy,False,False,0,7713
-2026-01-21T10:00,weekday,Sri Petaling,cloudy,False,False,0,3865
-2026-01-21T11:00,weekday,Kajang,cloudy,True,False,0,2631
-2026-01-21T12:00,weekday,Sri Petaling,clear,False,False,0,4077
-2026-01-21T13:00,weekday,Kelana Jaya,cloudy,False,False,0,4105
-2026-01-21T14:00,weekday,Ampang,rainy,True,False,0,2801
-2026-01-21T15:00,weekday,Sri Petaling,clear,False,False,0,3994
-2026-01-21T16:00,weekday,Sri Petaling,cloudy,True,False,0,2616
-2026-01-21T17:00,weekday,Ampang,clear,True,False,0,2497
-2026-01-21T18:00,weekday,Kelana Jaya,cloudy,False,False,0,7571
-2026-01-21T19:00,weekday,Kajang,rainy,False,False,0,9272
-2026-01-21T20:00,weekday,Putrajaya,stormy,False,False,0,5206
-2026-01-21T21:00,weekday,Kajang,clear,False,False,0,4371
-2026-01-21T22:00,weekday,Kajang,clear,False,False,0,4225
-2026-01-21T23:00,weekday,Kajang,clear,False,False,0,869
-2026-01-22T00:00,weekday,Ampang,rainy,False,False,0,969
-2026-01-22T01:00,weekday,Ampang,cloudy,False,False,0,804
+datetime,day_type,line,weather,event_name,event_passengers_per_hr,expected_passengers_per_hr
+2026-01-01T06:00,weekday,Kelana Jaya,stormy,Public Holiday,2003,2977
+2026-01-01T07:00,weekday,Kelana Jaya,stormy,,0,3774
+2026-01-01T08:00,weekday,Sri Petaling,clear,,0,4529
+2026-01-01T09:00,weekday,Kelana Jaya,clear,,0,2263
+2026-01-01T10:00,weekday,Sri Petaling,clear,,0,2522
+2026-01-01T11:00,weekday,Ampang,clear,,0,2654
+2026-01-01T12:00,weekday,Kelana Jaya,clear,,0,2420
+2026-01-01T13:00,weekday,Kelana Jaya,clear,,0,2418
+2026-01-01T14:00,weekday,Ampang,clear,,0,2673
+2026-01-01T15:00,weekday,Ampang,rainy,,0,2222
+2026-01-01T16:00,weekday,Kelana Jaya,rainy,,0,2073
+2026-01-01T17:00,weekday,Ampang,rainy,,0,4350
+2026-01-01T18:00,weekday,Sri Petaling,clear,,0,4569
+2026-01-01T19:00,weekday,Kelana Jaya,stormy,,0,1919
+2026-01-01T20:00,weekday,Kelana Jaya,clear,,0,2476
+2026-01-01T21:00,weekday,Kelana Jaya,clear,,0,2354
+2026-01-01T22:00,weekday,Sri Petaling,clear,,0,2574
+2026-01-01T23:00,weekday,Sri Petaling,rainy,,0,711
+2026-01-02T00:00,weekday,Ampang,clear,,0,878
+2026-01-02T01:00,weekday,Sri Petaling,stormy,,0,580
+2026-01-02T02:00,weekday,Kelana Jaya,clear,,0,848
+2026-01-02T03:00,weekday,Ampang,cloudy,Festival,4589,5342
+2026-01-02T04:00,weekday,Sri Petaling,clear,,0,861
+2026-01-02T05:00,weekday,Ampang,stormy,,0,519
+2026-01-02T06:00,weekday,Sri Petaling,stormy,,0,1836
+2026-01-02T07:00,weekday,Sri Petaling,cloudy,,0,4483
+2026-01-02T08:00,weekday,Sri Petaling,clear,,0,5255
+2026-01-02T09:00,weekday,Kelana Jaya,clear,,0,2646
+2026-01-02T10:00,weekday,Sri Petaling,cloudy,Marathon,3440,6202
+2026-01-02T11:00,weekday,Ampang,rainy,,0,2278
+2026-01-02T12:00,weekday,Sri Petaling,clear,,0,2590
+2026-01-02T13:00,weekday,Ampang,rainy,,0,2057
+2026-01-02T14:00,weekday,Ampang,clear,,0,2251
+2026-01-02T15:00,weekday,Sri Petaling,stormy,,0,1750
+2026-01-02T16:00,weekday,Sri Petaling,clear,,0,2685
+2026-01-02T17:00,weekday,Sri Petaling,clear,,0,4698
+2026-01-02T18:00,weekday,Kelana Jaya,clear,,0,5278
+2026-01-02T19:00,weekday,Kelana Jaya,rainy,,0,2120
+2026-01-02T20:00,weekday,Ampang,clear,,0,2665
+2026-01-02T21:00,weekday,Kelana Jaya,clear,Festival,4878,6756
+2026-01-02T22:00,weekday,Ampang,stormy,,0,1917
+2026-01-02T23:00,weekday,Kelana Jaya,rainy,,0,676
+2026-01-03T00:00,weekend,Kelana Jaya,rainy,,0,547
+2026-01-03T01:00,weekend,Kelana Jaya,cloudy,,0,599
+2026-01-03T02:00,weekend,Kelana Jaya,stormy,,0,411
+2026-01-03T03:00,weekend,Sri Petaling,stormy,,0,453
+2026-01-03T04:00,weekend,Kelana Jaya,cloudy,,0,520
+2026-01-03T05:00,weekend,Sri Petaling,clear,,0,610
+2026-01-03T06:00,weekend,Kelana Jaya,clear,,0,547
+2026-01-03T07:00,weekend,Kelana Jaya,clear,,0,548
+2026-01-03T08:00,weekend,Ampang,clear,,0,565
+2026-01-03T09:00,weekend,Sri Petaling,clear,,0,608
+2026-01-03T10:00,weekend,Kelana Jaya,cloudy,,0,605
+2026-01-03T11:00,weekend,Kelana Jaya,clear,,0,1972
+2026-01-03T12:00,weekend,Ampang,cloudy,,0,1987
+2026-01-03T13:00,weekend,Sri Petaling,stormy,,0,1287
+2026-01-03T14:00,weekend,Sri Petaling,cloudy,,0,2037
+2026-01-03T15:00,weekend,Kelana Jaya,clear,,0,1979
+2026-01-03T16:00,weekend,Kelana Jaya,cloudy,,0,1804
+2026-01-03T17:00,weekend,Ampang,clear,,0,2142
+2026-01-03T18:00,weekend,Kelana Jaya,clear,,0,2016
+2026-01-03T19:00,weekend,Kelana Jaya,clear,,0,2139
+2026-01-03T20:00,weekend,Ampang,clear,,0,565
+2026-01-03T21:00,weekend,Kelana Jaya,cloudy,,0,513
+2026-01-03T22:00,weekend,Ampang,cloudy,,0,602
+2026-01-03T23:00,weekend,Ampang,clear,,0,627
+2026-01-04T00:00,weekend,Sri Petaling,rainy,,0,474
+2026-01-04T01:00,weekend,Kelana Jaya,clear,,0,609
+2026-01-04T02:00,weekend,Kelana Jaya,rainy,,0,464
+2026-01-04T03:00,weekend,Ampang,rainy,,0,545
+2026-01-04T04:00,weekend,Kelana Jaya,clear,,0,549
+2026-01-04T05:00,weekend,Kelana Jaya,clear,,0,621
+2026-01-04T06:00,weekend,Ampang,clear,,0,646
+2026-01-04T07:00,weekend,Sri Petaling,clear,,0,614
+2026-01-04T08:00,weekend,Sri Petaling,cloudy,,0,572
+2026-01-04T09:00,weekend,Kelana Jaya,clear,,0,577
+2026-01-04T10:00,weekend,Ampang,clear,,0,617
+2026-01-04T11:00,weekend,Ampang,cloudy,,0,2065
+2026-01-04T12:00,weekend,Ampang,clear,,0,2025
+2026-01-04T13:00,weekend,Kelana Jaya,clear,,0,2002
+2026-01-04T14:00,weekend,Ampang,clear,,0,2151
+2026-01-04T15:00,weekend,Ampang,clear,,0,2133
+2026-01-04T16:00,weekend,Ampang,stormy,,0,1536
+2026-01-04T17:00,weekend,Sri Petaling,stormy,Festival,2226,3213
+2026-01-04T18:00,weekend,Kelana Jaya,clear,,0,2155
+2026-01-04T19:00,weekend,Sri Petaling,stormy,,0,1338
+2026-01-04T20:00,weekend,Sri Petaling,clear,,0,622
+2026-01-04T21:00,weekend,Sri Petaling,clear,,0,648
+2026-01-04T22:00,weekend,Kelana Jaya,clear,,0,639
+2026-01-04T23:00,weekend,Kelana Jaya,clear,,0,555
+2026-01-05T00:00,weekday,Kelana Jaya,clear,,0,808
+2026-01-05T01:00,weekday,Sri Petaling,cloudy,Coldplay Concert,4870,5799
+2026-01-05T02:00,weekday,Sri Petaling,clear,Public Holiday,3385,4228
+2026-01-05T03:00,weekday,Kelana Jaya,cloudy,Public Holiday,4682,5658
+2026-01-05T04:00,weekday,Ampang,clear,,0,759
+2026-01-05T05:00,weekday,Ampang,clear,,0,861
+2026-01-05T06:00,weekday,Sri Petaling,cloudy,,0,2577
+2026-01-05T07:00,weekday,Kelana Jaya,clear,,0,5310
+2026-01-05T08:00,weekday,Kelana Jaya,cloudy,,0,5153
+2026-01-05T09:00,weekday,Sri Petaling,cloudy,,0,2522
+2026-01-05T10:00,weekday,Kelana Jaya,clear,,0,2304
+2026-01-05T11:00,weekday,Ampang,clear,,0,2658
+2026-01-05T12:00,weekday,Ampang,cloudy,,0,2515
+2026-01-05T13:00,weekday,Kelana Jaya,clear,Football Match,2632,4955
+2026-01-05T14:00,weekday,Ampang,clear,,0,2504
+2026-01-05T15:00,weekday,Sri Petaling,stormy,,0,1584
+2026-01-05T16:00,weekday,Kelana Jaya,clear,,0,2741
+2026-01-05T17:00,weekday,Kelana Jaya,clear,,0,4845
+2026-01-05T18:00,weekday,Ampang,clear,,0,5011
+2026-01-05T19:00,weekday,Sri Petaling,cloudy,,0,2158
+2026-01-05T20:00,weekday,Kelana Jaya,cloudy,,0,2520
+2026-01-05T21:00,weekday,Sri Petaling,stormy,,0,1832
+2026-01-05T22:00,weekday,Ampang,clear,,0,2724
+2026-01-05T23:00,weekday,Sri Petaling,clear,,0,855
+2026-01-06T00:00,weekday,Ampang,stormy,,0,578
+2026-01-06T01:00,weekday,Ampang,clear,,0,808
+2026-01-06T02:00,weekday,Ampang,clear,,0,780
+2026-01-06T03:00,weekday,Kelana Jaya,stormy,,0,537
+2026-01-06T04:00,weekday,Kelana Jaya,rainy,,0,640
+2026-01-06T05:00,weekday,Sri Petaling,rainy,,0,675
+2026-01-06T06:00,weekday,Sri Petaling,cloudy,,0,2362
+2026-01-06T07:00,weekday,Kelana Jaya,stormy,,0,3348
+2026-01-06T08:00,weekday,Sri Petaling,stormy,,0,3215
+2026-01-06T09:00,weekday,Sri Petaling,clear,,0,2653
+2026-01-06T10:00,weekday,Kelana Jaya,clear,Marathon,3503,6422
+2026-01-06T11:00,weekday,Ampang,clear,,0,2564
+2026-01-06T12:00,weekday,Sri Petaling,clear,,0,2497
+2026-01-06T13:00,weekday,Kelana Jaya,clear,,0,2252
+2026-01-06T14:00,weekday,Ampang,clear,,0,2652
+2026-01-06T15:00,weekday,Sri Petaling,stormy,,0,1770
+2026-01-06T16:00,weekday,Ampang,clear,,0,2482
+2026-01-06T17:00,weekday,Sri Petaling,rainy,,0,4632
+2026-01-06T18:00,weekday,Sri Petaling,cloudy,,0,5122
+2026-01-06T19:00,weekday,Sri Petaling,cloudy,,0,2213
+2026-01-06T20:00,weekday,Ampang,cloudy,,0,2254
+2026-01-06T21:00,weekday,Ampang,stormy,,0,1757
+2026-01-06T22:00,weekday,Kelana Jaya,stormy,,0,1602
+2026-01-06T23:00,weekday,Kelana Jaya,clear,,0,771
+2026-01-07T00:00,weekday,Kelana Jaya,rainy,,0,643
+2026-01-07T01:00,weekday,Kelana Jaya,stormy,,0,511
+2026-01-07T02:00,weekday,Ampang,cloudy,,0,747
+2026-01-07T03:00,weekday,Ampang,clear,,0,843
+2026-01-07T04:00,weekday,Kelana Jaya,stormy,,0,589
+2026-01-07T05:00,weekday,Ampang,cloudy,Public Holiday,2223,3017
+2026-01-07T06:00,weekday,Sri Petaling,cloudy,,0,2396
+2026-01-07T07:00,weekday,Kelana Jaya,rainy,,0,4056
+2026-01-07T08:00,weekday,Kelana Jaya,cloudy,,0,4910
+2026-01-07T09:00,weekday,Sri Petaling,cloudy,,0,2359
+2026-01-07T10:00,weekday,Sri Petaling,clear,,0,2703
+2026-01-07T11:00,weekday,Sri Petaling,rainy,,0,1948
+2026-01-07T12:00,weekday,Kelana Jaya,cloudy,,0,2223
+2026-01-07T13:00,weekday,Ampang,clear,,0,2477
+2026-01-07T14:00,weekday,Ampang,clear,,0,2725
+2026-01-07T15:00,weekday,Ampang,cloudy,,0,2360
+2026-01-07T16:00,weekday,Sri Petaling,stormy,Public Holiday,1918,3185
+2026-01-07T17:00,weekday,Kelana Jaya,stormy,,0,3814
+2026-01-07T18:00,weekday,Kelana Jaya,clear,,0,4738
+2026-01-07T19:00,weekday,Sri Petaling,cloudy,,0,2587
+2026-01-07T20:00,weekday,Sri Petaling,cloudy,,0,2312
+2026-01-07T21:00,weekday,Sri Petaling,rainy,,0,2217
+2026-01-07T22:00,weekday,Ampang,clear,,0,2262
+2026-01-07T23:00,weekday,Sri Petaling,clear,,0,873
+2026-01-08T00:00,weekday,Sri Petaling,cloudy,,0,773
+2026-01-08T01:00,weekday,Kelana Jaya,stormy,,0,590
+2026-01-08T02:00,weekday,Sri Petaling,stormy,,0,593
+2026-01-08T03:00,weekday,Kelana Jaya,rainy,,0,670
+2026-01-08T04:00,weekday,Kelana Jaya,clear,,0,774
+2026-01-08T05:00,weekday,Ampang,cloudy,,0,830
+2026-01-08T06:00,weekday,Ampang,stormy,,0,1727
+2026-01-08T07:00,weekday,Sri Petaling,stormy,,0,3339
+2026-01-08T08:00,weekday,Ampang,rainy,,0,4526
+2026-01-08T09:00,weekday,Ampang,rainy,,0,2016
+2026-01-08T10:00,weekday,Ampang,clear,,0,2371
+2026-01-08T11:00,weekday,Sri Petaling,cloudy,,0,2317
+2026-01-08T12:00,weekday,Ampang,clear,,0,2340
+2026-01-08T13:00,weekday,Ampang,clear,,0,2420
+2026-01-08T14:00,weekday,Sri Petaling,rainy,,0,2148
+2026-01-08T15:00,weekday,Kelana Jaya,rainy,,0,2218
+2026-01-08T16:00,weekday,Sri Petaling,cloudy,,0,2465
+2026-01-08T17:00,weekday,Sri Petaling,stormy,,0,3705
+2026-01-08T18:00,weekday,Ampang,clear,,0,5191
+2026-01-08T19:00,weekday,Sri Petaling,clear,,0,2486
+2026-01-08T20:00,weekday,Ampang,rainy,,0,2229
+2026-01-08T21:00,weekday,Ampang,clear,,0,2385
+2026-01-08T22:00,weekday,Kelana Jaya,clear,,0,2346
+2026-01-08T23:00,weekday,Sri Petaling,clear,,0,841
+2026-01-09T00:00,weekday,Kelana Jaya,clear,,0,797
+2026-01-09T01:00,weekday,Sri Petaling,stormy,,0,562
+2026-01-09T02:00,weekday,Kelana Jaya,clear,,0,767
+2026-01-09T03:00,weekday,Kelana Jaya,clear,,0,833
+2026-01-09T04:00,weekday,Ampang,clear,Coldplay Concert,3266,3896
+2026-01-09T05:00,weekday,Sri Petaling,clear,,0,798
+2026-01-09T06:00,weekday,Sri Petaling,clear,,0,2489
+2026-01-09T07:00,weekday,Kelana Jaya,clear,,0,4752
+2026-01-09T08:00,weekday,Kelana Jaya,cloudy,,0,4655
+2026-01-09T09:00,weekday,Sri Petaling,clear,,0,2276
+2026-01-09T10:00,weekday,Sri Petaling,clear,,0,2292
+2026-01-09T11:00,weekday,Kelana Jaya,clear,,0,2458
+2026-01-09T12:00,weekday,Sri Petaling,rainy,,0,2134
+2026-01-09T13:00,weekday,Ampang,cloudy,,0,2417
+2026-01-09T14:00,weekday,Ampang,cloudy,,0,2166
+2026-01-09T15:00,weekday,Kelana Jaya,stormy,,0,1647
+2026-01-09T16:00,weekday,Ampang,clear,,0,2328
+2026-01-09T17:00,weekday,Sri Petaling,clear,Coldplay Concert,2673,7597
+2026-01-09T18:00,weekday,Ampang,rainy,,0,4021
+2026-01-09T19:00,weekday,Ampang,stormy,,0,1733
+2026-01-09T20:00,weekday,Kelana Jaya,stormy,,0,1850
+2026-01-09T21:00,weekday,Sri Petaling,stormy,,0,1901
+2026-01-09T22:00,weekday,Kelana Jaya,cloudy,,0,2445
+2026-01-09T23:00,weekday,Kelana Jaya,clear,Football Match,4246,4851
+2026-01-10T00:00,weekend,Sri Petaling,stormy,,0,414
+2026-01-10T01:00,weekend,Sri Petaling,cloudy,,0,558
+2026-01-10T02:00,weekend,Sri Petaling,clear,,0,592
+2026-01-10T03:00,weekend,Kelana Jaya,rainy,,0,533
+2026-01-10T04:00,weekend,Ampang,rainy,Football Match,4939,4872
+2026-01-10T05:00,weekend,Sri Petaling,rainy,,0,560
+2026-01-10T06:00,weekend,Ampang,stormy,,0,442
+2026-01-10T07:00,weekend,Ampang,clear,,0,593
+2026-01-10T08:00,weekend,Kelana Jaya,clear,,0,592
+2026-01-10T09:00,weekend,Kelana Jaya,cloudy,,0,559
+2026-01-10T10:00,weekend,Sri Petaling,clear,,0,559
+2026-01-10T11:00,weekend,Sri Petaling,cloudy,,0,1961
+2026-01-10T12:00,weekend,Sri Petaling,cloudy,Coldplay Concert,2288,3871
+2026-01-10T13:00,weekend,Ampang,clear,,0,2129
+2026-01-10T14:00,weekend,Sri Petaling,clear,,0,1984
+2026-01-10T15:00,weekend,Kelana Jaya,clear,,0,2049
+2026-01-10T16:00,weekend,Sri Petaling,cloudy,,0,1729
+2026-01-10T17:00,weekend,Sri Petaling,clear,,0,1915
+2026-01-10T18:00,weekend,Ampang,stormy,,0,1532
+2026-01-10T19:00,weekend,Kelana Jaya,rainy,,0,1635
+2026-01-10T20:00,weekend,Sri Petaling,clear,,0,566
+2026-01-10T21:00,weekend,Ampang,clear,,0,617
+2026-01-10T22:00,weekend,Ampang,clear,,0,575
+2026-01-10T23:00,weekend,Ampang,stormy,,0,418
+2026-01-11T00:00,weekend,Kelana Jaya,cloudy,,0,529
+2026-01-11T01:00,weekend,Sri Petaling,clear,,0,645
+2026-01-11T02:00,weekend,Ampang,clear,,0,642
+2026-01-11T03:00,weekend,Sri Petaling,clear,,0,540
+2026-01-11T04:00,weekend,Ampang,stormy,,0,426
+2026-01-11T05:00,weekend,Ampang,stormy,,0,415
+2026-01-11T06:00,weekend,Ampang,cloudy,,0,599
+2026-01-11T07:00,weekend,Ampang,cloudy,,0,612
+2026-01-11T08:00,weekend,Kelana Jaya,stormy,,0,397
+2026-01-11T09:00,weekend,Kelana Jaya,cloudy,,0,566
+2026-01-11T10:00,weekend,Ampang,cloudy,,0,603
+2026-01-11T11:00,weekend,Kelana Jaya,stormy,,0,1270
+2026-01-11T12:00,weekend,Sri Petaling,rainy,,0,1564
+2026-01-11T13:00,weekend,Kelana Jaya,cloudy,,0,1883
+2026-01-11T14:00,weekend,Kelana Jaya,stormy,,0,1443
+2026-01-11T15:00,weekend,Kelana Jaya,clear,,0,2187
+2026-01-11T16:00,weekend,Sri Petaling,clear,,0,2059
+2026-01-11T17:00,weekend,Sri Petaling,clear,,0,1952
+2026-01-11T18:00,weekend,Sri Petaling,clear,,0,2103
+2026-01-11T19:00,weekend,Kelana Jaya,rainy,,0,1609
+2026-01-11T20:00,weekend,Ampang,stormy,,0,440
+2026-01-11T21:00,weekend,Kelana Jaya,cloudy,,0,593
+2026-01-11T22:00,weekend,Ampang,clear,,0,575
+2026-01-11T23:00,weekend,Kelana Jaya,clear,,0,546
+2026-01-12T00:00,weekday,Ampang,clear,,0,759
+2026-01-12T01:00,weekday,Sri Petaling,cloudy,,0,711
+2026-01-12T02:00,weekday,Kelana Jaya,clear,,0,781
+2026-01-12T03:00,weekday,Kelana Jaya,stormy,,0,569
+2026-01-12T04:00,weekday,Ampang,clear,,0,793
+2026-01-12T05:00,weekday,Kelana Jaya,stormy,,0,556
+2026-01-12T06:00,weekday,Sri Petaling,clear,,0,2286
+2026-01-12T07:00,weekday,Sri Petaling,clear,,0,5462
+2026-01-12T08:00,weekday,Ampang,stormy,,0,3361
+2026-01-12T09:00,weekday,Ampang,cloudy,,0,2318
+2026-01-12T10:00,weekday,Sri Petaling,clear,,0,2599
+2026-01-12T11:00,weekday,Sri Petaling,clear,,0,2254
+2026-01-12T12:00,weekday,Sri Petaling,stormy,,0,1893
+2026-01-12T13:00,weekday,Ampang,stormy,,0,1891
+2026-01-12T14:00,weekday,Sri Petaling,clear,,0,2359
+2026-01-12T15:00,weekday,Sri Petaling,clear,,0,2627
+2026-01-12T16:00,weekday,Sri Petaling,stormy,,0,1794
+2026-01-12T17:00,weekday,Sri Petaling,stormy,Marathon,1136,4363
+2026-01-12T18:00,weekday,Kelana Jaya,stormy,,0,3356
+2026-01-12T19:00,weekday,Ampang,stormy,,0,1621
+2026-01-12T20:00,weekday,Ampang,rainy,,0,2300
+2026-01-12T21:00,weekday,Ampang,clear,,0,2722
+2026-01-12T22:00,weekday,Sri Petaling,clear,,0,2652
+2026-01-12T23:00,weekday,Kelana Jaya,cloudy,,0,830
+2026-01-13T00:00,weekday,Sri Petaling,stormy,,0,548
+2026-01-13T01:00,weekday,Ampang,rainy,,0,665
+2026-01-13T02:00,weekday,Sri Petaling,clear,,0,778
+2026-01-13T03:00,weekday,Sri Petaling,stormy,,0,546
+2026-01-13T04:00,weekday,Ampang,stormy,,0,530
+2026-01-13T05:00,weekday,Sri Petaling,clear,,0,809
+2026-01-13T06:00,weekday,Kelana Jaya,rainy,,0,2182
+2026-01-13T07:00,weekday,Sri Petaling,cloudy,,0,4662
+2026-01-13T08:00,weekday,Kelana Jaya,clear,,0,4804
+2026-01-13T09:00,weekday,Kelana Jaya,cloudy,,0,2558
+2026-01-13T10:00,weekday,Ampang,clear,,0,2585
+2026-01-13T11:00,weekday,Sri Petaling,stormy,,0,1721
+2026-01-13T12:00,weekday,Sri Petaling,stormy,,0,1720
+2026-01-13T13:00,weekday,Ampang,clear,,0,2719
+2026-01-13T14:00,weekday,Kelana Jaya,clear,,0,2358
+2026-01-13T15:00,weekday,Kelana Jaya,cloudy,,0,2184
+2026-01-13T16:00,weekday,Ampang,stormy,,0,1917
+2026-01-13T17:00,weekday,Kelana Jaya,clear,,0,4689
+2026-01-13T18:00,weekday,Ampang,clear,,0,4712
+2026-01-13T19:00,weekday,Sri Petaling,stormy,,0,1592
+2026-01-13T20:00,weekday,Kelana Jaya,clear,,0,2643
+2026-01-13T21:00,weekday,Kelana Jaya,clear,,0,2527
+2026-01-13T22:00,weekday,Kelana Jaya,rainy,,0,2011
+2026-01-13T23:00,weekday,Sri Petaling,clear,Football Match,1532,2350
+2026-01-14T00:00,weekday,Kelana Jaya,clear,,0,724
+2026-01-14T01:00,weekday,Ampang,clear,,0,758
+2026-01-14T02:00,weekday,Kelana Jaya,clear,,0,728
+2026-01-14T03:00,weekday,Ampang,stormy,,0,587
+2026-01-14T04:00,weekday,Ampang,cloudy,,0,762
+2026-01-14T05:00,weekday,Ampang,clear,,0,871
+2026-01-14T06:00,weekday,Sri Petaling,clear,,0,2683
+2026-01-14T07:00,weekday,Ampang,rainy,,0,4644
+2026-01-14T08:00,weekday,Ampang,clear,,0,4926
+2026-01-14T09:00,weekday,Ampang,clear,,0,2471
+2026-01-14T10:00,weekday,Ampang,clear,,0,2282
+2026-01-14T11:00,weekday,Sri Petaling,clear,,0,2524
+2026-01-14T12:00,weekday,Ampang,clear,,0,2515
+2026-01-14T13:00,weekday,Sri Petaling,cloudy,,0,2184
+2026-01-14T14:00,weekday,Kelana Jaya,stormy,,0,1802
+2026-01-14T15:00,weekday,Sri Petaling,rainy,,0,2095
+2026-01-14T16:00,weekday,Ampang,clear,,0,2476
+2026-01-14T17:00,weekday,Sri Petaling,cloudy,,0,4680
+2026-01-14T18:00,weekday,Ampang,stormy,,0,3256
+2026-01-14T19:00,weekday,Kelana Jaya,cloudy,,0,2178
+2026-01-14T20:00,weekday,Kelana Jaya,cloudy,,0,2314
+2026-01-14T21:00,weekday,Sri Petaling,clear,Festival,3300,5602
+2026-01-14T22:00,weekday,Ampang,clear,,0,2582
+2026-01-14T23:00,weekday,Sri Petaling,cloudy,Public Holiday,3459,3894
+2026-01-15T00:00,weekday,Sri Petaling,clear,,0,744
+2026-01-15T01:00,weekday,Kelana Jaya,cloudy,,0,737
+2026-01-15T02:00,weekday,Ampang,rainy,,0,649
+2026-01-15T03:00,weekday,Ampang,clear,,0,875
+2026-01-15T04:00,weekday,Sri Petaling,rainy,,0,687
+2026-01-15T05:00,weekday,Sri Petaling,rainy,,0,648
+2026-01-15T06:00,weekday,Ampang,clear,,0,2404
+2026-01-15T07:00,weekday,Ampang,clear,Football Match,3319,8580
+2026-01-15T08:00,weekday,Kelana Jaya,clear,,0,5471
+2026-01-15T09:00,weekday,Sri Petaling,clear,,0,2438
+2026-01-15T10:00,weekday,Ampang,cloudy,,0,2285
+2026-01-15T11:00,weekday,Sri Petaling,clear,,0,2691
+2026-01-15T12:00,weekday,Kelana Jaya,clear,,0,2274
+2026-01-15T13:00,weekday,Ampang,clear,,0,2462
+2026-01-15T14:00,weekday,Ampang,rainy,,0,2004
+2026-01-15T15:00,weekday,Kelana Jaya,rainy,,0,1959
+2026-01-15T16:00,weekday,Sri Petaling,stormy,,0,1759
+2026-01-15T17:00,weekday,Kelana Jaya,clear,,0,5484
+2026-01-15T18:00,weekday,Kelana Jaya,clear,,0,5445
+2026-01-15T19:00,weekday,Ampang,clear,,0,2309
+2026-01-15T20:00,weekday,Sri Petaling,cloudy,,0,2198
+2026-01-15T21:00,weekday,Sri Petaling,rainy,,0,2149
+2026-01-15T22:00,weekday,Ampang,stormy,Coldplay Concert,2786,3344
+2026-01-15T23:00,weekday,Ampang,clear,,0,811
+2026-01-16T00:00,weekday,Sri Petaling,stormy,,0,516
+2026-01-16T01:00,weekday,Ampang,clear,,0,871
+2026-01-16T02:00,weekday,Sri Petaling,cloudy,,0,697
+2026-01-16T03:00,weekday,Kelana Jaya,clear,,0,784
+2026-01-16T04:00,weekday,Ampang,clear,,0,839
+2026-01-16T05:00,weekday,Ampang,clear,,0,732
+2026-01-16T06:00,weekday,Kelana Jaya,stormy,,0,1642
+2026-01-16T07:00,weekday,Ampang,clear,,0,5318
+2026-01-16T08:00,weekday,Kelana Jaya,clear,,0,4755
+2026-01-16T09:00,weekday,Sri Petaling,clear,,0,2629
+2026-01-16T10:00,weekday,Kelana Jaya,clear,,0,2563
+2026-01-16T11:00,weekday,Sri Petaling,cloudy,,0,2350
+2026-01-16T12:00,weekday,Sri Petaling,rainy,,0,2177
+2026-01-16T13:00,weekday,Ampang,stormy,,0,1598
+2026-01-16T14:00,weekday,Sri Petaling,cloudy,,0,2267
+2026-01-16T15:00,weekday,Ampang,clear,,0,2405
+2026-01-16T16:00,weekday,Kelana Jaya,cloudy,Public Holiday,1314,3728
+2026-01-16T17:00,weekday,Sri Petaling,clear,,0,4884
+2026-01-16T18:00,weekday,Sri Petaling,rainy,,0,4453
+2026-01-16T19:00,weekday,Ampang,clear,,0,2535
+2026-01-16T20:00,weekday,Ampang,clear,,0,2500
+2026-01-16T21:00,weekday,Ampang,clear,,0,2699
+2026-01-16T22:00,weekday,Sri Petaling,clear,,0,2573
+2026-01-16T23:00,weekday,Kelana Jaya,clear,,0,878
+2026-01-17T00:00,weekend,Sri Petaling,rainy,,0,496
+2026-01-17T01:00,weekend,Ampang,clear,,0,580
+2026-01-17T02:00,weekend,Kelana Jaya,rainy,,0,525
+2026-01-17T03:00,weekend,Ampang,clear,,0,621
+2026-01-17T04:00,weekend,Ampang,clear,,0,618
+2026-01-17T05:00,weekend,Kelana Jaya,rainy,,0,518
+2026-01-17T06:00,weekend,Ampang,clear,,0,618
+2026-01-17T07:00,weekend,Ampang,stormy,,0,437
+2026-01-17T08:00,weekend,Ampang,clear,,0,617
+2026-01-17T09:00,weekend,Kelana Jaya,clear,,0,639
+2026-01-17T10:00,weekend,Sri Petaling,stormy,,0,385
+2026-01-17T11:00,weekend,Ampang,stormy,,0,1265
+2026-01-17T12:00,weekend,Kelana Jaya,clear,,0,1936
+2026-01-17T13:00,weekend,Kelana Jaya,cloudy,,0,1762
+2026-01-17T14:00,weekend,Ampang,clear,,0,1840
+2026-01-17T15:00,weekend,Sri Petaling,rainy,,0,1542
+2026-01-17T16:00,weekend,Sri Petaling,clear,,0,1950
+2026-01-17T17:00,weekend,Kelana Jaya,clear,,0,2108
+2026-01-17T18:00,weekend,Sri Petaling,clear,,0,1964
+2026-01-17T19:00,weekend,Sri Petaling,stormy,,0,1384
+2026-01-17T20:00,weekend,Sri Petaling,clear,,0,568
+2026-01-17T21:00,weekend,Ampang,clear,,0,634
+2026-01-17T22:00,weekend,Ampang,clear,,0,608
+2026-01-17T23:00,weekend,Ampang,cloudy,,0,601
+2026-01-18T00:00,weekend,Sri Petaling,rainy,,0,475
+2026-01-18T01:00,weekend,Sri Petaling,clear,,0,570
+2026-01-18T02:00,weekend,Ampang,stormy,,0,424
+2026-01-18T03:00,weekend,Sri Petaling,clear,,0,642
+2026-01-18T04:00,weekend,Kelana Jaya,clear,,0,572
+2026-01-18T05:00,weekend,Kelana Jaya,rainy,,0,468
+2026-01-18T06:00,weekend,Ampang,clear,,0,651
+2026-01-18T07:00,weekend,Kelana Jaya,cloudy,,0,555
+2026-01-18T08:00,weekend,Kelana Jaya,cloudy,,0,516
+2026-01-18T09:00,weekend,Sri Petaling,clear,,0,634
+2026-01-18T10:00,weekend,Kelana Jaya,clear,,0,639
+2026-01-18T11:00,weekend,Kelana Jaya,stormy,,0,1391
+2026-01-18T12:00,weekend,Kelana Jaya,rainy,,0,1536
+2026-01-18T13:00,weekend,Kelana Jaya,clear,,0,2090
+2026-01-18T14:00,weekend,Ampang,rainy,,0,1627
+2026-01-18T15:00,weekend,Kelana Jaya,clear,Marathon,3617,5947
+2026-01-18T16:00,weekend,Kelana Jaya,cloudy,,0,2053
+2026-01-18T17:00,weekend,Sri Petaling,rainy,Festival,3355,4316
+2026-01-18T18:00,weekend,Ampang,clear,,0,2045
+2026-01-18T19:00,weekend,Sri Petaling,clear,,0,2065
+2026-01-18T20:00,weekend,Sri Petaling,clear,,0,548
+2026-01-18T21:00,weekend,Sri Petaling,rainy,,0,559
+2026-01-18T22:00,weekend,Kelana Jaya,rainy,,0,506
+2026-01-18T23:00,weekend,Ampang,stormy,,0,399
+2026-01-19T00:00,weekday,Ampang,clear,,0,775
+2026-01-19T01:00,weekday,Sri Petaling,stormy,,0,590
+2026-01-19T02:00,weekday,Ampang,stormy,,0,543
+2026-01-19T03:00,weekday,Sri Petaling,clear,,0,844
+2026-01-19T04:00,weekday,Sri Petaling,cloudy,,0,711
+2026-01-19T05:00,weekday,Kelana Jaya,clear,,0,870
+2026-01-19T06:00,weekday,Ampang,clear,,0,2645
+2026-01-19T07:00,weekday,Ampang,clear,,0,5015
+2026-01-19T08:00,weekday,Ampang,rainy,,0,4465
+2026-01-19T09:00,weekday,Ampang,clear,,0,2640
+2026-01-19T10:00,weekday,Ampang,stormy,,0,1854
+2026-01-19T11:00,weekday,Ampang,cloudy,,0,2562
+2026-01-19T12:00,weekday,Ampang,cloudy,,0,2373
+2026-01-19T13:00,weekday,Ampang,cloudy,,0,2384
+2026-01-19T14:00,weekday,Sri Petaling,clear,,0,2465
+2026-01-19T15:00,weekday,Sri Petaling,clear,,0,2301
+2026-01-19T16:00,weekday,Sri Petaling,clear,,0,2472
+2026-01-19T17:00,weekday,Ampang,stormy,,0,3460
+2026-01-19T18:00,weekday,Kelana Jaya,cloudy,,0,5141
+2026-01-19T19:00,weekday,Ampang,rainy,,0,2329
+2026-01-19T20:00,weekday,Kelana Jaya,clear,,0,2453
+2026-01-19T21:00,weekday,Sri Petaling,rainy,,0,2317
+2026-01-19T22:00,weekday,Sri Petaling,clear,,0,2469
+2026-01-19T23:00,weekday,Kelana Jaya,clear,,0,823
+2026-01-20T00:00,weekday,Ampang,clear,,0,725
+2026-01-20T01:00,weekday,Sri Petaling,clear,,0,779
+2026-01-20T02:00,weekday,Kelana Jaya,cloudy,,0,764
+2026-01-20T03:00,weekday,Ampang,cloudy,,0,721
+2026-01-20T04:00,weekday,Kelana Jaya,clear,,0,799
+2026-01-20T05:00,weekday,Sri Petaling,cloudy,,0,801
+2026-01-20T06:00,weekday,Ampang,stormy,,0,1789
+2026-01-20T07:00,weekday,Ampang,stormy,,0,3245
+2026-01-20T08:00,weekday,Ampang,clear,,0,5213
+2026-01-20T09:00,weekday,Sri Petaling,clear,,0,2743
+2026-01-20T10:00,weekday,Ampang,stormy,,0,1767
+2026-01-20T11:00,weekday,Ampang,clear,,0,2605
+2026-01-20T12:00,weekday,Sri Petaling,stormy,,0,1701
+2026-01-20T13:00,weekday,Kelana Jaya,clear,,0,2646
+2026-01-20T14:00,weekday,Ampang,clear,Festival,3344,5690
+2026-01-20T15:00,weekday,Kelana Jaya,rainy,,0,1949
+2026-01-20T16:00,weekday,Ampang,clear,,0,2609
+2026-01-20T17:00,weekday,Ampang,rainy,,0,4524
+2026-01-20T18:00,weekday,Kelana Jaya,clear,,0,5142
+2026-01-20T19:00,weekday,Ampang,cloudy,,0,2301
+2026-01-20T20:00,weekday,Sri Petaling,rainy,,0,2238
+2026-01-20T21:00,weekday,Ampang,clear,,0,2684
+2026-01-20T22:00,weekday,Sri Petaling,clear,,0,2332
+2026-01-20T23:00,weekday,Sri Petaling,clear,,0,871
+2026-01-21T00:00,weekday,Ampang,rainy,,0,646
+2026-01-21T01:00,weekday,Sri Petaling,stormy,,0,574
+2026-01-21T02:00,weekday,Sri Petaling,rainy,,0,699
+2026-01-21T03:00,weekday,Sri Petaling,rainy,,0,701
+2026-01-21T04:00,weekday,Sri Petaling,stormy,,0,607
+2026-01-21T05:00,weekday,Kelana Jaya,clear,,0,871
+2026-01-21T06:00,weekday,Ampang,rainy,,0,2238
+2026-01-21T07:00,weekday,Sri Petaling,cloudy,,0,4748
+2026-01-21T08:00,weekday,Sri Petaling,stormy,,0,3819
+2026-01-21T09:00,weekday,Kelana Jaya,cloudy,,0,2462
+2026-01-21T10:00,weekday,Ampang,clear,Coldplay Concert,1647,4096
+2026-01-21T11:00,weekday,Ampang,cloudy,,0,2425
+2026-01-21T12:00,weekday,Sri Petaling,clear,,0,2744
+2026-01-21T13:00,weekday,Ampang,clear,,0,2435
+2026-01-21T14:00,weekday,Kelana Jaya,rainy,,0,2110
+2026-01-21T15:00,weekday,Ampang,clear,,0,2298
+2026-01-21T16:00,weekday,Ampang,clear,,0,2459
+2026-01-21T17:00,weekday,Ampang,clear,,0,5221
+2026-01-21T18:00,weekday,Kelana Jaya,clear,,0,5014
+2026-01-21T19:00,weekday,Ampang,cloudy,,0,2180
+2026-01-21T20:00,weekday,Sri Petaling,cloudy,,0,2251
+2026-01-21T21:00,weekday,Ampang,rainy,Public Holiday,3027,4789
+2026-01-21T22:00,weekday,Sri Petaling,stormy,,0,1762
+2026-01-21T23:00,weekday,Ampang,clear,,0,762
+2026-01-22T00:00,weekday,Ampang,clear,,0,784
+2026-01-22T01:00,weekday,Sri Petaling,rainy,,0,687
