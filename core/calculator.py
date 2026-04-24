@@ -98,6 +98,38 @@ _SUNDAY_FREQ = {
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
+# ── Event type profiles ───────────────────────────────────────────────────────
+# pre_mult  : fraction of event pax traveling TO venue in the hour BEFORE
+# during_mult: fraction using LRT DURING the event (latecomers / early leavers)
+# exit_mult : fraction leaving all at once in the hour AFTER
+_EVENT_PROFILES = {
+    "concert": {
+        "pre_mult": 0.70, "during_mult": 0.20, "exit_mult": 1.00,
+    },
+    "football_match": {
+        "pre_mult": 0.80, "during_mult": 0.30, "exit_mult": 1.00,
+    },
+    "festival": {
+        "pre_mult": 0.50, "during_mult": 0.60, "exit_mult": 0.50,
+    },
+    "marathon": {
+        "pre_mult": 0.90, "during_mult": 0.20, "exit_mult": 0.60,
+    },
+    "public_holiday": {
+        "pre_mult": 0.40, "during_mult": 0.50, "exit_mult": 0.40,
+    },
+    "exhibition": {
+        "pre_mult": 0.50, "during_mult": 0.40, "exit_mult": 0.60,
+    },
+    "religious_event": {
+        "pre_mult": 0.80, "during_mult": 0.10, "exit_mult": 0.90,
+    },
+    "default": {
+        "pre_mult": 0.70, "during_mult": 0.20, "exit_mult": 1.00,
+    },
+}
+
+
 def _parse_dt(dt_string: str) -> datetime:
     return datetime.fromisoformat(dt_string)
 
@@ -334,18 +366,17 @@ def compute_daily_schedule(
             ev_start = ev.get("start_hour", 0)
             ev_end   = ev.get("end_hour", 0)
             pax      = ev.get("passengers_per_hr", 0)
+            profile  = _EVENT_PROFILES.get(ev.get("event_type", "default"),
+                                           _EVENT_PROFILES["default"])
             if hour == ev_start - 1:
-                # Arrival surge: 70% of event pax travel to venue in the hour before
-                hour_event_pax += int(pax * 0.7)
+                hour_event_pax += int(pax * profile["pre_mult"])
                 hour_event_names.append(f"{ev['name']} (arrival)")
                 is_tail = True
             elif ev_start <= hour < ev_end:
-                # During event: only 20% extra pax (latecomers — most are already at venue)
-                hour_event_pax += int(pax * 0.2)
+                hour_event_pax += int(pax * profile["during_mult"])
                 hour_event_names.append(ev["name"])
             elif hour == ev_end:
-                # Exit rush: 100% of event pax leave at once after event ends
-                hour_event_pax += pax
+                hour_event_pax += int(pax * profile["exit_mult"])
                 hour_event_names.append(f"{ev['name']} (exit rush)")
                 is_tail = True
 

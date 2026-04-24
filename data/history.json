@@ -250,5 +250,80 @@
       "platform_incidents": "none",
       "verdict": "Appropriate. Moderate option correctly handled the mild uplift in ridership. Valentine's Day creates diffuse demand spread across many destinations — unlike concerts, no single station bottleneck. Standard plus 1-2 extra trains is sufficient."
     }
+  },
+  {
+    "date": "2024-12-07",
+    "line": "Ampang",
+    "situation": "Malaysia vs Thailand AFF Championship football match at Bukit Jalil. Saturday evening 8:45pm kickoff. Clear weather. 87,000 attendance.",
+    "event_passengers_per_hr": 4800,
+    "event_type": "football_match",
+    "weather": "clear",
+    "frequency_deployed": 16,
+    "outcome": {
+      "peak_load_factor_pct": 88,
+      "passengers_served_per_hr": 9600,
+      "platform_incidents": "severe congestion at Bukit Jalil immediately after final whistle — 10,000+ fans exited within 15 minutes",
+      "verdict": "Adequate during match but insufficient at final whistle. Football crowds exit far more abruptly than concerts — everyone leaves the moment the game ends. Should have pre-positioned max trains at Bukit Jalil 20 minutes before final whistle. Key lesson: for football, the exit surge is sharper and shorter than concerts — deploy maximum frequency 15-20 minutes before expected end time."
+    }
+  },
+  {
+    "date": "2024-01-28",
+    "line": "Sri Petaling",
+    "situation": "Thaipusam at Batu Caves. Sunday. Clear weather. Estimated 1.5 million devotees over the day, with peak from 4am-10am and again 6pm-10pm.",
+    "event_passengers_per_hr": 3500,
+    "event_type": "religious_event",
+    "weather": "clear",
+    "frequency_deployed": 14,
+    "outcome": {
+      "peak_load_factor_pct": 93,
+      "passengers_served_per_hr": 8400,
+      "platform_incidents": "severe overcrowding at Sri Petaling and Bukit Jalil 5am-8am. Many devotees travel pre-dawn.",
+      "verdict": "Insufficient in early morning. Thaipusam devotees start traveling from 3am — standard off-peak schedule was running when crowd hit. Lesson: religious events have unconventional peak times. Bukit Jalil/Sri Petaling line needs max frequency from 3am for Thaipusam. The exit rush is also very sharp as prayers end — congregation leaves together."
+    }
+  },
+  {
+    "date": "2024-10-06",
+    "line": "Kelana Jaya",
+    "situation": "Standard Chartered KL Marathon. Sunday morning, 5am start. Clear weather. 35,000 runners plus spectators at Dataran Merdeka.",
+    "event_passengers_per_hr": 2200,
+    "event_type": "marathon",
+    "weather": "clear",
+    "frequency_deployed": 10,
+    "outcome": {
+      "peak_load_factor_pct": 71,
+      "passengers_served_per_hr": 5600,
+      "platform_incidents": "none — crowd well distributed across 3 hours of race starts",
+      "verdict": "Well handled. Marathon crowds are unique — arrival is concentrated before 5am (everyone comes early) but finishers spread over 4-6 hours depending on pace. No single exit rush. Pre-race surge at 3am-5am is the critical window. Post-race departure is gradual. Lesson: for marathons, prioritise pre-event frequency from 3am, reduce after 8am as finishers trickle through."
+    }
+  },
+  {
+    "date": "2024-03-22",
+    "line": "Kelana Jaya",
+    "situation": "KLCC International Convention and Exhibition (ICE) — 3-day business expo. Friday. Clear weather. Estimated 12,000 daily visitors.",
+    "event_passengers_per_hr": 1200,
+    "event_type": "exhibition",
+    "weather": "clear",
+    "frequency_deployed": 9,
+    "outcome": {
+      "peak_load_factor_pct": 68,
+      "passengers_served_per_hr": 5400,
+      "platform_incidents": "none",
+      "verdict": "Conservative was sufficient. Exhibition visitors arrive gradually throughout the day — no sharp surge. Lunchtime (12-2pm) and end-of-day (5-6pm) see slight peaks but nothing dramatic. Unlike concerts, exhibitions have no single exit rush — visitors leave at different times. Standard schedule plus 1 extra train was more than adequate."
+    }
+  },
+  {
+    "date": "2024-08-24",
+    "line": "Sri Petaling",
+    "situation": "Urbanscapes music and arts festival at Bukit Jalil. Saturday afternoon 2pm-11pm. Cloudy weather. Estimated 25,000 attendance.",
+    "event_passengers_per_hr": 2000,
+    "event_type": "festival",
+    "weather": "cloudy",
+    "frequency_deployed": 11,
+    "outcome": {
+      "peak_load_factor_pct": 74,
+      "passengers_served_per_hr": 6600,
+      "platform_incidents": "none — crowd arrived and left gradually throughout the evening",
+      "verdict": "Correct choice. Festival crowds behave very differently from concerts — arrivals spread over 3-4 hours, multiple stages keep people at the venue longer, and departures are staggered rather than all at once. 11 trains/hr maintained comfortable load throughout. Lesson: festivals need consistent moderate frequency across the full event window rather than a sharp post-event spike."
+    }
   }
 ]

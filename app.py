@@ -272,6 +272,18 @@ if input_method == "Manual inputs":
         em_dur      = st.number_input("Emergency duration (hours)", 1, 4, 1, key="em_dur") if em_type_key != "None" else 1
     with ai2:
         ev_name = st.text_input("Event name (leave blank if none)", key="ev_name")
+        ev_type = st.selectbox("Event type", [
+            "concert", "football_match", "festival",
+            "marathon", "public_holiday", "exhibition", "religious_event",
+        ], key="ev_type", format_func=lambda x: {
+            "concert": "Concert",
+            "football_match": "Football match",
+            "festival": "Festival",
+            "marathon": "Marathon / run",
+            "public_holiday": "Public holiday",
+            "exhibition": "Exhibition / convention",
+            "religious_event": "Religious event",
+        }[x])
         ev_pax  = st.number_input("Extra passengers/hr at station", 0, 30_000, 0, key="ev_pax")
 
 elif input_method == "Describe in text (GLM extracts)":
@@ -343,7 +355,8 @@ if st.button("Analyse", type="primary", key="analyse_btn"):
 
     else:  # Manual inputs
         a_weather = st.session_state.get("sch_weather", "clear")
-        a_ev_raw  = [{"name": ev_name, "passengers_per_hr": int(ev_pax)}] \
+        a_ev_raw  = [{"name": ev_name, "passengers_per_hr": int(ev_pax),
+                      "event_type": st.session_state.get("ev_type", "concert")}] \
                     if ev_name.strip() and ev_pax > 0 else []
         a_line    = sch_line
 

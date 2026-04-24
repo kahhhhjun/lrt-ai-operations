@@ -28,16 +28,26 @@ Return ONLY a valid JSON object with exactly these fields:
   "emergency": a short string describing the emergency, or null,
   "emergency_type": "track_incident", "breakdown", "signal_failure", "power_failure", "evacuation", "overcrowding", or null,
   "line": one of ["Kelana Jaya", "Ampang", "Sri Petaling"] or null,
-  "events": [{"name": string, "passengers_per_hr": integer}]
+  "events": [{"name": string, "passengers_per_hr": integer, "event_type": string}]
 }
 
-Emergency type rules — read carefully:
-- "track_incident": person on track, suicide attempt, body on track, track intrusion — SERVICE MUST BE HALTED
-- "breakdown": train malfunction, out of service, mechanical failure — one fewer train available
-- "signal_failure": signal fault, signalling problem — trains must slow/space out
-- "power_failure": power outage, electrical fault — service disrupted
-- "evacuation": fire, bomb threat, security alert — stations must be cleared
-- "overcrowding": crowd crush, platform full, stampede risk — need more trains urgently
+Emergency type rules:
+- "track_incident": person on track, suicide attempt, body on track — SERVICE MUST BE HALTED
+- "breakdown": train malfunction, out of service, mechanical failure
+- "signal_failure": signal fault, signalling problem
+- "power_failure": power outage, electrical fault
+- "evacuation": fire, bomb threat, security alert
+- "overcrowding": crowd crush, platform full, stampede risk
+
+Event type rules — set "event_type" for each event:
+- "concert": music concert, gig, live performance, band
+- "football_match": football, soccer, match, game, final, cup
+- "festival": festival, fair, carnival, bazaar, pasar malam
+- "marathon": marathon, run, race, cycling event
+- "public_holiday": public holiday, national day, celebration, parade
+- "exhibition": exhibition, convention, expo, conference, trade show
+- "religious_event": prayers, church, temple, mosque, thaipusam, wesak, deepavali mass gathering
+- "concert" is the default if event type is unclear
 
 "passengers_per_hr" means extra passengers per hour due to events (not emergencies).
 If a field cannot be determined, use sensible defaults: weather="clear", emergency=null, emergency_type=null, line=null, events=[].
@@ -101,19 +111,34 @@ def _placeholder_extract(text: str) -> dict:
             result["line"] = " ".join(w.capitalize() for w in line.split())
             break
 
+    _event_type_map = [
+        ("concert",         ["concert", "gig", "show", "live performance", "tour"]),
+        ("football_match",  ["football", "soccer", "match", "final", "cup", "game"]),
+        ("festival",        ["festival", "fair", "carnival", "bazaar", "pasar malam"]),
+        ("marathon",        ["marathon", "run", "race", "cycling"]),
+        ("public_holiday",  ["holiday", "merdeka", "national day", "parade", "celebration"]),
+        ("exhibition",      ["exhibition", "expo", "convention", "conference", "trade show"]),
+        ("religious_event", ["thaipusam", "wesak", "deepavali", "prayers", "church", "temple"]),
+    ]
     event_keywords = ["concert", "match", "game", "festival", "rally", "marathon",
-                      "event", "show", "gig", "holiday"]
+                      "event", "show", "gig", "holiday", "exhibition", "prayers",
+                      "thaipusam", "wesak", "deepavali", "carnival", "bazaar", "run"]
     if any(k in t for k in event_keywords):
-        # Extract passenger numbers from text (e.g. "4,000 extra passengers")
         numbers = re.findall(r"(\d[\d,]*)\s*(?:extra\s+)?(?:passengers?|pax|people|fans?|crowd)?", t)
-        pax_hr = 2_000  # default if no number found
+        pax_hr = 2_000
         for n in numbers:
             val = int(n.replace(",", ""))
             if 500 <= val <= 30_000:
                 pax_hr = val
                 break
+        detected_type = "concert"
+        for ev_type, keywords in _event_type_map:
+            if any(k in t for k in keywords):
+                detected_type = ev_type
+                break
         event_name = next((k.capitalize() for k in event_keywords if k in t), "Event")
-        result["events"] = [{"name": event_name, "passengers_per_hr": pax_hr}]
+        result["events"] = [{"name": event_name, "passengers_per_hr": pax_hr,
+                              "event_type": detected_type}]
 
     return result
 
