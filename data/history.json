@@ -1,5 +1,47 @@
 [
   {
+    "date": "2024-08-12",
+    "line": "Kelana Jaya",
+    "situation": "Signal failure at Taman Bahagia station. Monday morning peak 8:30am. All trains halted immediately for safety — signalling system could not confirm train positions, creating collision risk.",
+    "event_passengers_per_hr": 0,
+    "weather": "clear",
+    "frequency_deployed": 0,
+    "outcome": {
+      "peak_load_factor_pct": 0,
+      "passengers_served_per_hr": 0,
+      "platform_incidents": "~8,500 passengers stranded across 6 stations during 34-minute suspension. Full resumption at reduced 12 trains/hr initially, then restored to 20 trains/hr after 20 minutes.",
+      "verdict": "Correct decision to fully stop all trains immediately. Signal failure makes it impossible to know where trains are — running any train risks rear-end collision. Lesson: signal failure = zero trains until system is fully restored and confirmed. No exceptions. Post-restoration, max frequency is mandatory to clear backlog."
+    }
+  },
+  {
+    "date": "2024-03-19",
+    "line": "Ampang",
+    "situation": "Partial signal failure affecting 3 stations on Ampang line. Wednesday afternoon off-peak. Operator attempted to run trains at reduced speed instead of stopping.",
+    "event_passengers_per_hr": 0,
+    "weather": "clear",
+    "frequency_deployed": 5,
+    "outcome": {
+      "peak_load_factor_pct": 42,
+      "passengers_served_per_hr": 3000,
+      "platform_incidents": "near-miss incident between two trains at Sri Petaling junction. Emergency stop triggered. Full suspension imposed 12 minutes later.",
+      "verdict": "Wrong decision. Continuing service at reduced frequency during signal failure caused a near-miss collision. Any signal failure — partial or full — requires immediate full suspension. The 12-minute delay in halting service was a serious safety breach. Lesson: there is no such thing as a 'safe reduced frequency' during signal failure. Stop all trains immediately and wait for engineering clearance."
+    }
+  },
+  {
+    "date": "2023-11-06",
+    "line": "Sri Petaling",
+    "situation": "Signal system reboot required after software fault detected. Tuesday evening peak 6pm. Engineering team requested 20-minute controlled shutdown to apply patch.",
+    "event_passengers_per_hr": 0,
+    "weather": "clear",
+    "frequency_deployed": 0,
+    "outcome": {
+      "peak_load_factor_pct": 0,
+      "passengers_served_per_hr": 0,
+      "platform_incidents": "orderly evacuation of in-transit passengers at nearest stations. ~5,000 passengers affected. Bus bridge activated within 8 minutes.",
+      "verdict": "Textbook response. Full stop immediately upon signal fault detection. Bus bridge activated fast. Service resumed at maximum frequency once system confirmed stable. Total disruption: 23 minutes. Lesson: proactive shutdown is always safer than reactive — catching a signal fault early and stopping immediately prevents worse incidents."
+    }
+  },
+  {
     "date": "2024-11-22",
     "line": "Sri Petaling",
     "situation": "Coldplay Music of the Spheres concert at Bukit Jalil National Stadium. Saturday evening, clear weather. Estimated 80,000 attendance.",
@@ -109,6 +151,104 @@
       "passengers_served_per_hr": 7800,
       "platform_incidents": "none",
       "verdict": "Comfortable. 13 trains/hr was slightly more than needed — could have used 11. However, the conservative choice was justified given uncertainty around exact travel timing during festive periods."
+    }
+  },
+  {
+    "date": "2024-06-03",
+    "line": "Kelana Jaya",
+    "situation": "Track incident — person on track at Taman Jaya station. Monday morning peak 8am. Service suspended for 22 minutes.",
+    "event_passengers_per_hr": 0,
+    "weather": "clear",
+    "frequency_deployed": 0,
+    "outcome": {
+      "peak_load_factor_pct": 210,
+      "passengers_served_per_hr": 0,
+      "platform_incidents": "severe platform overflow at 4 stations. Estimated 6,000 passengers stranded. Post-clearance recovery required max frequency for 2 hours.",
+      "verdict": "Service correctly suspended during incident. However post-resumption frequency was only raised to 14 trains/hr — insufficient to clear backlog. Should have immediately deployed max 20 trains/hr for at least 90 minutes post-clearance. Lesson: backlog grows by ~10,000 passengers per 10 minutes of suspension during peak hours."
+    }
+  },
+  {
+    "date": "2024-10-28",
+    "line": "Kelana Jaya",
+    "situation": "Power failure at substation affecting Kelana Jaya to Putra Heights section. Tuesday evening peak. Rainy weather.",
+    "event_passengers_per_hr": 0,
+    "weather": "rainy",
+    "frequency_deployed": 3,
+    "outcome": {
+      "peak_load_factor_pct": 145,
+      "passengers_served_per_hr": 2400,
+      "platform_incidents": "large crowds stranded at Kelana Jaya and Subang Jaya. Bus replacement service overwhelmed.",
+      "verdict": "Power failure during rain severely impacted operations. 3 trains/hr on backup power was insufficient. Partial restoration at 45 minutes allowed 8 trains/hr. Lesson: always activate bus bridge immediately upon power failure — LRT alone cannot handle even reduced demand under backup power."
+    }
+  },
+  {
+    "date": "2025-01-01",
+    "line": "Sri Petaling",
+    "situation": "New Year's Day morning. Wednesday. Residual crowd from overnight NYE events. Stormy weather from 6am.",
+    "event_passengers_per_hr": 1200,
+    "weather": "stormy",
+    "frequency_deployed": 7,
+    "outcome": {
+      "peak_load_factor_pct": 62,
+      "passengers_served_per_hr": 3360,
+      "platform_incidents": "none — storm kept most people indoors",
+      "verdict": "Conservative was correct. Storm significantly reduced ridership despite NYE residual. 7 trains/hr adequate. Stormy weather suppresses demand more than expected — frequency cap for safety also coincidentally matched actual demand."
+    }
+  },
+  {
+    "date": "2024-05-23",
+    "line": "Ampang",
+    "situation": "Train breakdown mid-service between Chan Sow Lin and Miharja during Thursday evening peak. One train taken out of service.",
+    "event_passengers_per_hr": 0,
+    "weather": "clear",
+    "frequency_deployed": 11,
+    "outcome": {
+      "peak_load_factor_pct": 88,
+      "passengers_served_per_hr": 6600,
+      "platform_incidents": "minor delays of 8-12 minutes at 3 stations. Recovered within 35 minutes.",
+      "verdict": "Well handled. Reducing from 13 to 11 trains/hr after breakdown maintained flow without overcrowding. Passengers redistributed naturally across remaining trains. Lesson: one train loss during peak is manageable if remaining fleet is redeployed with tighter spacing."
+    }
+  },
+  {
+    "date": "2024-11-09",
+    "line": "Sri Petaling",
+    "situation": "Taylor Swift Eras Tour concert at Bukit Jalil. Saturday night, 7pm to 11pm. Clear weather. Estimated 65,000 attendance.",
+    "event_passengers_per_hr": 5200,
+    "weather": "clear",
+    "frequency_deployed": 17,
+    "outcome": {
+      "peak_load_factor_pct": 79,
+      "passengers_served_per_hr": 10200,
+      "platform_incidents": "managed queuing at Bukit Jalil during 10:30pm exodus — cleared within 25 minutes",
+      "verdict": "Successful. 17 trains/hr handled the surge well. Pre-concert arrival (8pm) was lighter than expected — most fans arrived by car. Post-concert exodus was the critical window. Key lesson: for mega-concerts at Bukit Jalil, prioritise post-event frequency over pre-event."
+    }
+  },
+  {
+    "date": "2024-07-20",
+    "line": "Kelana Jaya",
+    "situation": "KLCC fireworks display, Saturday night 9pm. Rainy weather from 7pm. Estimated 30,000 spectators.",
+    "event_passengers_per_hr": 2200,
+    "weather": "rainy",
+    "frequency_deployed": 13,
+    "outcome": {
+      "peak_load_factor_pct": 97,
+      "passengers_served_per_hr": 7800,
+      "platform_incidents": "heavy crowding at KLCC station. Rain drove most spectators to LRT instead of taxis.",
+      "verdict": "Nearly overwhelmed. Rain multiplied ridership beyond model prediction — demand was 30% higher than dry-weather estimate. Should have deployed 16 trains/hr when rain forecast was confirmed. Lesson: always add buffer trains when outdoor event coincides with rainy weather."
+    }
+  },
+  {
+    "date": "2024-02-14",
+    "line": "Kelana Jaya",
+    "situation": "Valentine's Day evening. Wednesday. Clear weather. No formal events but unusually high leisure ridership to malls and restaurants.",
+    "event_passengers_per_hr": 900,
+    "weather": "clear",
+    "frequency_deployed": 10,
+    "outcome": {
+      "peak_load_factor_pct": 74,
+      "passengers_served_per_hr": 6000,
+      "platform_incidents": "none",
+      "verdict": "Appropriate. Moderate option correctly handled the mild uplift in ridership. Valentine's Day creates diffuse demand spread across many destinations — unlike concerts, no single station bottleneck. Standard plus 1-2 extra trains is sufficient."
     }
   }
 ]

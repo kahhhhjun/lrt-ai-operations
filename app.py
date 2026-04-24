@@ -9,7 +9,8 @@ import streamlit as st
 
 from core.calculator import WEATHER_MAX_FREQ, TRAIN_CAPACITY, compute_options, default_frequency as _dfreq
 from core.glm_client import extract_inputs_from_image, extract_inputs_from_text
-from core.recommender import get_glm_recommendation, get_glm_recommendation_stream, recommend_daily
+from core.recommender import (get_glm_recommendation, get_glm_recommendation_stream,
+                              get_glm_daily_reasoning_stream, recommend_daily)
 
 st.set_page_config(page_title="LRT AI Operations", layout="wide")
 st.title("LRT AI Operations — Decision Support")
@@ -39,7 +40,7 @@ def _apply_option_to_window(schedule, chosen, tune_s, tune_e, cost_per_hr, weath
     if delta == 0:
         return schedule
     for s in schedule:
-        if tune_s <= s["hour"] <= tune_e:
+        if tune_s <= s["hour"] < tune_e:
             new_freq = max(s["standard_frequency"],          # never drop below standard
                            min(s["recommended_frequency"] + delta, max_freq))
             extra    = new_freq - s["standard_frequency"]
@@ -75,7 +76,7 @@ if st.session_state.get("_sch_key") != _key:
     st.session_state.update({
         "_sch_key": _key, "_sch_default": _def, "_sch_result": _def,
         "_sch_mode": "default", "_sch_events": [],
-        "_tune_start": 6, "_tune_end": 23,
+        "_tune_start": 6, "_tune_end": 24,
         "_analysis": None, "_chosen_option": "moderate",
     })
 
@@ -112,35 +113,60 @@ else:
 
 rows = []
 for s in schedule:
-    in_win = (mode == "updated") and (tune_s <= s["hour"] <= tune_e)
-    if in_win:
+    in_win   = (mode == "updated") and (tune_s <= s["hour"] < tune_e)
+    is_tail  = s.get("is_event_tail", False)
+    em_status = s.get("em_status")
+    show_adj = in_win or is_tail or bool(em_status)
+    if show_adj:
         delta = s["extra_trains"]
         if delta > 0:   tc = f"{s['recommended_frequency']} (+{delta})"
         elif delta < 0: tc = f"{s['recommended_frequency']} (−{abs(delta)})"
         else:           tc = str(s["recommended_frequency"])
+        if em_status == "active":
+            status = "🚨 Emergency"
+        elif em_status == "recovery1":
+            status = "⚠️ Recovery (backlog)"
+        elif em_status == "recovery2":
+            status = "↗ Tapering"
+        elif s["has_event"]:
+            status = ", ".join(s["event_names"])
+        else:
+            status = "Adjusted"
         rows.append({
-            "Time":         s["time_slot"],
-            "Frequency":    f"every {s['headway_rec_min']} min",
-            "Trains/hr":    tc,
-            "Cost (RM/hr)": f"RM {s['total_cost_rm']:,.0f}",
-            "Load factor":  f"{s['load_factor_pct']}%",
-            "Status":       ", ".join(s["event_names"]) if s["has_event"] else "Adjusted",
+            "Time":             s["time_slot"],
+            "Expected Pax/hr":  f"{s['expected_passengers_per_hr']:,}",
+            "Frequency":        f"every {s['headway_rec_min']} min",
+            "Trains/hr":        tc,
+            "Cost (RM/hr)":     f"RM {s['total_cost_rm']:,.0f}",
+            "Load factor":      f"{s['load_factor_pct']}%",
+            "Status":           status,
         })
     else:
         rows.append({
-            "Time":         s["time_slot"],
-            "Frequency":    f"every {s['headway_std_min']} min",
-            "Trains/hr":    str(s["standard_frequency"]),
-            "Cost (RM/hr)": f"RM {s['standard_cost_rm']:,.0f}",
-            "Load factor":  f"{s['standard_load_factor_pct']}%",
-            "Status":       "Standard",
+            "Time":             s["time_slot"],
+            "Expected Pax/hr":  f"{s['expected_passengers_per_hr']:,}",
+            "Frequency":        f"every {s['headway_std_min']} min",
+            "Trains/hr":        str(s["standard_frequency"]),
+            "Cost (RM/hr)":     f"RM {s['standard_cost_rm']:,.0f}",
+            "Load factor":      f"{s['standard_load_factor_pct']}%",
+            "Status":           "Standard",
         })
 
 df = pd.DataFrame(rows)
 
 def _style_rows(row):
-    if mode == "updated" and tune_s <= schedule[row.name]["hour"] <= tune_e:
+    s = schedule[row.name]
+    em = s.get("em_status")
+    if em == "active":
+        return ["background-color: #7b1111; color: #ffffff; font-weight: bold"] * len(row)
+    if em == "recovery1":
+        return ["background-color: #7b4a00; color: #ffffff; font-weight: bold"] * len(row)
+    if em == "recovery2":
+        return ["background-color: #4a4a00; color: #ffffff; font-weight: bold"] * len(row)
+    if mode == "updated" and tune_s <= s["hour"] < tune_e:
         return ["background-color: #1a3a5c; color: #ffffff; font-weight: bold"] * len(row)
+    if s.get("is_event_tail"):
+        return ["background-color: #2a4a3c; color: #ffffff; font-weight: bold"] * len(row)
     return [""] * len(row)
 
 st.dataframe(df.style.apply(_style_rows, axis=1), use_container_width=True, hide_index=True)
@@ -149,7 +175,7 @@ st.dataframe(df.style.apply(_style_rows, axis=1), use_container_width=True, hide
 std_total = result["daily_standard_cost_rm"]
 extra_win = sum(
     s["extra_cost_rm"] for s in schedule
-    if mode == "updated" and tune_s <= s["hour"] <= tune_e
+    if mode == "updated" and tune_s <= s["hour"] < tune_e
 )
 total_day = std_total + extra_win
 
@@ -177,10 +203,24 @@ with st.expander("📊 Weekly cost overview (standard schedule, no events)"):
     weekly_rows.append({"Day": "WEEKLY TOTAL", "Type": "", "Cost/day": f"RM {weekly_total:,.0f}"})
     st.dataframe(pd.DataFrame(weekly_rows), use_container_width=True, hide_index=True)
 
-# ── GLM shift briefing (shown after applying with an event) ───────────────────
-if mode == "updated" and ev_active:
-    with st.expander("GLM shift briefing", expanded=True):
-        st.write(result["explanation"])
+# ── GLM shift briefing (shown after any schedule change, streamed) ────────────
+if mode == "updated" and result.get("has_adjustments"):
+    bp = result.get("daily_briefing_params", {})
+    try:
+        with st.status("GLM is writing shift briefing...", expanded=True) as briefing_status:
+            briefing_text = st.write_stream(get_glm_daily_reasoning_stream(
+                date_str=bp.get("date_str", sch_date.isoformat()),
+                line=bp.get("line", sch_line),
+                weather=bp.get("weather", "clear"),
+                events=bp.get("events", []),
+                schedule=schedule,
+                emergency_type=bp.get("emergency_type"),
+                emergency_hour=bp.get("emergency_hour"),
+                emergency_duration=bp.get("emergency_duration", 1),
+            ))
+        briefing_status.update(label="Shift briefing ready", state="complete", expanded=True)
+    except Exception:
+        st.info("Schedule updated. See highlighted rows for changes.")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -193,9 +233,9 @@ st.markdown("### Adjust schedule")
 st.markdown("**Step 1 — Select time window to adjust**")
 tw1, tw2 = st.columns(2)
 with tw1:
-    tune_start = st.slider("From", 6, 22, 6,  format="%d:00", key="tune_start")
+    tune_start = st.slider("From", 6, 23, 6,  format="%d:00", key="tune_start")
 with tw2:
-    tune_end   = st.slider("To",   7, 23, 23, format="%d:00", key="tune_end")
+    tune_end   = st.slider("To",   7, 24, 24, format="%d:00", key="tune_end")
 st.caption(
     f"Only **{tune_start:02d}:00 – {tune_end:02d}:00** will be adjusted. "
     "The rest of the day stays on the standard timetable."
@@ -208,11 +248,28 @@ input_method = st.radio(
     horizontal=True, key="input_method", label_visibility="collapsed",
 )
 
+_EMERGENCY_OPTIONS = [
+    "None", "track_incident", "signal_failure", "power_failure",
+    "breakdown", "evacuation", "overcrowding",
+]
+_EMERGENCY_LABELS = {
+    "None": "None",
+    "track_incident":  "Track incident (person/suicide on track)",
+    "signal_failure":  "Signal failure",
+    "power_failure":   "Power failure",
+    "breakdown":       "Train breakdown",
+    "evacuation":      "Evacuation (fire / bomb threat)",
+    "overcrowding":    "Overcrowding / stampede risk",
+}
+
 if input_method == "Manual inputs":
     ai1, ai2 = st.columns(2)
     with ai1:
         sch_weather = st.selectbox("Weather", ["clear", "cloudy", "rainy", "stormy"], key="sch_weather")
         sch_cost    = st.number_input("Running cost / train-hour (RM)", 50, 2000, 350, key="sch_cost")
+        em_type_key = st.selectbox("Emergency type", _EMERGENCY_OPTIONS,
+                                   format_func=lambda x: _EMERGENCY_LABELS[x], key="em_type")
+        em_dur      = st.number_input("Emergency duration (hours)", 1, 4, 1, key="em_dur") if em_type_key != "None" else 1
     with ai2:
         ev_name = st.text_input("Event name (leave blank if none)", key="ev_name")
         ev_pax  = st.number_input("Extra passengers/hr at station", 0, 30_000, 0, key="ev_pax")
@@ -290,9 +347,16 @@ if st.button("Analyse", type="primary", key="analyse_btn"):
                     if ev_name.strip() and ev_pax > 0 else []
         a_line    = sch_line
 
-    # Pull emergency fields from extraction (text/image) or default None for manual
+    # Pull emergency fields from extraction (text/image) or manual selector
     a_emergency      = extracted.get("emergency")      if input_method != "Manual inputs" else None
     a_emergency_type = extracted.get("emergency_type") if input_method != "Manual inputs" else None
+    # Manual emergency override
+    if input_method == "Manual inputs":
+        _em_sel = st.session_state.get("em_type", "None")
+        if _em_sel != "None":
+            a_emergency_type = _em_sel
+            a_emergency      = _EMERGENCY_LABELS.get(_em_sel, _em_sel)
+    a_emergency_dur = st.session_state.get("em_dur", 1) if input_method == "Manual inputs" else 1
 
     # Show emergency banner immediately so duty manager sees it before GLM finishes
     _EMERGENCY_LABELS = {
@@ -316,7 +380,7 @@ if st.button("Analyse", type="primary", key="analyse_btn"):
         "emergency":                a_emergency,
         "emergency_type":           a_emergency_type,
         "line":                     a_line,
-        "current_frequency_per_hr": _dfreq(rep_hour, sch_date.weekday(), sch_line),
+        "current_frequency_per_hr": _dfreq(rep_hour, sch_date.weekday()),
         "train_capacity":           TRAIN_CAPACITY,
         "running_cost_per_train_hr": int(sch_cost),
     }
@@ -338,6 +402,8 @@ if st.button("Analyse", type="primary", key="analyse_btn"):
         "_a_tune_s":      tune_start,
         "_a_tune_e":      tune_end,
         "_a_line":        a_line,
+        "_a_em_type":     a_emergency_type,
+        "_a_em_dur":      a_emergency_dur,
     })
     st.rerun()  # shows 3 cards immediately; Phase 2 triggers on this render
 
@@ -424,6 +490,7 @@ if analysis and analysis.get("options"):
             choice, explanation = _parse_recommendation(full_text)
             st.session_state["_analysis"]["chosen_option"] = choice
             st.session_state["_analysis"]["explanation"]   = explanation
+            st.session_state["_chosen_option"]             = choice
             st.session_state.pop("_glm_inputs", None)
             st.rerun()
 
@@ -433,10 +500,16 @@ if analysis and analysis.get("options"):
             st.write(analysis["explanation"])
 
         cur_pick = st.session_state.get("_chosen_option", glm_pick)
+        _options = ["conservative", "moderate", "aggressive"]
+        _labels  = [
+            f"{o}  ✦ Suggested" if o == glm_pick else o
+            for o in _options
+        ]
         new_pick = st.radio(
             "Apply this option to the schedule:",
-            ["conservative", "moderate", "aggressive"],
-            index=["conservative", "moderate", "aggressive"].index(cur_pick),
+            _options,
+            format_func=lambda o: f"{o}  ✦ Suggested" if o == glm_pick else o,
+            index=_options.index(cur_pick),
             horizontal=True, key="option_radio",
         )
         st.session_state["_chosen_option"] = new_pick
@@ -453,10 +526,12 @@ if analysis and analysis.get("options"):
             a_ev_raw  = st.session_state.get("_a_ev_raw", [])
             a_ts      = st.session_state.get("_a_tune_s", 6)
             a_te      = st.session_state.get("_a_tune_e", 23)
+            a_em_type = st.session_state.get("_a_em_type")
+            a_em_dur  = st.session_state.get("_a_em_dur", 1)
 
             events_daily = [
                 {"name": ev["name"], "start_hour": a_ts,
-                 "end_hour": a_te + 1, "passengers_per_hr": ev["passengers_per_hr"]}
+                 "end_hour": a_te, "passengers_per_hr": ev["passengers_per_hr"]}
                 for ev in a_ev_raw
             ]
 
@@ -468,6 +543,10 @@ if analysis and analysis.get("options"):
                         weather=a_weather,
                         events=events_daily,
                         cost_per_train_hr=a_cost,
+                        weather_window=(a_ts, a_te),
+                        emergency_type=a_em_type,
+                        emergency_hour=a_ts,
+                        emergency_duration=a_em_dur,
                     )
                 except Exception as _ex:
                     st.error(f"Error applying schedule: {_ex}")
@@ -506,6 +585,6 @@ elif mode == "updated":
             "_sch_mode":   "default",
             "_sch_events": [],
             "_tune_start": 6,
-            "_tune_end":   23,
+            "_tune_end":   24,
         })
         st.rerun()

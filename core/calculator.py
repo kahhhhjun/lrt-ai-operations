@@ -1,6 +1,7 @@
 """Rule-based math layer grounded in LRT system assumptions:
-  - Train capacity (normal): 600 pax | max: 900 pax
-  - Standard headway schedule (Mon–Fri / Sat / Sun) defined in _*_SCHEDULE tables
+  - Train capacity (normal): 800 pax | max: 900 pax
+  - Weekday schedule derived from actual hourly ridership data
+  - Sat/Sun schedule from official LRT timetable
   - Bad weather: reduces BASELINE demand but increases EVENT ridership (people take LRT instead of driving)
   - Bad weather also caps max frequency (trains slow down for safety)
 """
@@ -8,57 +9,11 @@
 from datetime import datetime
 
 # ── Constants from assumptions ────────────────────────────────────────────────
-TRAIN_CAPACITY = 600          # normal comfort capacity per train
+TRAIN_CAPACITY = 800          # normal comfort capacity per train
 TRAIN_CAPACITY_MAX = 900      # absolute max (crush load)
 TARGET_LOAD_FACTOR = 0.75     # aim for 75% full — leave headroom for comfort
 
-# Peak demand hours (affects baseline passenger estimate, not just frequency)
-PEAK_HOURS = {7, 8, 9, 17, 18, 19}  # 7–10am and 5–8pm
 
-# ── Standard headway timetable per line (headway in minutes) ─────────────────
-# Format: {line: {day_type: [(start_hour_incl, end_hour_excl, headway_min)]}}
-_SCHEDULES = {
-    "Kelana Jaya": {
-        "weekday": [
-            ( 6,  7,  7),   # 06–07  every 7 min
-            ( 7, 10,  3),   # 07–10  every 3 min  ← morning peak
-            (10, 17,  7),   # 10–17  every 7 min
-            (17, 20,  3),   # 17–20  every 3 min  ← evening peak
-            (20, 24, 12),   # 20–24  every 12 min
-        ],
-        "saturday": [
-            ( 6, 22,  7),   # 06–22  every 7 min
-            (22, 24, 10),   # 22–24  every 10 min
-        ],
-        "sunday": [
-            ( 6, 10, 10),   # 06–10  every 10 min
-            (10, 22,  7),   # 10–22  every 7 min
-            (22, 24, 10),   # 22–24  every 10 min
-        ],
-    },
-    "Sri Petaling": {
-        "weekday": [
-            ( 6,  7,  7),
-            ( 7, 10,  3),
-            (10, 17,  7),
-            (17, 20,  3),
-            (20, 24,  7),   # 20–24  every 7 min (not 12 like KJ)
-        ],
-        "saturday": [( 6, 24,  7)],   # all day every 7 min
-        "sunday":   [( 6, 24,  7)],   # not specified — assumed same as Saturday
-    },
-    "Ampang": {
-        "weekday": [
-            ( 6,  7,  7),
-            ( 7, 10,  3),
-            (10, 17,  7),
-            (17, 20,  3),
-            (20, 24,  7),   # 20–24  every 7 min
-        ],
-        "saturday": [( 6, 24,  7)],   # all day every 7 min
-        "sunday":   [( 6, 24,  7)],   # all day every 7 min
-    },
-}
 
 # Weather — effect on BASELINE demand (bad weather → people stay home / make fewer trips)
 WEATHER_PAX_MULT = {
@@ -86,12 +41,59 @@ WEATHER_MAX_FREQ = {
     "stormy": 12,
 }
 
-# Baseline passengers per station per hour (typical busy KL LRT station)
-PAX_PEAK        = 5_000   # weekday morning/evening rush
-PAX_OFF_PEAK    = 2_500   # weekday daytime
-PAX_NIGHT       =   800   # weekday late evening
-PAX_WEEKEND_DAY = 2_000   # weekend 11am–7pm (leisure traffic)
-PAX_WEEKEND_LOW =   600   # weekend morning / late night
+# Weekday baseline passengers per hour (Mon–Fri, all lines, from actual ridership data)
+_WEEKDAY_BASELINE = {
+    6:  2_300,
+    7:  10_500,
+    8:  11_000,
+    9:  6_500,
+    10: 5_800,
+    11: 5_600,
+    12: 6_800,
+    13: 7_200,
+    14: 7_400,
+    15: 8_600,
+    16: 9_800,
+    17: 11_000,
+    18: 12_000,
+    19: 7_500,
+    20: 5_300,
+    21: 3_500,
+    22: 3_200,
+    23: 2_000,
+}
+
+_SATURDAY_BASELINE = {
+    6:    800,  7:  1_500,  8:  2_200,  9:  3_500,
+    10: 4_800, 11:  5_500, 12:  6_200, 13:  6_500,
+    14: 6_800, 15:  6_500, 16:  6_000, 17:  6_500,
+    18: 7_200, 19:  7_000, 20:  5_500, 21:  4_000,
+    22: 2_500, 23:  1_200,
+}
+
+_SUNDAY_BASELINE = {
+    6:    500,  7:    900,  8:  1_500,  9:  2_200,
+    10: 3_500, 11:  4_500, 12:  5_500, 13:  5_800,
+    14: 5_500, 15:  5_200, 16:  5_000, 17:  5_500,
+    18: 6_000, 19:  5_000, 20:  3_800, 21:  2_800,
+    22: 1_800, 23:    900,
+}
+
+_SATURDAY_FREQ = {
+    6:  2,  7:  3,  8:  4,  9:  6,
+    10: 8, 11: 10, 12: 11, 13: 11,
+    14: 12, 15: 11, 16: 10, 17: 11,
+    18: 12, 19: 12, 20: 10, 21:  7,
+    22: 5, 23:  2,
+}
+
+_SUNDAY_FREQ = {
+    6:  2,  7:  2,  8:  3,  9:  4,
+    10: 6, 11:  8, 12: 10, 13: 10,
+    14: 10, 15: 9, 16:  9, 17: 10,
+    18: 10, 19: 9, 20:  7, 21:  5,
+    22: 3, 23:  2,
+}
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -104,39 +106,61 @@ def _is_weekend(dt: datetime) -> bool:
     return dt.weekday() >= 5  # Saturday=5, Sunday=6
 
 
-def _baseline_pax(hour: int, is_weekend: bool) -> int:
-    if is_weekend:
-        return PAX_WEEKEND_DAY if 11 <= hour <= 19 else PAX_WEEKEND_LOW
-    if hour in PEAK_HOURS:
-        return PAX_PEAK
-    if 6 <= hour <= 22:
-        return PAX_OFF_PEAK
-    return PAX_NIGHT
-
-
-def get_standard_headway(hour: int, weekday: int, line: str = "Kelana Jaya") -> int:
-    """Headway in minutes from the official per-line schedule. weekday: 0=Mon … 6=Sun."""
-    line_sched = _SCHEDULES.get(line, _SCHEDULES["Kelana Jaya"])
+def _baseline_pax(hour: int, weekday: int) -> int:
     if weekday == 6:
-        sched = line_sched["sunday"]
+        return _SUNDAY_BASELINE.get(hour, 0)
+    if weekday == 5:
+        return _SATURDAY_BASELINE.get(hour, 0)
+    return _WEEKDAY_BASELINE.get(hour, 0)
+
+
+# Weekday trains/hr derived from actual ridership data (all lines, Mon–Fri)
+# Formula: ceil(expected_pax / (800 capacity × 0.75 load factor))
+_WEEKDAY_FREQ = {
+    6:  4,
+    7:  18,
+    8:  19,
+    9:  11,
+    10: 10,
+    11: 10,
+    12: 12,
+    13: 12,
+    14: 13,
+    15: 15,
+    16: 17,
+    17: 19,
+    18: 20,
+    19: 13,
+    20: 9,
+    21: 6,
+    22: 6,
+    23: 4,
+}
+
+
+def get_standard_headway(hour: int, weekday: int) -> int:
+    """Headway in minutes derived from per-hour frequency tables. weekday: 0=Mon … 6=Sun."""
+    if weekday == 6:
+        freq = _SUNDAY_FREQ.get(hour, 2)
     elif weekday == 5:
-        sched = line_sched["saturday"]
+        freq = _SATURDAY_FREQ.get(hour, 2)
     else:
-        sched = line_sched["weekday"]
-    for start, end, hw in sched:
-        if start <= hour < end:
-            return hw
-    return 7  # fallback
+        freq = _WEEKDAY_FREQ.get(hour, 4)
+    return round(60 / max(freq, 1))
 
 
-def default_frequency(hour: int, weekday_or_is_weekend, line: str = "Kelana Jaya") -> int:
-    """Trains per hour from the official headway schedule.
+def default_frequency(hour: int, weekday_or_is_weekend) -> int:
+    """Trains per hour from the per-hour frequency tables.
     Accepts weekday int (0=Mon … 6=Sun) or legacy is_weekend bool."""
     if isinstance(weekday_or_is_weekend, bool):
         weekday = 5 if weekday_or_is_weekend else 0
     else:
         weekday = int(weekday_or_is_weekend)
-    return round(60 / get_standard_headway(hour, weekday, line))
+    if weekday == 6:
+        return _SUNDAY_FREQ.get(hour, 2)
+    if weekday == 5:
+        return _SATURDAY_FREQ.get(hour, 2)
+    return _WEEKDAY_FREQ.get(hour, 4)
 
 
 # ── Core computation ──────────────────────────────────────────────────────────
@@ -182,12 +206,12 @@ def _option_metrics(inputs: dict, freq: int, expected: int, max_freq: int) -> di
 def compute_options(inputs: dict) -> list[dict]:
     dt       = _parse_dt(inputs["datetime"])
     hour     = dt.hour
-    is_wknd  = _is_weekend(dt)
+    weekday  = dt.weekday()
     weather  = inputs.get("weather", "clear")
     events   = inputs.get("events", [])
 
     # Step 1: baseline passengers from time of day
-    baseline = _baseline_pax(hour, is_wknd)
+    baseline = _baseline_pax(hour, weekday)
 
     # Step 2: event passengers — rain pushes attendees to take LRT instead of driving
     raw_event_pax = sum(e.get("passengers_per_hr", 0) for e in events)
@@ -197,46 +221,73 @@ def compute_options(inputs: dict) -> list[dict]:
     pax_mult = WEATHER_PAX_MULT.get(weather, 1.0)
     expected = int(baseline * pax_mult + event_pax)
 
-    # Step 4: compute needed frequency for target load factor
-    capacity = inputs.get("train_capacity", TRAIN_CAPACITY)
-    needed   = max(1, round(expected / (capacity * TARGET_LOAD_FACTOR)))
+    # Step 4: how many EXTRA trains needed on top of the standard schedule.
+    # The standard schedule (current_frequency_per_hr) is already calibrated for normal demand —
+    # we only compute the surplus demand that exceeds what it comfortably handles.
+    capacity        = inputs.get("train_capacity", TRAIN_CAPACITY)
+    std_freq        = inputs["current_frequency_per_hr"]
+    std_comfortable = std_freq * capacity * TARGET_LOAD_FACTOR   # pax the standard schedule serves comfortably
+    extra_demand    = max(0, expected - std_comfortable)
+    extra_needed    = round(extra_demand / (capacity * TARGET_LOAD_FACTOR))
 
-    # Step 5: cap by weather (trains must slow down in bad weather)
+    # Step 5: weather frequency cap
     max_freq = WEATHER_MAX_FREQ.get(weather, 20)
-    needed   = min(needed, max_freq)
 
-    # Step 6: emergency — behaviour depends on type
+    # Step 6: build freq_map relative to the standard schedule
     emergency_type = inputs.get("emergency_type") or ("overcrowding" if inputs.get("emergency") else None)
-    if emergency_type:
-        curr = inputs["current_frequency_per_hr"]
-        if emergency_type in ("signal_failure", "power_failure"):
-            # Infrastructure problem — must run slower/fewer trains for safety
-            needed = min(needed, max(1, curr - 2))
-            max_freq = min(max_freq, max(1, curr - 1))
-        elif emergency_type == "breakdown":
-            # One train lost — slight reduction, but passengers need rerouting
-            needed = min(max(needed, curr + 1), max_freq)
-        elif emergency_type == "evacuation":
-            # Clear stations fast — maximum frequency to move people out
-            needed = min(max_freq, curr + 4)
-        elif emergency_type != "track_incident":
-            # overcrowding / generic — add trains
-            needed = min(max(needed, curr + 2), max_freq)
-        # track_incident handled separately in Step 7
 
-    # Step 7: three options
     if emergency_type == "track_incident":
-        # Service suspended NOW. Options represent resumption strategy after clearance.
+        # Service suspended. Options = resumption strategy after clearance.
         freq_map = {
             "conservative": 0,                  # remain suspended, wait for full all-clear
             "moderate":     min(5, max_freq),   # cautious resumption at reduced speed
             "aggressive":   max_freq,            # immediate full resumption to clear backlog
         }
-    else:
+    elif emergency_type == "signal_failure":
+        # Signal failure — immediate full stop, trains cannot navigate safely
         freq_map = {
-            "conservative": max(1, needed - 2),
-            "moderate":     needed,
-            "aggressive":   min(needed + 3, max_freq),
+            "conservative": 0,
+            "moderate":     0,
+            "aggressive":   min(3, max_freq),   # only if operator manually overrides
+        }
+    elif emergency_type == "power_failure":
+        # Power failure — reduce heavily but may keep some trains moving on backup
+        reduce_to = max(1, std_freq - 2)
+        max_freq  = min(max_freq, max(1, std_freq - 1))
+        freq_map  = {
+            "conservative": max(1, reduce_to - 1),
+            "moderate":     reduce_to,
+            "aggressive":   min(reduce_to + 1, max_freq),
+        }
+    elif emergency_type == "breakdown":
+        # One train lost — operate slightly below standard
+        freq_map = {
+            "conservative": max(1, std_freq - 2),
+            "moderate":     max(1, std_freq - 1),
+            "aggressive":   std_freq,
+        }
+    elif emergency_type == "evacuation":
+        # Clear stations fast — push well above standard
+        freq_map = {
+            "conservative": min(std_freq + 2, max_freq),
+            "moderate":     min(std_freq + 4, max_freq),
+            "aggressive":   max_freq,
+        }
+    elif emergency_type:
+        # overcrowding or generic — urgently add trains above standard + event demand
+        target = std_freq + extra_needed
+        freq_map = {
+            "conservative": min(target,     max_freq),
+            "moderate":     min(target + 2, max_freq),
+            "aggressive":   min(target + 4, max_freq),
+        }
+    else:
+        # Normal case — options are standard + extra demand.
+        # Conservative never drops below standard (the official schedule is the floor here).
+        freq_map = {
+            "conservative": min(std_freq + max(0, extra_needed - 2), max_freq),
+            "moderate":     min(std_freq + extra_needed, max_freq),
+            "aggressive":   min(std_freq + extra_needed + (3 if extra_needed > 0 else 1), max_freq),
         }
 
     return [
@@ -252,32 +303,58 @@ def compute_daily_schedule(
     events: list[dict],
     cost_per_train_hr: int = 350,
     train_capacity: int = TRAIN_CAPACITY,
+    weather_window: tuple[int, int] | None = None,
+    emergency_type: str | None = None,
+    emergency_hour: int | None = None,
+    emergency_duration: int = 1,
 ) -> list[dict]:
     """
-    Compute full day schedule from 06:00 to 23:00 (18 slots).
-    events: list of {name, start_hour, end_hour, passengers_per_hr}
-    Returns one dict per hour slot.
+    Compute full day schedule from 06:00 to 24:00 (18 slots).
+    weather_window: weather only applies within (start, end) range.
+    emergency_type/hour/duration: models a real-time incident with a recovery curve.
     """
     dt_base  = _parse_dt(date_str + "T06:00")
     weekday  = dt_base.weekday()          # 0=Mon … 6=Sun
-    max_freq = WEATHER_MAX_FREQ.get(weather, 20)
 
-    schedule = []
+    em_end      = (emergency_hour + emergency_duration) if emergency_hour is not None else None
+    backlog     = 0   # unserved passengers carrying over from emergency hours
+    schedule    = []
     for hour in range(6, 24):
+        # Apply weather only within the selected window; clear elsewhere
+        hour_weather = weather if (
+            weather_window is None or
+            weather_window[0] <= hour < weather_window[1]
+        ) else "clear"
+
         # Collect event passengers active this hour
         hour_event_pax   = 0
         hour_event_names = []
+        is_tail          = False
         for ev in events:
-            if ev.get("start_hour", 0) <= hour < ev.get("end_hour", 0):
-                hour_event_pax += ev.get("passengers_per_hr", 0)
+            ev_start = ev.get("start_hour", 0)
+            ev_end   = ev.get("end_hour", 0)
+            pax      = ev.get("passengers_per_hr", 0)
+            if hour == ev_start - 1:
+                # Arrival surge: 70% of event pax travel to venue in the hour before
+                hour_event_pax += int(pax * 0.7)
+                hour_event_names.append(f"{ev['name']} (arrival)")
+                is_tail = True
+            elif ev_start <= hour < ev_end:
+                # During event: only 20% extra pax (latecomers — most are already at venue)
+                hour_event_pax += int(pax * 0.2)
                 hour_event_names.append(ev["name"])
+            elif hour == ev_end:
+                # Exit rush: 100% of event pax leave at once after event ends
+                hour_event_pax += pax
+                hour_event_names.append(f"{ev['name']} (exit rush)")
+                is_tail = True
 
-        std_freq = default_frequency(hour, weekday, line)
+        std_freq = default_frequency(hour, weekday)
 
         # Reuse options logic — treat standard freq as current
         inputs_hour = {
             "datetime":                  f"{date_str}T{hour:02d}:00",
-            "weather":                   weather,
+            "weather":                   hour_weather,
             "events":                    [{"name": ", ".join(hour_event_names),
                                            "passengers_per_hr": hour_event_pax}] if hour_event_pax else [],
             "emergency":                 None,
@@ -289,17 +366,61 @@ def compute_daily_schedule(
         options  = compute_options(inputs_hour)
         moderate = next(o for o in options if o["label"] == "moderate")
         rec_freq = moderate["recommended_frequency_per_hr"]
+        expected_pax = moderate["expected_passengers_per_hr"]
+
+        # ── Emergency recovery curve ──────────────────────────────────────────
+        em_status = None   # "active" | "recovery1" | "recovery2"
+        max_freq  = WEATHER_MAX_FREQ.get(hour_weather, 20)
+
+        if emergency_type and emergency_hour is not None:
+            if emergency_hour <= hour < em_end:
+                em_status = "active"
+                if emergency_type == "track_incident":
+                    rec_freq = 0
+                elif emergency_type == "signal_failure":
+                    rec_freq = 0
+                elif emergency_type == "power_failure":
+                    rec_freq = max(1, std_freq - 4)
+                elif emergency_type == "breakdown":
+                    rec_freq = max(1, std_freq - 2)
+                elif emergency_type == "evacuation":
+                    rec_freq = min(max_freq, std_freq + 4)
+                else:
+                    rec_freq = max(1, std_freq - 2)
+                served  = rec_freq * train_capacity
+                backlog += max(0, expected_pax - served)
+
+            elif hour == em_end:
+                em_status = "recovery1"
+                # Clear backlog: boost expected by stranded passengers
+                expected_pax = expected_pax + backlog
+                extra_needed = max(0, round((expected_pax - std_freq * train_capacity * TARGET_LOAD_FACTOR)
+                                            / (train_capacity * TARGET_LOAD_FACTOR)))
+                rec_freq = min(max_freq, std_freq + extra_needed)
+                backlog  = max(0, expected_pax - rec_freq * train_capacity)
+
+            elif hour == em_end + 1 and backlog > 0:
+                em_status = "recovery2"
+                expected_pax = expected_pax + backlog // 2
+                extra_needed = max(0, round((expected_pax - std_freq * train_capacity * TARGET_LOAD_FACTOR)
+                                            / (train_capacity * TARGET_LOAD_FACTOR)))
+                rec_freq = min(max_freq, std_freq + extra_needed)
+                backlog  = 0
+        # ─────────────────────────────────────────────────────────────────────
+
+        new_capacity  = rec_freq * train_capacity
+        load_pct      = 300.0 if new_capacity == 0 else round(min(expected_pax / max(new_capacity, 1), 3.0) * 100, 1)
+        passengers_served = min(expected_pax, new_capacity)
 
         extra_trains   = rec_freq - std_freq
         std_cost       = std_freq * cost_per_train_hr
         extra_cost     = extra_trains * cost_per_train_hr
         total_cost     = std_cost + extra_cost
-        end_hour       = hour + 1 if hour < 23 else 0
-        time_slot      = f"{hour:02d}:00–{end_hour:02d}:00" if end_hour else "23:00–00:00"
-        headway_std    = get_standard_headway(hour, weekday, line)
+        end_hour  = hour + 1
+        time_slot = f"{hour:02d}:00–{end_hour:02d}:00"
+        headway_std    = get_standard_headway(hour, weekday)
         headway_rec    = int(round(60 / max(rec_freq, 1)))
 
-        expected_pax      = moderate["expected_passengers_per_hr"]
         std_capacity      = std_freq * train_capacity
         std_load_factor   = round(min(expected_pax / max(std_capacity, 1), 3.0) * 100, 1)
 
@@ -316,10 +437,12 @@ def compute_daily_schedule(
             "extra_cost_rm":            extra_cost,
             "total_cost_rm":            total_cost,
             "standard_load_factor_pct": std_load_factor,
-            "load_factor_pct":          moderate["load_factor_pct"],
-            "passengers_served_per_hr": moderate["passengers_served_per_hr"],
+            "load_factor_pct":          load_pct,
+            "passengers_served_per_hr": passengers_served,
             "has_event":                bool(hour_event_pax),
+            "is_event_tail":            is_tail,
             "event_names":              hour_event_names,
+            "em_status":                em_status,
         })
 
     return schedule

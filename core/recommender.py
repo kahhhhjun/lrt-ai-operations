@@ -38,27 +38,35 @@ def _load_relevant_history(inputs: dict, max_records: int = 3) -> list[dict]:
 _OPTIONS_SYSTEM = """You are an expert operations advisor for Malaysian LRT lines (Kelana Jaya, Ampang, Sri Petaling).
 You help duty managers make real-time scheduling decisions.
 
-Key facts you must use in your reasoning:
-- Normal train capacity: 600 passengers. Maximum crush load: 900.
-- Load factor 75% = comfortable target. 100% = trains completely full. >100% = passengers LEFT BEHIND on platform.
+CRITICAL — READ THIS FIRST:
+The standard schedule (current frequency) is already calibrated for normal demand at this time of day, including peak hours.
+Peak hours alone are NOT a reason to add trains — the schedule already accounts for that.
+Frequency adjustments are ONLY justified by factors BEYOND the standard schedule:
+  - Events (concerts, matches, festivals) creating extra passenger surge
+  - Weather forcing a safety-based frequency reduction
+  - Emergencies requiring service suspension or rapid recovery
+If none of these extra factors are present, the standard schedule is correct and should be maintained.
+
+Key facts:
+- Normal train capacity: 800 passengers. Target load: 75%. >100% = passengers left behind on platform.
 - Headway = minutes between trains. Shorter headway = more trains = less waiting.
-- Rainy/stormy weather: passengers crowd platforms more AND trains must slow down for safety.
-- Events (concerts, holidays, matches): cause sharp passenger surges, especially at entry/exit times.
-- Peak hours (7-9am, 5-7pm weekdays): highest commuter volume.
-- Cost increases with every extra train deployed — minimising cost while maintaining service quality is the goal.
-- The goal is NOT to maximise revenue — this is a public service. Move the most people comfortably at the lowest cost.
-- EMERGENCY TYPES and how they affect recommendations:
-  * track_incident (person/suicide on track): service is SUSPENDED. On resumption, maximum frequency needed to clear platform backlog. Safety is absolute priority.
-  * signal_failure / power_failure: infrastructure problem — REDUCE frequency for safety, not increase.
-  * breakdown: one fewer train available — slight reduction, manage passenger flow.
+- Rainy/stormy weather: trains must slow down for safety (frequency cap applies).
+- Events cause sharp surges especially at arrival (1hr before) and exit (1hr after).
+- Cost increases with every extra train — only add trains when the extra factors justify it.
+- The goal is NOT to maximise revenue — this is a public service.
+- EMERGENCY TYPES:
+  * signal_failure: ALL trains must stop immediately — no exceptions. Signals protect against collisions.
+  * track_incident: service SUSPENDED. Maximum frequency on resumption to clear backlog.
+  * power_failure: reduce frequency, run on backup power only.
+  * breakdown: one fewer train — slight reduction.
   * evacuation (fire/bomb): maximum frequency to clear stations rapidly.
   * overcrowding: add trains urgently.
 
 Your task:
-1. Identify the PRIMARY factor(s) driving demand in this specific situation.
+1. State the PRIMARY extra factor (event / weather / emergency) driving this recommendation. If none, say so.
 2. Evaluate the three options — quote load factor, headway, passengers served, and cost delta.
-3. Choose the BEST option that maximises passenger throughput and comfort while minimising unnecessary cost.
-4. Explain why the other two options are either insufficient (too few trains) or wasteful (too many trains).
+3. Choose the BEST option. If no extra factors exist, choose the option closest to standard.
+4. Explain why the other two are insufficient or wasteful.
 5. End with one clear action sentence for the duty manager.
 
 Write your reasoning as plain paragraphs. Do NOT use JSON, bullet points, or markdown headers.
@@ -292,6 +300,9 @@ def _get_glm_daily_reasoning(
     weather: str,
     events: list[dict],
     schedule: list[dict],
+    emergency_type: str | None = None,
+    emergency_hour: int | None = None,
+    emergency_duration: int = 1,
 ) -> str:
     from datetime import datetime as _dt
     dt        = _dt.fromisoformat(date_str + "T12:00")
@@ -301,14 +312,14 @@ def _get_glm_daily_reasoning(
         f"  - {e['name']}: {e['start_hour']:02d}:00–{e['end_hour']:02d}:00 | "
         f"{e['passengers_per_hr']:,} extra pax/hr at station"
         for e in events
-    )
+    ) or "  None"
 
-    event_rows = [s for s in schedule if s["has_event"]]
+    adjusted_rows = [s for s in schedule if s["recommended_frequency"] != s["standard_frequency"]]
     affected_text = "\n".join(
         f"  {s['time_slot']}: standard {s['standard_frequency']}/hr → recommended {s['recommended_frequency']}/hr "
-        f"(+{s['extra_trains']} trains | load {s['load_factor_pct']}% | extra cost RM {s['extra_cost_rm']:,.0f})"
-        for s in event_rows
-    )
+        f"({s['extra_trains']:+d} trains | load {s['load_factor_pct']}% | extra cost RM {s['extra_cost_rm']:,.0f})"
+        for s in adjusted_rows
+    ) or "  No frequency changes from standard."
 
     # Load relevant history for context
     history      = _load_relevant_history({"line": line, "weather": weather, "events": events})
@@ -321,10 +332,24 @@ def _get_glm_daily_reasoning(
             f"Verdict: {o.get('verdict', '')}\n"
         )
 
+    if emergency_type and emergency_hour is not None:
+        em_end = emergency_hour + emergency_duration
+        emergency_text = (
+            f"  Type    : {emergency_type}\n"
+            f"  Window  : {emergency_hour:02d}:00–{em_end:02d}:00 ({emergency_duration}h)\n"
+            f"  Impact  : Service suspended/reduced during window. "
+            f"Recovery trains deployed at {em_end:02d}:00 to clear backlog."
+        )
+    else:
+        emergency_text = "  None"
+
     prompt = f"""DAILY SCHEDULE BRIEFING REQUEST:
-Date    : {dt.strftime('%A, %d %b %Y')} ({day_label})
-Line    : {line}
-Weather : {weather}
+Date      : {dt.strftime('%A, %d %b %Y')} ({day_label})
+Line      : {line}
+Weather   : {weather}
+
+EMERGENCY:
+{emergency_text}
 
 EVENTS:
 {events_text}
@@ -339,41 +364,94 @@ Write a shift briefing for the duty manager covering what to action, when, and w
     return call_glm(prompt, system=_DAILY_SYSTEM, temperature=0.3)
 
 
+def get_glm_daily_reasoning_stream(
+    date_str: str,
+    line: str,
+    weather: str,
+    events: list[dict],
+    schedule: list[dict],
+    emergency_type: str | None = None,
+    emergency_hour: int | None = None,
+    emergency_duration: int = 1,
+):
+    """Generator: yields GLM shift briefing as text chunks for st.write_stream."""
+    if not GLM_API_KEY:
+        yield "[PLACEHOLDER — set GLM_API_KEY in .env for real briefing]\n\nSchedule adjusted. See highlighted rows for changes."
+        return
+    # Reuse the same prompt-building logic
+    from datetime import datetime as _dt
+    dt        = _dt.fromisoformat(date_str + "T12:00")
+    day_label = "Weekend" if dt.weekday() >= 5 else "Weekday"
+    events_text = "\n".join(
+        f"  - {e['name']}: {e['start_hour']:02d}:00–{e['end_hour']:02d}:00 | "
+        f"{e['passengers_per_hr']:,} extra pax/hr at station"
+        for e in events
+    ) or "  None"
+    adjusted_rows = [s for s in schedule if s["recommended_frequency"] != s["standard_frequency"]
+                     or s.get("em_status")]
+    affected_text = "\n".join(
+        f"  {s['time_slot']}: {s['standard_frequency']}/hr → {s['recommended_frequency']}/hr "
+        f"({s['extra_trains']:+d} trains | load {s['load_factor_pct']}% | {s.get('em_status','adjusted')})"
+        for s in adjusted_rows
+    ) or "  No frequency changes."
+    if emergency_type and emergency_hour is not None:
+        em_end = emergency_hour + emergency_duration
+        emergency_text = (
+            f"  Type: {emergency_type} | "
+            f"Window: {emergency_hour:02d}:00–{em_end:02d}:00 | "
+            f"Recovery deployed at {em_end:02d}:00"
+        )
+    else:
+        emergency_text = "  None"
+    prompt = f"""DAILY SCHEDULE BRIEFING REQUEST:
+Date      : {dt.strftime('%A, %d %b %Y')} ({day_label})
+Line      : {line}
+Weather   : {weather}
+EMERGENCY : {emergency_text}
+EVENTS    :
+{events_text}
+SCHEDULE ADJUSTMENTS:
+{affected_text}
+Write a shift briefing for the duty manager covering what to action, when, and why."""
+    yield from call_glm_stream(prompt, system=_DAILY_SYSTEM, temperature=0.3)
+
+
 def recommend_daily(
     date_str: str,
     line: str,
     weather: str,
     events: list[dict],
     cost_per_train_hr: int = 350,
+    weather_window: tuple[int, int] | None = None,
+    emergency_type: str | None = None,
+    emergency_hour: int | None = None,
+    emergency_duration: int = 1,
 ) -> dict:
-    schedule = compute_daily_schedule(date_str, line, weather, events, cost_per_train_hr)
+    schedule = compute_daily_schedule(date_str, line, weather, events, cost_per_train_hr,
+                                      weather_window=weather_window,
+                                      emergency_type=emergency_type,
+                                      emergency_hour=emergency_hour,
+                                      emergency_duration=emergency_duration)
 
     daily_std_cost   = sum(s["standard_cost_rm"] for s in schedule)
     daily_extra_cost = sum(s["extra_cost_rm"]    for s in schedule)
     daily_total_cost = sum(s["total_cost_rm"]    for s in schedule)
 
-    event_hours = [s for s in schedule if s["has_event"]]
-    if event_hours and GLM_API_KEY:
-        try:
-            explanation = _get_glm_daily_reasoning(date_str, line, weather, events, schedule)
-        except (TimeoutError, ConnectionError) as exc:
-            explanation = (
-                f"⚠ GLM unavailable for shift briefing ({exc}).\n\n"
-                "Schedule has been applied based on demand calculations. "
-                "Highlighted rows show the adjusted time window — check load factors and deploy extra trains as indicated."
-            )
-    elif event_hours:
-        explanation = (
-            "[PLACEHOLDER — set GLM_API_KEY in .env for real briefing]\n\n"
-            "Standard schedule adjusted for event window. See highlighted rows for changes."
-        )
-    else:
-        explanation = "No events for this day. Standard schedule applies throughout."
+    has_adjustments = bool(events or weather != "clear" or emergency_type)
 
     return {
-        "schedule":              schedule,
-        "explanation":           explanation,
+        "schedule":               schedule,
+        "has_adjustments":        has_adjustments,
+        "daily_briefing_params":  {         # app.py streams this on demand
+            "date_str":          date_str,
+            "line":              line,
+            "weather":           weather,
+            "events":            events,
+            "emergency_type":    emergency_type,
+            "emergency_hour":    emergency_hour,
+            "emergency_duration": emergency_duration,
+        },
         "daily_standard_cost_rm": daily_std_cost,
-        "daily_extra_cost_rm":   daily_extra_cost,
-        "daily_total_cost_rm":   daily_total_cost,
+        "daily_extra_cost_rm":    daily_extra_cost,
+        "daily_total_cost_rm":    daily_total_cost,
     }
