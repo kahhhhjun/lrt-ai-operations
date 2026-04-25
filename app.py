@@ -9,7 +9,7 @@ import pandas as pd
 import streamlit as st
 
 from core.calculator import WEATHER_MAX_FREQ, TRAIN_CAPACITY, compute_options, default_frequency as _dfreq
-from core.glm_client import extract_inputs_from_image, extract_inputs_from_text
+from core.glm_client import extract_inputs_from_text
 from core.recommender import (get_glm_recommendation, get_glm_recommendation_stream,
                               get_glm_daily_reasoning_stream, recommend_daily)
 from core.database import init_db, save_schedule, load_schedule, delete_schedule, list_saved
@@ -357,7 +357,7 @@ st.caption(
 # Step 2 — situation input
 st.markdown("**Step 2 — Describe the situation**")
 input_method = st.radio(
-    "", ["Manual inputs", "Describe in text (GLM extracts)", "Upload image / poster (GLM reads)"],
+    "", ["Manual inputs", "Describe in text (GLM extracts)"],
     horizontal=True, key="input_method", label_visibility="collapsed",
 )
 
@@ -414,16 +414,6 @@ elif input_method == "Describe in text (GLM extracts)":
     )
     sch_cost = 350
 
-else:  # Upload image
-    uploaded_file = st.file_uploader(
-        "Upload a concert poster, event flyer, or news screenshot",
-        type=["jpg", "jpeg", "png", "webp"],
-        key="uploaded_image",
-    )
-    if uploaded_file:
-        st.image(uploaded_file, caption=uploaded_file.name, width=300)
-    sch_cost = 350
-
 # Step 3 — Analyse
 st.markdown("**Step 3 — Analyse options**")
 
@@ -464,23 +454,6 @@ if st.button("Analyse", type="primary", key="analyse_btn"):
         a_ev_raw  = extracted.get("events", [])
         a_line    = extracted.get("line") or sch_line
         st.info(f"GLM extracted — weather: **{a_weather}** | events: {[e['name'] for e in a_ev_raw] or ['none']}")
-
-    elif input_method == "Upload image / poster (GLM reads)":
-        uploaded_file = st.session_state.get("uploaded_image")
-        if not uploaded_file:
-            st.warning("Please upload an image first.")
-            st.stop()
-        mime_type = uploaded_file.type or "image/jpeg"
-        with st.spinner("Reading image with OCR, then extracting details..."):
-            try:
-                extracted = extract_inputs_from_image(uploaded_file.getvalue(), mime_type)
-            except Exception as _ex:
-                st.error(f"Could not read image: {_ex}")
-                st.stop()
-        a_weather = extracted.get("weather", "clear")
-        a_ev_raw  = extracted.get("events", [])
-        a_line    = extracted.get("line") or sch_line
-        st.info(f"GLM read image — weather: **{a_weather}** | events: {[e['name'] for e in a_ev_raw] or ['none']}")
 
     else:  # Manual inputs
         _ev_type_labels = {
