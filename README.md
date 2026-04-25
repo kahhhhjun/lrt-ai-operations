@@ -6,20 +6,24 @@
 
 ---
 
+## Presentation & Demonstration Link
+Link: https://drive.google.com/drive/folders/1kCi2BLf8Ktk48mooGZPc5qrzqo6rzX7O?usp=sharing
+
+
 ## What It Does
 
 LRT duty managers deal with three things that can change the whole day — **weather**, **events**, and **emergencies**. Right now, adjusting the train schedule for these situations is done manually, takes 15–20 minutes, and depends on each individual's experience.
 
 This system fixes that. Staff describe what is happening, the math engine instantly calculates three scheduling options (Conservative, Moderate, Aggressive), and GLM-5.1 picks the best one with a plain-language explanation. Staff apply it with one click and save it to the database for any shift to retrieve later.
 
-**Without GLM-5.1, the system can still calculate the three options — but it cannot interpret free-text or image input, cannot reason across context and history, and cannot explain its choice. GLM is essential.**
+**Without GLM-5.1, the system can still calculate the three options — but it cannot interpret free-text, cannot reason across context and history, and cannot explain its choice. GLM is essential.**
 
 ---
 
 ## Features
 
 - **Full day schedule view** — 06:00 to 24:00, showing trains per hour, load factor, headway, and cost for every hour slot
-- **Three input modes** — manual form (dropdowns), free-text description, or image upload (concert poster, news screenshot via OCR)
+- **Two input modes** — manual form (dropdowns) or free-text description
 - **Instant three-option trade-off** — Conservative, Moderate, and Aggressive computed in under 2 seconds with full metrics
 - **Live GLM reasoning** — GLM-5.1 streams its pick and explanation in real time, citing load factor, cost, and historical precedents
 - **Six emergency types** — track incident, signal failure, power failure, train breakdown, evacuation, overcrowding — each with its own response logic and a recovery curve for the hours after clearance
@@ -36,7 +40,6 @@ This system fixes that. Staff describe what is happening, the math engine instan
 | UI | Streamlit 1.30+ |
 | Core logic | Python 3.12 |
 | AI reasoning | Z.AI GLM-5.1 (`ilmu-glm 5.1`) |
-| Image OCR | OCR.space API |
 | Database | SQLite |
 | Data | pandas |
 
@@ -55,7 +58,7 @@ lrt_ai/
 │   │                       # event profiles, three-option computation, emergency logic
 │   ├── recommender.py      # Orchestrator — calls math core + GLM, builds prompts,
 │   │                       # parses RECOMMENDATION tag, generates shift briefing
-│   ├── glm_client.py       # Z.AI GLM wrapper — streaming, fallback, OCR pipeline
+│   ├── glm_client.py       # Z.AI GLM wrapper — streaming, 
 │   └── database.py         # SQLite CRUD — save, load, delete, list schedules
 └── data/
     ├── generator.py        # Synthetic ridership CSV generator (seed 42)
@@ -71,7 +74,7 @@ lrt_ai/
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/<your-org>/lrt_ai.git
+git clone https://github.com/kahhhhjun/lrt-ai-operations.git
 cd lrt_ai
 ```
 
@@ -88,13 +91,10 @@ Create a `.env` file in the project root:
 ```env
 GLM_API_KEY=your_z_ai_api_key_here
 GLM_ENDPOINT=https://api.z.ai/api/paas/v4/chat/completions
-GLM_MODEL=glm-4
-
-# Optional — only needed for image upload feature
-OCR_API_KEY=your_ocr_space_api_key_here
+GLM_MODEL=ilmu-glm-5.1
 ```
 
-> Get your Z.AI API key at [z.ai](https://z.ai). Get a free OCR.space key at [ocr.space](https://ocr.space/ocrapi).
+> Get your Z.AI API key at [z.ai](https://z.ai)
 
 ### 4. Test your GLM connection
 
@@ -162,7 +162,6 @@ All settings are loaded from `.env` via `python-dotenv`. No values are hard-code
 | `GLM_API_KEY` | Your Z.AI API key | — |
 | `GLM_ENDPOINT` | Z.AI completions endpoint | `https://api.z.ai/api/paas/v4/chat/completions` |
 | `GLM_MODEL` | Model name | `glm-4` |
-| `OCR_API_KEY` | OCR.space API key (optional) | — |
 
 ---
 
