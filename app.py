@@ -11,6 +11,9 @@ from core.calculator import WEATHER_MAX_FREQ, TRAIN_CAPACITY, compute_options, d
 from core.glm_client import extract_inputs_from_image, extract_inputs_from_text
 from core.recommender import (get_glm_recommendation, get_glm_recommendation_stream,
                               get_glm_daily_reasoning_stream, recommend_daily)
+from core.database import init_db, save_schedule, load_schedule, delete_schedule
+
+init_db()
 
 st.set_page_config(page_title="LRT AI Operations", layout="wide")
 st.title("LRT AI Operations — Decision Support")
@@ -70,7 +73,7 @@ sch_line = st.selectbox("LRT line", LINES, key="sch_line")
 sch_weekday  = sch_date.weekday()
 sch_day_name = DAYS[sch_weekday]
 
-# Auto-load default schedule when date or line changes
+# Auto-load schedule when date or line changes — prefer saved DB record if exists
 _key = f"{sch_date}_{sch_line}"
 if st.session_state.get("_sch_key") != _key:
     try:
@@ -78,12 +81,35 @@ if st.session_state.get("_sch_key") != _key:
     except Exception as _e:
         st.error(f"Could not load schedule: {_e}")
         st.stop()
-    st.session_state.update({
-        "_sch_key": _key, "_sch_default": _def, "_sch_result": _def,
-        "_sch_mode": "default", "_sch_events": [],
-        "_tune_start": 6, "_tune_end": 24,
-        "_analysis": None, "_chosen_option": "moderate",
-    })
+    _saved = load_schedule(sch_date.isoformat(), sch_line)
+    if _saved:
+        # Reconstruct a result-like dict from the saved record
+        _saved_result = {
+            "schedule":               _saved["schedule"],
+            "has_adjustments":        True,
+            "daily_briefing_params":  {},
+            "daily_standard_cost_rm": _saved["total_std_cost"],
+            "daily_extra_cost_rm":    _saved["total_extra_cost"],
+            "daily_total_cost_rm":    _saved["total_cost"],
+        }
+        st.session_state.update({
+            "_sch_key": _key, "_sch_default": _def,
+            "_sch_result": _saved_result, "_sch_mode": "updated",
+            "_sch_events": _saved["events"],
+            "_tune_start": 6, "_tune_end": 24,
+            "_upd_weather": _saved["weather"],
+            "_analysis": None, "_chosen_option": "moderate",
+            "_db_saved_at": _saved["saved_at"],
+            "_briefing_text": "",  # loaded from DB — skip briefing on reload
+        })
+    else:
+        st.session_state.update({
+            "_sch_key": _key, "_sch_default": _def, "_sch_result": _def,
+            "_sch_mode": "default", "_sch_events": [],
+            "_tune_start": 6, "_tune_end": 24,
+            "_analysis": None, "_chosen_option": "moderate",
+            "_db_saved_at": None,
+        })
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -194,16 +220,41 @@ st.dataframe(
 )
 
 if mode == "updated":
-    if st.button("Reset to standard", key="sch_reset_table", type="primary"):
-        st.session_state.update({
-            "_sch_result": st.session_state["_sch_default"],
-            "_sch_mode":   "default",
-            "_sch_events": [],
-            "_tune_start": 6,
-            "_tune_end":   24,
-            "_analysis":   None,
-        })
-        st.rerun()
+    st.markdown("---")
+    _saved_at = st.session_state.get("_db_saved_at")
+    if _saved_at:
+        st.caption(f"💾 Last saved: {_saved_at}")
+
+    btn1, btn2 = st.columns(2)
+    with btn1:
+        if st.button("💾 Save schedule", type="primary", key="save_btn"):
+            save_schedule(
+                date=sch_date.isoformat(),
+                line=sch_line,
+                schedule=schedule,
+                weather=st.session_state.get("_upd_weather", "clear"),
+                events=ev_active,
+                total_std_cost=result["daily_standard_cost_rm"],
+                total_extra_cost=result["daily_extra_cost_rm"],
+                total_cost=result["daily_total_cost_rm"],
+            )
+            st.session_state["_db_saved_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+            st.success("Schedule saved!")
+            st.rerun()
+    with btn2:
+        if st.button("Reset to standard", key="sch_reset_table", type="primary"):
+            delete_schedule(sch_date.isoformat(), sch_line)
+            st.session_state.update({
+                "_sch_result":   st.session_state["_sch_default"],
+                "_sch_mode":     "default",
+                "_sch_events":   [],
+                "_tune_start":   6,
+                "_tune_end":     24,
+                "_analysis":     None,
+                "_db_saved_at":  None,
+                "_briefing_text": None,
+            })
+            st.rerun()
 
 # ── Daily cost ────────────────────────────────────────────────────────────────
 std_total = result["daily_standard_cost_rm"]
@@ -234,24 +285,30 @@ with st.expander("📊 Weekly cost overview (standard schedule, no events)"):
     weekly_rows.append({"Day": "WEEKLY TOTAL", "Type": "", "Cost/day": f"RM {weekly_total:,.0f}"})
     st.dataframe(pd.DataFrame(weekly_rows), use_container_width=True, hide_index=True)
 
-# ── GLM shift briefing (shown after any schedule change, streamed) ────────────
+# ── GLM shift briefing (streamed once per update; skipped on page reload) ─────
 if mode == "updated" and result.get("has_adjustments"):
-    bp = result.get("daily_briefing_params", {})
-    try:
-        with st.status("GLM is writing shift briefing...", expanded=True) as briefing_status:
-            briefing_text = st.write_stream(get_glm_daily_reasoning_stream(
-                date_str=bp.get("date_str", sch_date.isoformat()),
-                line=bp.get("line", sch_line),
-                weather=bp.get("weather", "clear"),
-                events=bp.get("events", []),
-                schedule=schedule,
-                emergency_type=bp.get("emergency_type"),
-                emergency_hour=bp.get("emergency_hour"),
-                emergency_duration=bp.get("emergency_duration", 1),
-            ))
-        briefing_status.update(label="Shift briefing ready", state="complete", expanded=True)
-    except Exception:
-        st.info("Schedule updated. See highlighted rows for changes.")
+    cached_briefing = st.session_state.get("_briefing_text")
+    if cached_briefing:  # already streamed this session — show cached text
+        with st.expander("Shift briefing", expanded=True):
+            st.markdown(cached_briefing)
+    elif cached_briefing is None:  # fresh update — stream now
+        bp = result.get("daily_briefing_params", {})
+        try:
+            with st.status("GLM is writing shift briefing...", expanded=True) as briefing_status:
+                briefing_text = st.write_stream(get_glm_daily_reasoning_stream(
+                    date_str=bp.get("date_str", sch_date.isoformat()),
+                    line=bp.get("line", sch_line),
+                    weather=bp.get("weather", "clear"),
+                    events=bp.get("events", []),
+                    schedule=schedule,
+                    emergency_type=bp.get("emergency_type"),
+                    emergency_hour=bp.get("emergency_hour"),
+                    emergency_duration=bp.get("emergency_duration", 1),
+                ))
+            briefing_status.update(label="Shift briefing ready", state="complete", expanded=True)
+            st.session_state["_briefing_text"] = briefing_text
+        except Exception:
+            st.info("Schedule updated. See highlighted rows for changes.")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -640,13 +697,14 @@ if analysis and analysis.get("options"):
             )
 
             st.session_state.update({
-                "_sch_result":   _upd,
-                "_sch_mode":     "updated",
-                "_sch_events":  events_daily,
-                "_upd_weather": a_weather,
-                "_tune_start":  a_ts,
-                "_tune_end":    a_te,
-                "_analysis":    None,
+                "_sch_result":    _upd,
+                "_sch_mode":      "updated",
+                "_sch_events":    events_daily,
+                "_upd_weather":   a_weather,
+                "_tune_start":    a_ts,
+                "_tune_end":      a_te,
+                "_analysis":      None,
+                "_briefing_text": None,
             })
             st.rerun()
 
@@ -661,10 +719,3 @@ if analysis and analysis.get("options"):
             })
             st.rerun()
 
-elif mode == "updated":
-    st.markdown(
-        '<a href="#schedule-top" style="display:inline-block; padding:6px 16px; '
-        'background:#1a3a5c; color:#fff; border-radius:6px; text-decoration:none; font-size:0.9rem;">'
-        '↑ View updated schedule</a>',
-        unsafe_allow_html=True,
-    )
