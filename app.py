@@ -194,7 +194,7 @@ st.dataframe(
 )
 
 if mode == "updated":
-    if st.button("Reset to standard", key="sch_reset_table"):
+    if st.button("Reset to standard", key="sch_reset_table", type="primary"):
         st.session_state.update({
             "_sch_result": st.session_state["_sch_default"],
             "_sch_mode":   "default",
@@ -255,8 +255,11 @@ if mode == "updated" and result.get("has_adjustments"):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# SECTION 3 — ADJUSTMENT PANEL
+# SECTION 3 — ADJUSTMENT PANEL (hidden after schedule is applied)
 # ═══════════════════════════════════════════════════════════════════════════════
+if mode == "updated":
+    st.stop()
+
 st.markdown("---")
 st.markdown("### Adjust schedule")
 
@@ -264,11 +267,11 @@ st.markdown("### Adjust schedule")
 st.markdown("**Step 1 — Select time window to adjust**")
 tw1, tw2 = st.columns(2)
 with tw1:
-    tune_start = st.slider("From", 6, 23, 6,  format="%d:00", key="tune_start")
+    tune_start = st.slider("Situation starts at", 6, 23, 6,  format="%d:00", key="tune_start")
 with tw2:
-    tune_end   = st.slider("To",   7, 24, 24, format="%d:00", key="tune_end")
+    tune_end   = st.slider("Situation ends at",   7, 24, 24, format="%d:00", key="tune_end")
 st.caption(
-    f"Only **{tune_start:02d}:00 – {tune_end:02d}:00** will be adjusted. "
+    f"Weather / emergency / event occurs between **{tune_start:02d}:00 – {tune_end:02d}:00**. "
     "The rest of the day stays on the standard timetable."
 )
 
@@ -319,7 +322,7 @@ if input_method == "Manual inputs":
             "religious_event": "Religious event",
         }.get(x, x), label_visibility="collapsed")
         if ev_type != "none":
-            ev_pax = st.number_input("Estimated crowd for event (pax/hr)", 0, 30_000, 0, key="ev_pax")
+            ev_pax = st.number_input("Estimated crowd for event (pax/hr)", value=0, key="ev_pax")
         else:
             ev_pax = 0
 
@@ -344,10 +347,20 @@ else:  # Upload image
 
 # Step 3 — Analyse
 st.markdown("**Step 3 — Analyse options**")
+
 if st.button("Analyse", type="primary", key="analyse_btn"):
     if tune_end <= tune_start:
-        st.warning(f"'To' must be after 'From'. Minimum window is 1 hour (e.g. {tune_start:02d}:00 – {tune_start+1:02d}:00).")
+        st.error(f"'Ends at' must be after 'Starts at' — minimum 1 hour (e.g. {tune_start:02d}:00 – {tune_start+1:02d}:00).")
         st.stop()
+    if input_method == "Manual inputs":
+        _pax_now  = st.session_state.get("ev_pax", 0) or 0
+        _type_now = st.session_state.get("ev_type", "none")
+        if _pax_now < 0 or _pax_now > 30_000:
+            st.error(f"Estimated crowd must be between **0 and 30,000** pax/hr. You entered {_pax_now:,}.")
+            st.stop()
+        if _type_now != "none" and _pax_now == 0:
+            st.error("You selected an event type but entered 0 crowd. Please enter the crowd size or set event to None.")
+            st.stop()
 
     # Midpoint of window as the representative hour for single-hour analysis
     rep_hour = (tune_start + tune_end) // 2
@@ -492,11 +505,22 @@ if analysis and analysis.get("options"):
             else:
                 st.info(f"**{opt['label'].upper()}**")
             freq_val = opt["recommended_frequency_per_hr"]
+            if freq_val == 0:
+                freq_label = "SUSPENDED"
+            elif freq_delta > 0:
+                freq_label = {"conservative": "Slightly increased",
+                              "moderate":     "Moderately increased",
+                              "aggressive":   "Significantly increased"}.get(opt["label"], "Increased")
+            elif freq_delta < 0:
+                freq_label = {"conservative": "Significantly decreased",
+                              "moderate":     "Moderately decreased",
+                              "aggressive":   "Slightly decreased"}.get(opt["label"], "Decreased")
+            else:
+                freq_label = "No change"
             st.metric(
                 "Frequency",
-                "SUSPENDED" if freq_val == 0 else f"{freq_val}/hr",
-                delta=freq_delta,
-                help="Trains running per hour. Arrow shows change vs current schedule. More trains = shorter wait time between arrivals.",
+                freq_label,
+                help="Whether train frequency increases, decreases, or stays the same vs current schedule.",
             )
             st.metric(
                 "Load factor",
