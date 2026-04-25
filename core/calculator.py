@@ -301,26 +301,42 @@ def compute_options(inputs: dict) -> list[dict]:
     elif emergency_type == "evacuation":
         # Clear stations fast — push well above standard
         freq_map = {
-            "conservative": min(std_freq + 2, max_freq),
-            "moderate":     min(std_freq + 4, max_freq),
+            "conservative": max(1, max_freq - 4),
+            "moderate":     max(1, max_freq - 2),
             "aggressive":   max_freq,
         }
     elif emergency_type:
         # overcrowding or generic — urgently add trains above standard + event demand
         target = std_freq + extra_needed
-        freq_map = {
-            "conservative": min(target,     max_freq),
-            "moderate":     min(target + 2, max_freq),
-            "aggressive":   min(target + 4, max_freq),
-        }
+        if target >= max_freq:
+            freq_map = {
+                "conservative": max(1, max_freq - 4),
+                "moderate":     max(1, max_freq - 2),
+                "aggressive":   max_freq,
+            }
+        else:
+            freq_map = {
+                "conservative": max(1, target - 2),
+                "moderate":     target,
+                "aggressive":   min(target + 3, max_freq),
+            }
     else:
-        # Normal case — options are standard + extra demand.
-        # Conservative never drops below standard (the official schedule is the floor here).
-        freq_map = {
-            "conservative": min(std_freq + max(0, extra_needed - 2), max_freq),
-            "moderate":     min(std_freq + extra_needed, max_freq),
-            "aggressive":   min(std_freq + extra_needed + (3 if extra_needed > 0 else 1), max_freq),
-        }
+        # Three options always spread around the optimal frequency.
+        # When base hits the safety ceiling, shift the spread downward so all
+        # three options are always meaningfully different for GLM to evaluate.
+        base = std_freq + extra_needed
+        if base >= max_freq:
+            freq_map = {
+                "conservative": max(1, max_freq - 4),
+                "moderate":     max(1, max_freq - 2),
+                "aggressive":   max_freq,
+            }
+        else:
+            freq_map = {
+                "conservative": max(1, base - 2),
+                "moderate":     base,
+                "aggressive":   min(base + 3, max_freq),
+            }
 
     return [
         {"label": label, **_option_metrics(inputs, freq, expected, max_freq)}
@@ -394,10 +410,10 @@ def compute_daily_schedule(
             "train_capacity":            train_capacity,
             "running_cost_per_train_hr": cost_per_train_hr,
         }
-        options  = compute_options(inputs_hour)
-        moderate = next(o for o in options if o["label"] == "moderate")
-        rec_freq = moderate["recommended_frequency_per_hr"]
-        expected_pax = moderate["expected_passengers_per_hr"]
+        options      = compute_options(inputs_hour)
+        moderate_opt = next(o for o in options if o["label"] == "moderate")
+        rec_freq     = moderate_opt["recommended_frequency_per_hr"]
+        expected_pax = moderate_opt["expected_passengers_per_hr"]
 
         # ── Emergency recovery curve ──────────────────────────────────────────
         em_status = None   # "active" | "recovery1" | "recovery2"

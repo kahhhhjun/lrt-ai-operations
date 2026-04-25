@@ -43,6 +43,11 @@ The standard schedule (current frequency) is already calibrated for normal deman
 Peak hours alone are NOT a reason to add trains — the schedule already accounts for that.
 Frequency adjustments are ONLY justified by factors BEYOND the standard schedule:
   - Events (concerts, matches, festivals) creating extra passenger surge
+The THREE OPTIONS are always spread around the optimal frequency:
+  - CONSERVATIVE = 2 trains/hr below optimal (saves cost, may risk slight overcrowding — you must evaluate if acceptable)
+  - MODERATE = optimal frequency for predicted demand
+  - AGGRESSIVE = 3 trains/hr above optimal (extra buffer, higher cost — justified only if demand is uncertain or surge risk is high)
+If no extra factors exist, moderate = standard schedule. Conservative = standard minus 2 (risky). Aggressive = standard plus 3 (wasteful). Pick moderate unless there is a strong reason otherwise.
   - Weather forcing a safety-based frequency reduction
   - Emergencies requiring service suspension or rapid recovery
 If none of these extra factors are present, the standard schedule is correct and should be maintained.

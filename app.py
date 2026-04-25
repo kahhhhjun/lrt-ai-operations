@@ -34,30 +34,35 @@ def _fmt_cost(val: int) -> str:
 
 
 def _apply_option_to_window(schedule, chosen, tune_s, tune_e, cost_per_hr, weather):
-    """Shift every window-hour's recommended frequency by the option delta."""
+    """Apply the chosen option's delta to all event-affected and window hours.
+    Uses a consistent delta (−2 / 0 / +3) from moderate so the table always
+    matches the option cards regardless of per-hour baseline differences."""
     max_freq = WEATHER_MAX_FREQ.get(weather, 20)
     delta = {"conservative": -2, "moderate": 0, "aggressive": 3}.get(chosen, 0)
     if delta == 0:
         return schedule
     for s in schedule:
-        if tune_s <= s["hour"] < tune_e:
-            new_freq = max(s["standard_frequency"],          # never drop below standard
-                           min(s["recommended_frequency"] + delta, max_freq))
-            extra    = new_freq - s["standard_frequency"]
-            exp_pax  = s.get("expected_passengers_per_hr", 0)
-            new_cap  = new_freq * TRAIN_CAPACITY
-            s["recommended_frequency"] = new_freq
-            s["extra_trains"]          = extra
-            s["extra_cost_rm"]         = extra * cost_per_hr
-            s["total_cost_rm"]         = s["standard_cost_rm"] + extra * cost_per_hr
-            s["load_factor_pct"]       = round(min(exp_pax / max(new_cap, 1), 2.0) * 100, 1)
-            s["headway_rec_min"]       = int(round(60 / max(new_freq, 1)))
+        in_window    = tune_s <= s["hour"] < tune_e
+        event_affected = s.get("has_event") or s.get("is_event_tail")
+        if not (in_window or event_affected):
+            continue
+        new_freq = max(1, min(s["recommended_frequency"] + delta, max_freq))
+        extra    = new_freq - s["standard_frequency"]
+        exp_pax  = s.get("expected_passengers_per_hr", 0)
+        new_cap  = new_freq * TRAIN_CAPACITY
+        s["recommended_frequency"] = new_freq
+        s["extra_trains"]          = extra
+        s["extra_cost_rm"]         = extra * cost_per_hr
+        s["total_cost_rm"]         = s["standard_cost_rm"] + extra * cost_per_hr
+        s["load_factor_pct"]       = round(min(exp_pax / max(new_cap, 1), 2.0) * 100, 1)
+        s["headway_rec_min"]       = int(round(60 / max(new_freq, 1)))
     return schedule
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # SECTION 1 — DATE & LINE
 # ═══════════════════════════════════════════════════════════════════════════════
+st.markdown('<a name="schedule-top"></a>', unsafe_allow_html=True)
 st.subheader("Full Day Schedule")
 
 sch_date = st.date_input("Date", value=date_type.today(), key="sch_date")
@@ -113,10 +118,10 @@ else:
 
 rows = []
 for s in schedule:
-    in_win   = (mode == "updated") and (tune_s <= s["hour"] < tune_e)
-    is_tail  = s.get("is_event_tail", False)
+    is_tail   = s.get("is_event_tail", False)
     em_status = s.get("em_status")
-    show_adj = in_win or is_tail or bool(em_status)
+    freq_changed = mode == "updated" and s["recommended_frequency"] != s["standard_frequency"]
+    show_adj  = freq_changed or is_tail or bool(em_status)
     if show_adj:
         delta = s["extra_trains"]
         if delta > 0:   tc = f"{s['recommended_frequency']} (+{delta})"
@@ -130,6 +135,10 @@ for s in schedule:
             status = "↗ Tapering"
         elif s["has_event"]:
             status = ", ".join(s["event_names"])
+        elif delta < 0:
+            status = "Reduced"
+        elif delta > 0:
+            status = "Increased"
         else:
             status = "Adjusted"
         rows.append({
@@ -163,20 +172,42 @@ def _style_rows(row):
         return ["background-color: #7b4a00; color: #ffffff; font-weight: bold"] * len(row)
     if em == "recovery2":
         return ["background-color: #4a4a00; color: #ffffff; font-weight: bold"] * len(row)
-    if mode == "updated" and tune_s <= s["hour"] < tune_e:
+    if mode == "updated" and s["recommended_frequency"] != s["standard_frequency"] and not s.get("em_status") and not s.get("is_event_tail"):
         return ["background-color: #1a3a5c; color: #ffffff; font-weight: bold"] * len(row)
     if s.get("is_event_tail"):
         return ["background-color: #2a4a3c; color: #ffffff; font-weight: bold"] * len(row)
     return [""] * len(row)
 
-st.dataframe(df.style.apply(_style_rows, axis=1), use_container_width=True, hide_index=True)
+st.dataframe(
+    df.style.apply(_style_rows, axis=1),
+    use_container_width=True,
+    hide_index=True,
+    column_config={
+        "Time":             st.column_config.TextColumn("Time",             help="Hour slot for this schedule entry."),
+        "Expected Pax/hr":  st.column_config.TextColumn("Expected Pax/hr",  help="Estimated total passengers arriving at the station per hour, including event surge and weather effects."),
+        "Frequency":        st.column_config.TextColumn("Frequency",        help="How often a train arrives — shorter interval means more trains."),
+        "Trains/hr":        st.column_config.TextColumn("Trains/hr",        help="Number of trains per hour. Bracket shows change vs standard schedule: (+2) = 2 extra trains, (−1) = 1 fewer train."),
+        "Cost (RM/hr)":     st.column_config.TextColumn("Cost (RM/hr)",     help="Total operating cost for this hour based on trains deployed × RM 350 per train-hour."),
+        "Load factor":      st.column_config.TextColumn("Load factor",      help="How full the trains are. 75% = comfortable target. 100% = completely full. Above 100% = passengers left behind on platform."),
+        "Status":           st.column_config.TextColumn("Status",           help="Standard = no change. Increased/Reduced = frequency adjusted. Event rows show the event name. Emergency rows show the incident type."),
+    }
+)
+
+if mode == "updated":
+    if st.button("Reset to standard", key="sch_reset_table"):
+        st.session_state.update({
+            "_sch_result": st.session_state["_sch_default"],
+            "_sch_mode":   "default",
+            "_sch_events": [],
+            "_tune_start": 6,
+            "_tune_end":   24,
+            "_analysis":   None,
+        })
+        st.rerun()
 
 # ── Daily cost ────────────────────────────────────────────────────────────────
 std_total = result["daily_standard_cost_rm"]
-extra_win = sum(
-    s["extra_cost_rm"] for s in schedule
-    if mode == "updated" and tune_s <= s["hour"] < tune_e
-)
+extra_win = sum(s["extra_cost_rm"] for s in schedule) if mode == "updated" else 0
 total_day = std_total + extra_win
 
 st.markdown("### Daily cost")
@@ -262,29 +293,35 @@ _EMERGENCY_LABELS = {
     "overcrowding":    "Overcrowding / stampede risk",
 }
 
+sch_cost = 350  # fixed running cost — not exposed in UI
+
 if input_method == "Manual inputs":
-    ai1, ai2 = st.columns(2)
+    ai1, ai2, ai3 = st.columns(3)
     with ai1:
-        sch_weather = st.selectbox("Weather", ["clear", "cloudy", "rainy", "stormy"], key="sch_weather")
-        sch_cost    = st.number_input("Running cost / train-hour (RM)", 50, 2000, 350, key="sch_cost")
-        em_type_key = st.selectbox("Emergency type", _EMERGENCY_OPTIONS,
-                                   format_func=lambda x: _EMERGENCY_LABELS[x], key="em_type")
-        em_dur      = st.number_input("Emergency duration (hours)", 1, 4, 1, key="em_dur") if em_type_key != "None" else 1
+        st.markdown("**Weather**")
+        sch_weather = st.selectbox("Condition", ["clear", "cloudy", "rainy", "stormy"],
+                                   key="sch_weather", label_visibility="collapsed")
     with ai2:
-        ev_name = st.text_input("Event name (leave blank if none)", key="ev_name")
+        st.markdown("**Emergency**")
+        em_type_key = st.selectbox("Emergency type", _EMERGENCY_OPTIONS,
+                                   format_func=lambda x: _EMERGENCY_LABELS[x],
+                                   key="em_type", label_visibility="collapsed")
+    with ai3:
+        st.markdown("**Event**")
         ev_type = st.selectbox("Event type", [
-            "concert", "football_match", "festival",
-            "marathon", "public_holiday", "exhibition", "religious_event",
+            "none", "concert", "football_match", "festival", "marathon",
+            "public_holiday", "exhibition", "religious_event",
         ], key="ev_type", format_func=lambda x: {
-            "concert": "Concert",
-            "football_match": "Football match",
-            "festival": "Festival",
-            "marathon": "Marathon / run",
-            "public_holiday": "Public holiday",
+            "none": "None", "concert": "Concert",
+            "football_match": "Football match", "festival": "Festival",
+            "marathon": "Marathon / run", "public_holiday": "Public holiday",
             "exhibition": "Exhibition / convention",
             "religious_event": "Religious event",
-        }[x])
-        ev_pax  = st.number_input("Extra passengers/hr at station", 0, 30_000, 0, key="ev_pax")
+        }.get(x, x), label_visibility="collapsed")
+        if ev_type != "none":
+            ev_pax = st.number_input("Estimated crowd for event (pax/hr)", 0, 30_000, 0, key="ev_pax")
+        else:
+            ev_pax = 0
 
 elif input_method == "Describe in text (GLM extracts)":
     sit_text = st.text_area(
@@ -293,7 +330,7 @@ elif input_method == "Describe in text (GLM extracts)":
         placeholder='e.g. "Blackpink concert tonight at 8pm, around 4,000 extra passengers per hour. Heavy rain since afternoon."',
         key="sit_text",
     )
-    sch_cost = st.session_state.get("sch_cost", 350)
+    sch_cost = 350
 
 else:  # Upload image
     uploaded_file = st.file_uploader(
@@ -303,7 +340,7 @@ else:  # Upload image
     )
     if uploaded_file:
         st.image(uploaded_file, caption=uploaded_file.name, width=300)
-    sch_cost = st.session_state.get("sch_cost", 350)
+    sch_cost = 350
 
 # Step 3 — Analyse
 st.markdown("**Step 3 — Analyse options**")
@@ -354,11 +391,22 @@ if st.button("Analyse", type="primary", key="analyse_btn"):
         st.info(f"GLM read image — weather: **{a_weather}** | events: {[e['name'] for e in a_ev_raw] or ['none']}")
 
     else:  # Manual inputs
-        a_weather = st.session_state.get("sch_weather", "clear")
-        a_ev_raw  = [{"name": ev_name, "passengers_per_hr": int(ev_pax),
-                      "event_type": st.session_state.get("ev_type", "concert")}] \
-                    if ev_name.strip() and ev_pax > 0 else []
-        a_line    = sch_line
+        _ev_type_labels = {
+            "concert": "Concert", "football_match": "Football match",
+            "festival": "Festival", "marathon": "Marathon / run",
+            "public_holiday": "Public holiday",
+            "exhibition": "Exhibition / convention",
+            "religious_event": "Religious event",
+        }
+        a_weather  = st.session_state.get("sch_weather", "clear")
+        _ev_type   = st.session_state.get("ev_type", "none")
+        _ev_pax    = int(st.session_state.get("ev_pax", 0) or 0)
+        _ev_name   = _ev_type_labels.get(_ev_type, "Event")
+        a_ev_raw   = [{"name": _ev_name, "passengers_per_hr": _ev_pax,
+                       "event_type": _ev_type}] \
+                     if _ev_type != "none" and _ev_pax > 0 else []
+        a_line     = sch_line
+        st.info(f"Manual inputs — weather: **{a_weather}** | event: {_ev_name if a_ev_raw else 'none'} | pax/hr: {_ev_pax if a_ev_raw else 0}")
 
     # Pull emergency fields from extraction (text/image) or manual selector
     a_emergency      = extracted.get("emergency")      if input_method != "Manual inputs" else None
@@ -369,7 +417,7 @@ if st.button("Analyse", type="primary", key="analyse_btn"):
         if _em_sel != "None":
             a_emergency_type = _em_sel
             a_emergency      = _EMERGENCY_LABELS.get(_em_sel, _em_sel)
-    a_emergency_dur = st.session_state.get("em_dur", 1) if input_method == "Manual inputs" else 1
+    a_emergency_dur = max(1, tune_end - tune_start)
 
     # Show emergency banner immediately so duty manager sees it before GLM finishes
     _EMERGENCY_LABELS = {
@@ -527,11 +575,8 @@ if analysis and analysis.get("options"):
         )
         st.session_state["_chosen_option"] = new_pick
 
-        ap1, ap2 = st.columns(2)
-        with ap1:
-            apply_btn = st.button("Apply to schedule", type="primary", key="apply_btn")
-        with ap2:
-            reset_btn = st.button("Reset to standard", key="sch_reset")
+        apply_btn = st.button("Apply to schedule", type="primary", key="apply_btn")
+        reset_btn = False
 
         if apply_btn:
             a_weather = st.session_state.get("_a_weather", "clear")
@@ -540,11 +585,12 @@ if analysis and analysis.get("options"):
             a_ts      = st.session_state.get("_a_tune_s", 6)
             a_te      = st.session_state.get("_a_tune_e", 23)
             a_em_type = st.session_state.get("_a_em_type")
-            a_em_dur  = st.session_state.get("_a_em_dur", 1)
+            a_em_dur  = max(1, a_te - a_ts)
 
             events_daily = [
                 {"name": ev["name"], "start_hour": a_ts,
-                 "end_hour": a_te, "passengers_per_hr": ev["passengers_per_hr"]}
+                 "end_hour": a_te, "passengers_per_hr": ev["passengers_per_hr"],
+                 "event_type": ev.get("event_type", "concert")}
                 for ev in a_ev_raw
             ]
 
@@ -570,8 +616,8 @@ if analysis and analysis.get("options"):
             )
 
             st.session_state.update({
-                "_sch_result":  _upd,
-                "_sch_mode":    "updated",
+                "_sch_result":   _upd,
+                "_sch_mode":     "updated",
                 "_sch_events":  events_daily,
                 "_upd_weather": a_weather,
                 "_tune_start":  a_ts,
@@ -592,12 +638,9 @@ if analysis and analysis.get("options"):
             st.rerun()
 
 elif mode == "updated":
-    if st.button("Reset to standard", key="sch_reset_plain"):
-        st.session_state.update({
-            "_sch_result": st.session_state["_sch_default"],
-            "_sch_mode":   "default",
-            "_sch_events": [],
-            "_tune_start": 6,
-            "_tune_end":   24,
-        })
-        st.rerun()
+    st.markdown(
+        '<a href="#schedule-top" style="display:inline-block; padding:6px 16px; '
+        'background:#1a3a5c; color:#fff; border-radius:6px; text-decoration:none; font-size:0.9rem;">'
+        '↑ View updated schedule</a>',
+        unsafe_allow_html=True,
+    )
