@@ -327,7 +327,7 @@ elif input_method == "Describe in text (GLM extracts)":
     sit_text = st.text_area(
         "Describe the situation",
         height=100,
-        placeholder='e.g. "Blackpink concert tonight at 8pm, around 4,000 extra passengers per hour. Heavy rain since afternoon."',
+        placeholder='e.g. "Blackpink concert at Bukit Jalil, around 4,000 extra passengers per hour. Weather is rainy. Train breakdown reported."',
         key="sit_text",
     )
     sch_cost = 350

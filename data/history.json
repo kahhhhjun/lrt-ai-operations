@@ -779,5 +779,117 @@
       "platform_incidents": "none — crowd arrived and left gradually throughout the evening",
       "verdict": "Correct choice. Festival crowds behave very differently from concerts — arrivals spread over 3-4 hours, multiple stages keep people at the venue longer, and departures are staggered rather than all at once. 11 trains/hr maintained comfortable load throughout. Lesson: festivals need consistent moderate frequency across the full event window rather than a sharp post-event spike."
     }
+  },
+  {
+    "date": "2025-03-17",
+    "line": "Kelana Jaya",
+    "situation": "Suicide attempt at Taman Jaya station. Person jumped onto tracks during Monday morning peak. Service suspended immediately for 30 minutes while emergency services responded. Tragic fatality confirmed on site.",
+    "event_passengers_per_hr": 0,
+    "event_type": null,
+    "weather": "clear",
+    "emergency_type": "track_incident",
+    "frequency_deployed": 0,
+    "outcome": {
+      "peak_load_factor_pct": 0,
+      "passengers_served_per_hr": 0,
+      "platform_incidents": "7,000 passengers stranded during 30-minute suspension. Post-clearance: deployed max 20 trains/hr for 2 hours to clear backlog.",
+      "verdict": "Correct. Suicide on track = immediate full suspension with no exceptions. Human life and safety override all other considerations including events, passenger demand, or cost. The first priority is always to stop all trains and allow emergency services to respond. Only after full clearance can service resume. Post-resumption must be aggressive max frequency to clear backlog. Key lesson: track_incident from suicide ALWAYS means conservative (0 trains) for the duration. No compromise is acceptable. Events and weather are irrelevant during the active emergency phase — safety is absolute."
+    }
+  },
+  {
+    "date": "2025-05-22",
+    "line": "Ampang",
+    "situation": "Person fell onto tracks at Chan Sow Lin station during Thursday evening peak. Rainy weather. Service suspended for 25 minutes. Fatality confirmed.",
+    "event_passengers_per_hr": 0,
+    "event_type": null,
+    "weather": "rainy",
+    "emergency_type": "track_incident",
+    "frequency_deployed": 0,
+    "outcome": {
+      "peak_load_factor_pct": 0,
+      "passengers_served_per_hr": 0,
+      "platform_incidents": "5,500 passengers stranded. Rain drove more people to shelter at stations during suspension, worsening platform crowding. Post-clearance: max 17 trains/hr (rain safety cap) for 90 minutes.",
+      "verdict": "Correct. Fatal track incident requires immediate full suspension regardless of weather or demand. Rain made recovery harder (capped at 17 trains) but suspension was still the only correct choice. Conservative option (0 trains) is mandatory during active track incident. Moderate (5 trains) and aggressive (17 trains) would both be extremely dangerous — trains cannot run when there is a person on the track. Lesson: track_incident with fatality = conservative (0 trains) ALWAYS during the incident. Weather only matters for the recovery phase, never the suspension phase. Human safety is the absolute highest priority."
+    }
+  },
+  {
+    "date": "2025-01-11",
+    "line": "Sri Petaling",
+    "situation": "Suicide on track at Bukit Jalil station during Saturday evening. Concert at nearby stadium with 4,500 extra passengers per hour expected. Clear weather. Service suspended for 40 minutes.",
+    "event_passengers_per_hr": 4500,
+    "event_type": "concert",
+    "weather": "clear",
+    "emergency_type": "track_incident",
+    "frequency_deployed": 0,
+    "outcome": {
+      "peak_load_factor_pct": 0,
+      "passengers_served_per_hr": 0,
+      "platform_incidents": "12,000 passengers stranded including concert-goers. Extreme platform overcrowding during 40-minute suspension. Post-clearance: deployed max 20 trains/hr for 2 hours to clear combined backlog.",
+      "verdict": "Correct. A death on the track means ALL trains stop immediately — the concert, the crowd, the cost, none of it matters. Running trains over or near a track where a person has died is absolutely unacceptable. The conservative option (0 trains) was the ONLY correct choice during the active incident. Even moderate (5 trains) or aggressive (17 trains) would have been a catastrophic safety violation. Post-clearance: aggressive max frequency was correct to clear the massive backlog. Lesson: track_incident with suicide/fatality = conservative (suspended) ALWAYS, no matter how large the crowd or how important the event. Safety is non-negotiable. Recovery phase (next hour) = aggressive max frequency to clear backlog."
+    }
+  },
+  {
+    "date": "2025-07-08",
+    "line": "Kelana Jaya",
+    "situation": "Person on track at Setiawangsa station. Wednesday afternoon off-peak. Marathon event with 2,000 extra passengers per hour. Rainy weather. Suicide attempt — person survived after emergency response. Service suspended 35 minutes.",
+    "event_passengers_per_hr": 2000,
+    "event_type": "marathon",
+    "weather": "rainy",
+    "emergency_type": "track_incident",
+    "frequency_deployed": 0,
+    "outcome": {
+      "peak_load_factor_pct": 0,
+      "passengers_served_per_hr": 0,
+      "platform_incidents": "4,000 passengers stranded including marathon participants. Rain compounded platform crowding. Post-clearance: max 17 trains/hr (rain cap) for 75 minutes to clear backlog.",
+      "verdict": "Correct. Person on track = immediate suspension regardless of event, weather, or time of day. The combination of marathon crowd and rain made the backlog worse but did NOT change the suspension requirement. Conservative (0 trains) was mandatory. Running any train while a person is on the track is an absolute safety violation. Post-clearance: aggressive at rain cap (17) was correct. Lesson: track_incident is the highest-priority emergency. It overrides events, weather, cost, and passenger demand completely. First phase: suspend ALL trains (conservative). Second phase: max frequency recovery (aggressive). This two-phase response is non-negotiable."
+    }
+  },
+  {
+    "date": "2025-09-30",
+    "line": "Sri Petaling",
+    "situation": "Body found on tracks between Bukit Jalil and Sri Petaling stations. Sunday morning. No events. Clear weather. Service suspended for 45 minutes while police conducted investigation. Fatality confirmed.",
+    "event_passengers_per_hr": 0,
+    "event_type": null,
+    "weather": "clear",
+    "emergency_type": "track_incident",
+    "frequency_deployed": 0,
+    "outcome": {
+      "peak_load_factor_pct": 0,
+      "passengers_served_per_hr": 0,
+      "platform_incidents": "3,000 passengers affected during 45-minute suspension. Police investigation required longer than usual clearance time. Post-clearance: max 20 trains/hr for 1 hour.",
+      "verdict": "Correct. Body on track = immediate and complete suspension. Police investigation extended the suspension to 45 minutes — this is normal for a fatality. No train can run on tracks where a body is present or where police are investigating. Conservative (0 trains) was the only option for the entire duration. Post-clearance: aggressive max frequency cleared the backlog within 1 hour. Lesson: track incidents involving fatalities often require longer suspension times than signal failures. Plan for 30-60 minutes of complete suspension. The conservative option remains correct throughout. Recovery after clearance must be aggressive. Two-phase response: suspend first (conservative), then recover aggressively."
+    }
+  },
+  {
+    "date": "2025-11-15",
+    "line": "Ampang",
+    "situation": "Person jumped onto tracks at Masjid Jamek interchange during Friday evening peak. Heavy rain. Football match at Bukit Jalil with 3,500 extra passengers per hour expected. Service suspended for 28 minutes. Fatality confirmed on site.",
+    "event_passengers_per_hr": 3500,
+    "event_type": "football_match",
+    "weather": "rainy",
+    "emergency_type": "track_incident",
+    "frequency_deployed": 0,
+    "outcome": {
+      "peak_load_factor_pct": 0,
+      "passengers_served_per_hr": 0,
+      "platform_incidents": "9,000 passengers stranded at interchange — worst possible location. Rain drove even more commuters into stations. Football crowd added to platform density. Post-clearance: max 17 trains/hr (rain cap) for 2.5 hours to fully recover.",
+      "verdict": "Correct. This was the worst multi-factor scenario — suicide at interchange during peak + rain + football — and the only correct response was still to suspend ALL trains immediately. A person has died on the track. Nothing — not the football crowd, not the rain, not the peak hour demand — justifies running even a single train. Conservative (0 trains) was mandatory. Moderate and aggressive options during the active incident would be criminally negligent. Post-clearance: aggressive at rain cap was the fastest possible recovery. Lesson: when track_incident (suicide/fatality) coincides with events, weather, and peak demand, the track incident takes absolute priority. Phase 1: suspend completely. Phase 2: maximum recovery frequency. Events and weather are only relevant for estimating how bad the backlog will be and how fast recovery needs to be — they NEVER override the suspension requirement."
+    }
+  },
+  {
+    "date": "2025-04-03",
+    "line": "Kelana Jaya",
+    "situation": "Track intrusion — person seen walking on tracks near University station. Tuesday midday off-peak. No events. Clear weather. Security responded, person removed safely. Service suspended 18 minutes. No fatality.",
+    "event_passengers_per_hr": 0,
+    "event_type": null,
+    "weather": "clear",
+    "emergency_type": "track_incident",
+    "frequency_deployed": 0,
+    "outcome": {
+      "peak_load_factor_pct": 0,
+      "passengers_served_per_hr": 0,
+      "platform_incidents": "2,500 passengers delayed during 18-minute suspension. Post-clearance: max 20 trains/hr for 30 minutes to clear backlog.",
+      "verdict": "Correct. Even without a fatality, any person on the tracks requires immediate full suspension. A person walking on live tracks is at imminent risk of being struck by a train — continuing service would endanger their life. Conservative (0 trains) was the only safe option. Post-clearance: aggressive max frequency cleared the backlog quickly. Lesson: track_incident does not require a fatality to justify suspension. ANY person on the track — suicide attempt, trespasser, fallen passenger — requires immediate full suspension. Safety first, always. Two-phase response applies: suspend (conservative), then recover (aggressive)."
+    }
   }
 ]
