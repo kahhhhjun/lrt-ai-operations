@@ -60,36 +60,6 @@
     }
   },
   {
-    "date": "2024-04-10",
-    "line": "Sri Petaling",
-    "situation": "Hari Raya Aidilfitri eve. Wednesday evening. Clear weather. Mass outstation travel.",
-    "event_passengers_per_hr": 3200,
-    "event_type": "public_holiday",
-    "weather": "clear",
-    "frequency_deployed": 12,
-    "outcome": {
-      "peak_load_factor_pct": 101,
-      "passengers_served_per_hr": 7200,
-      "platform_incidents": "significant queuing at Masjid Jamek interchange",
-      "verdict": "Insufficient. Should have deployed 15 trains/hr from 4pm — holiday eve traffic peaks earlier than expected."
-    }
-  },
-  {
-    "date": "2024-08-31",
-    "line": "Kelana Jaya",
-    "situation": "Merdeka Day national parade at Dataran Merdeka. Saturday. Cloudy. 60,000 expected.",
-    "event_passengers_per_hr": 2800,
-    "event_type": "public_holiday",
-    "weather": "cloudy",
-    "frequency_deployed": 10,
-    "outcome": {
-      "peak_load_factor_pct": 78,
-      "passengers_served_per_hr": 6000,
-      "platform_incidents": "none",
-      "verdict": "Well managed. Conservative was correct — parade crowds disperse gradually with no single exodus. Cloudy weather had minimal impact on ridership."
-    }
-  },
-  {
     "date": "2024-12-31",
     "line": "Kelana Jaya",
     "situation": "New Year's Eve countdown at KLCC. Tuesday night 9pm-1am. Clear weather.",
@@ -147,21 +117,6 @@
       "passengers_served_per_hr": 5400,
       "platform_incidents": "queuing at Sri Petaling for ~45 minutes",
       "verdict": "Marginal. Aggressive should have been deployed immediately — emergency rerouting adds demand faster than event surges. Act fast."
-    }
-  },
-  {
-    "date": "2024-01-25",
-    "line": "Ampang",
-    "situation": "Chinese New Year eve. Thursday evening. Clear weather. High outstation travel.",
-    "event_passengers_per_hr": 2600,
-    "event_type": "public_holiday",
-    "weather": "clear",
-    "frequency_deployed": 13,
-    "outcome": {
-      "peak_load_factor_pct": 69,
-      "passengers_served_per_hr": 7800,
-      "platform_incidents": "none",
-      "verdict": "Comfortable. Conservative was slightly better in hindsight — 13 trains was 2 more than needed. Public holidays have uncertain timing so moderate was justified."
     }
   },
   {
@@ -252,21 +207,6 @@
       "passengers_served_per_hr": 7800,
       "platform_incidents": "heavy crowding at KLCC. Rain drove spectators to LRT instead of taxis.",
       "verdict": "Nearly overwhelmed. This festival had a sharp arrival and exit pattern — the hour before (arrival surge) and hour after (exit rush) needed aggressive frequency. During the event itself, standard frequency with no increase was sufficient as everyone was at the venue. The event hours should be labelled as 'festival' but no extra trains added during the event. Rain compounded the exit rush — spectators could not walk or take taxis, all converged on LRT for the exit. Lesson: festivals = increase frequency ONLY for the hour before (arrival) and hour after (exit). During the event, keep standard frequency — label it but do not add trains. Rain amplifies arrival and exit surges only."
-    }
-  },
-  {
-    "date": "2024-02-14",
-    "line": "Kelana Jaya",
-    "situation": "Valentine's Day evening. Wednesday. Clear weather. High leisure ridership, no formal event.",
-    "event_passengers_per_hr": 900,
-    "event_type": "public_holiday",
-    "weather": "clear",
-    "frequency_deployed": 10,
-    "outcome": {
-      "peak_load_factor_pct": 74,
-      "passengers_served_per_hr": 6000,
-      "platform_incidents": "none",
-      "verdict": "Moderate was correct. Diffuse demand across many destinations — no station bottleneck. Conservative would have been tight; aggressive wasteful."
     }
   },
   {
@@ -403,8 +343,7 @@
       "platform_incidents": "moderate crowding at exit — rain caused more fans to take LRT vs rideshare",
       "verdict": "Aggressive was correct for the arrival and exit windows only. Rain + concert means the arrival hour and exit hour need maximum frequency — rain pushes more fans to LRT instead of driving. During the concert itself, fans were inside the venue — standard frequency with no increase was sufficient. The concert hours should be labelled as 'concert' but no extra trains added during the event. Only the first hour (arrival surge) and last hour (exit rush) need frequency increases. Lesson: concerts = increase frequency ONLY for the hour before (arrival) and hour after (exit). During the event, keep standard frequency — label it but do not add trains. Rain amplifies the arrival and exit surges only."
     }
-  }
-,
+  },
   {
     "date": "2024-03-09",
     "line": "Ampang",
@@ -480,7 +419,6 @@
       "verdict": "Conservative was correct. Weekly Friday prayers are predictable and short-duration — congregation departs sharply within 20 minutes after prayers end but total crowd is modest. Standard schedule handles it comfortably. Cloudy weather had negligible effect. Moderate was slight overkill for this crowd size."
     }
   },
-
   {
     "date": "2024-10-12",
     "line": "Sri Petaling",
@@ -527,38 +465,6 @@
       "passengers_served_per_hr": 1800,
       "platform_incidents": "severe crowding — 3 trains on backup power insufficient for concert crowd plus regular passengers.",
       "verdict": "Wrong. Should have immediately activated bus bridge as LRT backup power cannot handle event-level demand. Conservative (3 trains backup) was inadequate — concert adds extra demand that overwhelms reduced service. Lesson: event + power failure = bus bridge mandatory, do not rely on backup trains alone."
-    }
-  },
-  {
-    "date": "2024-01-20",
-    "line": "Ampang",
-    "situation": "Train breakdown during Chinese New Year eve evening rush. Thursday. Clear weather. Holiday crowd plus festive shoppers.",
-    "event_passengers_per_hr": 2400,
-    "event_type": "public_holiday",
-    "weather": "clear",
-    "emergency_type": "breakdown",
-    "frequency_deployed": 12,
-    "outcome": {
-      "peak_load_factor_pct": 86,
-      "passengers_served_per_hr": 7200,
-      "platform_incidents": "minor queuing at 3 stations for 20 minutes.",
-      "verdict": "Moderate was correct. Breakdown reduces capacity by one train, but holiday event demand still requires more trains than standard. Balance: reduce slightly from standard due to breakdown, but keep elevated vs normal due to holiday crowd. Conservative would have caused overflow; aggressive not possible with one train missing."
-    }
-  },
-  {
-    "date": "2024-03-30",
-    "line": "Sri Petaling",
-    "situation": "Overcrowding emergency during Hari Raya eve at peak 6pm. Platform crush risk at Bukit Jalil. Clear weather.",
-    "event_passengers_per_hr": 3500,
-    "event_type": "public_holiday",
-    "weather": "clear",
-    "emergency_type": "overcrowding",
-    "frequency_deployed": 18,
-    "outcome": {
-      "peak_load_factor_pct": 78,
-      "passengers_served_per_hr": 10800,
-      "platform_incidents": "none after frequency increase — platform cleared within 15 minutes.",
-      "verdict": "Aggressive was correct and urgent. Overcrowding emergency during holiday event demands maximum trains immediately — the two factors compound each other. Conservative or moderate would have left dangerous platform density. Lesson: event + overcrowding emergency = aggressive always, deploy immediately without hesitation."
     }
   },
   {
@@ -687,22 +593,6 @@
       "passengers_served_per_hr": 10200,
       "platform_incidents": "none after immediate frequency increase to rain cap.",
       "verdict": "Aggressive at rain cap (17 trains) was correct for the exit window. The overcrowding alert at 8pm was triggered by the festival exit rush — attendees leaving in the hours around the event's end. During the festival itself (3-8pm), standard frequency with no increase was sufficient as attendees were inside the venue — those hours should be labelled as 'festival' but no extra trains added. Only the arrival hour before and exit hour after needed aggressive frequency. Rain pushed 25% more passengers for the exit. Lesson: festivals = increase frequency ONLY for the hour before (arrival) and hour after (exit). During the event, keep standard frequency — label it but do not add trains. Rain amplifies the exit surge."
-    }
-  },
-  {
-    "date": "2024-04-19",
-    "line": "Kelana Jaya",
-    "situation": "Hari Raya holiday shopping rush during power failure. Saturday afternoon 3pm. Rainy weather. Mall crowds at Midvalley and Pavilion.",
-    "event_passengers_per_hr": 2200,
-    "event_type": "public_holiday",
-    "weather": "rainy",
-    "emergency_type": "power_failure",
-    "frequency_deployed": 4,
-    "outcome": {
-      "peak_load_factor_pct": 138,
-      "passengers_served_per_hr": 2400,
-      "platform_incidents": "heavy crowding — holiday shoppers plus rain-driven commuters overwhelmed backup power service.",
-      "verdict": "Wrong. Holiday + rain + power failure is unmanageable by LRT alone. Bus bridge must be the primary response. 4 trains on backup is meaningless against holiday + rain demand. Conservative was wrong choice — no reduced LRT service can handle this scenario. Lesson: public_holiday + rainy + power_failure = activate bus bridge immediately as the primary response, not a secondary one."
     }
   },
   {

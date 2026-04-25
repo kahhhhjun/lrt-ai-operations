@@ -9,7 +9,7 @@ random.seed(42)
 
 WEATHERS  = ["clear", "clear", "clear", "cloudy", "rainy", "stormy"]
 LINES     = ["Kelana Jaya", "Ampang", "Sri Petaling"]
-EVENTS    = ["Coldplay Concert", "Football Match", "Public Holiday", "Marathon", "Festival"]
+EVENTS    = ["Coldplay Concert", "Football Match", "Marathon", "Festival"]
 
 PAX_PEAK        = 5_000
 PAX_OFF_PEAK    = 2_500
