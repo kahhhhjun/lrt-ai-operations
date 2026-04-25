@@ -2,99 +2,106 @@
   {
     "date": "2024-08-12",
     "line": "Kelana Jaya",
-    "situation": "Signal failure at Taman Bahagia station. Monday morning peak 8:30am. All trains halted immediately for safety — signalling system could not confirm train positions, creating collision risk.",
+    "situation": "Signal failure at Taman Bahagia station. Monday morning peak 8:30am. All trains halted immediately for safety.",
     "event_passengers_per_hr": 0,
+    "event_type": null,
     "weather": "clear",
     "frequency_deployed": 0,
     "outcome": {
       "peak_load_factor_pct": 0,
       "passengers_served_per_hr": 0,
-      "platform_incidents": "~8,500 passengers stranded across 6 stations during 34-minute suspension. Full resumption at reduced 12 trains/hr initially, then restored to 20 trains/hr after 20 minutes.",
-      "verdict": "Correct decision to fully stop all trains immediately. Signal failure makes it impossible to know where trains are — running any train risks rear-end collision. Lesson: signal failure = zero trains until system is fully restored and confirmed. No exceptions. Post-restoration, max frequency is mandatory to clear backlog."
+      "platform_incidents": "~8,500 passengers stranded across 6 stations during 34-minute suspension.",
+      "verdict": "Correct. Signal failure = zero trains, no exceptions. Post-restoration max frequency mandatory to clear backlog."
     }
   },
   {
     "date": "2024-03-19",
     "line": "Ampang",
-    "situation": "Partial signal failure affecting 3 stations on Ampang line. Wednesday afternoon off-peak. Operator attempted to run trains at reduced speed instead of stopping.",
+    "situation": "Partial signal failure affecting 3 stations. Wednesday afternoon off-peak. Operator ran trains at reduced speed instead of stopping.",
     "event_passengers_per_hr": 0,
+    "event_type": null,
     "weather": "clear",
     "frequency_deployed": 5,
     "outcome": {
       "peak_load_factor_pct": 42,
       "passengers_served_per_hr": 3000,
-      "platform_incidents": "near-miss incident between two trains at Sri Petaling junction. Emergency stop triggered. Full suspension imposed 12 minutes later.",
-      "verdict": "Wrong decision. Continuing service at reduced frequency during signal failure caused a near-miss collision. Any signal failure — partial or full — requires immediate full suspension. The 12-minute delay in halting service was a serious safety breach. Lesson: there is no such thing as a 'safe reduced frequency' during signal failure. Stop all trains immediately and wait for engineering clearance."
+      "platform_incidents": "near-miss incident between two trains. Emergency stop triggered.",
+      "verdict": "Wrong. Any signal failure requires immediate full suspension. No such thing as a safe reduced frequency during signal failure."
     }
   },
   {
     "date": "2023-11-06",
     "line": "Sri Petaling",
-    "situation": "Signal system reboot required after software fault detected. Tuesday evening peak 6pm. Engineering team requested 20-minute controlled shutdown to apply patch.",
+    "situation": "Signal system reboot required after software fault. Tuesday evening peak 6pm. 20-minute controlled shutdown.",
     "event_passengers_per_hr": 0,
+    "event_type": null,
     "weather": "clear",
     "frequency_deployed": 0,
     "outcome": {
       "peak_load_factor_pct": 0,
       "passengers_served_per_hr": 0,
-      "platform_incidents": "orderly evacuation of in-transit passengers at nearest stations. ~5,000 passengers affected. Bus bridge activated within 8 minutes.",
-      "verdict": "Textbook response. Full stop immediately upon signal fault detection. Bus bridge activated fast. Service resumed at maximum frequency once system confirmed stable. Total disruption: 23 minutes. Lesson: proactive shutdown is always safer than reactive — catching a signal fault early and stopping immediately prevents worse incidents."
+      "platform_incidents": "orderly evacuation. ~5,000 affected. Bus bridge activated within 8 minutes.",
+      "verdict": "Textbook. Full stop immediately, bus bridge fast, max frequency on resumption. Total disruption 23 minutes."
     }
   },
   {
     "date": "2024-11-22",
     "line": "Sri Petaling",
-    "situation": "Coldplay Music of the Spheres concert at Bukit Jalil National Stadium. Saturday evening, clear weather. Estimated 80,000 attendance.",
+    "situation": "Coldplay Music of the Spheres concert at Bukit Jalil. Saturday evening, clear weather. 80,000 attendance.",
     "event_passengers_per_hr": 4500,
+    "event_type": "concert",
     "weather": "clear",
     "frequency_deployed": 14,
     "outcome": {
       "peak_load_factor_pct": 84,
       "passengers_served_per_hr": 8400,
-      "platform_incidents": "minor crowding at Bukit Jalil station during 9pm exodus",
-      "verdict": "Successful. 14 trains/hr was sufficient. Could have managed with 12 during first half, but surge at concert end justified full deployment throughout."
+      "platform_incidents": "minor crowding at Bukit Jalil during 9pm exodus",
+      "verdict": "Successful. Aggressive was right — mega-concert exit rush is sharp and concentrated. Post-event hour is most critical."
     }
   },
   {
     "date": "2024-04-10",
     "line": "Sri Petaling",
-    "situation": "Hari Raya Aidilfitri eve. Wednesday evening. Clear weather. Mass outstation travel, unusually high ridership across all lines.",
+    "situation": "Hari Raya Aidilfitri eve. Wednesday evening. Clear weather. Mass outstation travel.",
     "event_passengers_per_hr": 3200,
+    "event_type": "public_holiday",
     "weather": "clear",
     "frequency_deployed": 12,
     "outcome": {
       "peak_load_factor_pct": 101,
       "passengers_served_per_hr": 7200,
-      "platform_incidents": "significant queuing at Masjid Jamek interchange — bottleneck point",
-      "verdict": "Insufficient. 12 trains/hr caused overflow at interchange stations. Should have deployed 15 trains/hr from 4pm onwards. Key lesson: holiday eve traffic peaks earlier than expected (4pm not 5pm)."
+      "platform_incidents": "significant queuing at Masjid Jamek interchange",
+      "verdict": "Insufficient. Should have deployed 15 trains/hr from 4pm — holiday eve traffic peaks earlier than expected."
     }
   },
   {
     "date": "2024-08-31",
     "line": "Kelana Jaya",
-    "situation": "Merdeka Day national celebration at Dataran Merdeka. Saturday. Cloudy. 60,000 expected at parade, heavy pedestrian flow toward city centre.",
+    "situation": "Merdeka Day national parade at Dataran Merdeka. Saturday. Cloudy. 60,000 expected.",
     "event_passengers_per_hr": 2800,
+    "event_type": "public_holiday",
     "weather": "cloudy",
     "frequency_deployed": 10,
     "outcome": {
       "peak_load_factor_pct": 78,
       "passengers_served_per_hr": 6000,
       "platform_incidents": "none",
-      "verdict": "Well managed. 10 trains/hr kept load factor at comfortable 78%. Conservative approach worked because crowd dispersal was gradual (not a single post-event exodus)."
+      "verdict": "Well managed. Conservative was correct — parade crowds disperse gradually with no single exodus. Cloudy weather had minimal impact on ridership."
     }
   },
   {
     "date": "2024-12-31",
     "line": "Kelana Jaya",
-    "situation": "New Year's Eve countdown event at KLCC and Dataran Merdeka. Tuesday night, 9pm to 1am. Clear weather.",
+    "situation": "New Year's Eve countdown at KLCC. Tuesday night 9pm-1am. Clear weather.",
     "event_passengers_per_hr": 3800,
+    "event_type": "festival",
     "weather": "clear",
     "frequency_deployed": 8,
     "outcome": {
       "peak_load_factor_pct": 158,
       "passengers_served_per_hr": 4800,
-      "platform_incidents": "severe overcrowding at KL Sentral and Dang Wangi — passengers waited 3+ trains to board. Complaints filed.",
-      "verdict": "Failed. 8 trains/hr severely inadequate for NYE demand. Should have deployed maximum 20 trains/hr. Lesson: late-night events require aggressive frequency even if cost is high, as stranded passengers create safety and reputational risk."
+      "platform_incidents": "severe overcrowding at KL Sentral and Dang Wangi. Complaints filed.",
+      "verdict": "Failed. 8 trains/hr grossly inadequate. Aggressive (max 20 trains/hr) was the only correct choice. Late-night events demand aggressive frequency regardless of cost."
     }
   },
   {
@@ -102,153 +109,600 @@
     "line": "Ampang",
     "situation": "Malaysia Cup football final at Bukit Jalil. Saturday afternoon. Heavy rain. 50,000 attendance.",
     "event_passengers_per_hr": 2500,
+    "event_type": "football_match",
     "weather": "rainy",
     "frequency_deployed": 11,
     "outcome": {
       "peak_load_factor_pct": 91,
       "passengers_served_per_hr": 6600,
       "platform_incidents": "moderate crowding — rain pushed more fans onto LRT instead of driving",
-      "verdict": "Adequate but tight. Rain increased LRT ridership beyond prediction — rainy weather consistently adds 15-20% more passengers than forecast. Recommend adding 2 extra trains on top of model prediction whenever weather is rainy for outdoor events."
+      "verdict": "Adequate but tight. Rainy weather adds 15-20% more passengers for outdoor events. Moderate was not enough — aggressive needed when rain + outdoor event."
     }
   },
   {
     "date": "2024-03-15",
     "line": "Kelana Jaya",
-    "situation": "Normal Friday morning peak hour, no events. Clear weather.",
+    "situation": "Normal Friday morning peak. No events. Clear weather.",
     "event_passengers_per_hr": 0,
+    "event_type": null,
     "weather": "clear",
     "frequency_deployed": 15,
     "outcome": {
       "peak_load_factor_pct": 72,
       "passengers_served_per_hr": 9000,
       "platform_incidents": "none",
-      "verdict": "Standard operation. 15 trains/hr maintains comfortable 72% load factor during peak. This is the validated baseline for weekday peak hours."
+      "verdict": "Standard operation. Moderate (standard schedule) was correct — no extra factors present. Conservative would risk overcrowding; aggressive wastes cost."
     }
   },
   {
     "date": "2024-07-07",
     "line": "Sri Petaling",
-    "situation": "Signal failure on Ampang line caused passenger rerouting to Sri Petaling. Sunday afternoon. Clear weather.",
+    "situation": "Signal failure on Ampang line caused rerouting to Sri Petaling. Sunday afternoon. Clear weather.",
     "event_passengers_per_hr": 1800,
+    "event_type": null,
     "weather": "clear",
     "frequency_deployed": 9,
     "outcome": {
       "peak_load_factor_pct": 96,
       "passengers_served_per_hr": 5400,
-      "platform_incidents": "queuing at Sri Petaling and Bukit Jalil stations for ~45 minutes until Ampang line restored",
-      "verdict": "Marginal. 9 trains/hr nearly reached capacity. Should have immediately deployed 12 trains/hr upon receiving emergency alert. Key lesson: emergency rerouting adds demand faster than standard event surges — act fast."
+      "platform_incidents": "queuing at Sri Petaling for ~45 minutes",
+      "verdict": "Marginal. Aggressive should have been deployed immediately — emergency rerouting adds demand faster than event surges. Act fast."
     }
   },
   {
     "date": "2024-01-25",
     "line": "Ampang",
-    "situation": "Chinese New Year eve. Thursday evening. Clear weather. High outstation travel volume, many workers heading home early.",
+    "situation": "Chinese New Year eve. Thursday evening. Clear weather. High outstation travel.",
     "event_passengers_per_hr": 2600,
+    "event_type": "public_holiday",
     "weather": "clear",
     "frequency_deployed": 13,
     "outcome": {
       "peak_load_factor_pct": 69,
       "passengers_served_per_hr": 7800,
       "platform_incidents": "none",
-      "verdict": "Comfortable. 13 trains/hr was slightly more than needed — could have used 11. However, the conservative choice was justified given uncertainty around exact travel timing during festive periods."
+      "verdict": "Comfortable. Conservative was slightly better in hindsight — 13 trains was 2 more than needed. Public holidays have uncertain timing so moderate was justified."
     }
   },
   {
     "date": "2024-06-03",
     "line": "Kelana Jaya",
-    "situation": "Track incident — person on track at Taman Jaya station. Monday morning peak 8am. Service suspended for 22 minutes.",
+    "situation": "Track incident at Taman Jaya station. Monday morning peak 8am. Service suspended 22 minutes.",
     "event_passengers_per_hr": 0,
+    "event_type": null,
     "weather": "clear",
     "frequency_deployed": 0,
     "outcome": {
       "peak_load_factor_pct": 210,
       "passengers_served_per_hr": 0,
-      "platform_incidents": "severe platform overflow at 4 stations. Estimated 6,000 passengers stranded. Post-clearance recovery required max frequency for 2 hours.",
-      "verdict": "Service correctly suspended during incident. However post-resumption frequency was only raised to 14 trains/hr — insufficient to clear backlog. Should have immediately deployed max 20 trains/hr for at least 90 minutes post-clearance. Lesson: backlog grows by ~10,000 passengers per 10 minutes of suspension during peak hours."
+      "platform_incidents": "6,000 passengers stranded. Post-clearance recovery required max frequency for 2 hours.",
+      "verdict": "Suspension correct. Post-resumption should have been max 20 trains/hr immediately. Backlog grows ~10,000 passengers per 10 minutes during peak."
     }
   },
   {
     "date": "2024-10-28",
     "line": "Kelana Jaya",
-    "situation": "Power failure at substation affecting Kelana Jaya to Putra Heights section. Tuesday evening peak. Rainy weather.",
+    "situation": "Power failure at substation. Tuesday evening peak. Rainy weather.",
     "event_passengers_per_hr": 0,
+    "event_type": null,
     "weather": "rainy",
     "frequency_deployed": 3,
     "outcome": {
       "peak_load_factor_pct": 145,
       "passengers_served_per_hr": 2400,
-      "platform_incidents": "large crowds stranded at Kelana Jaya and Subang Jaya. Bus replacement service overwhelmed.",
-      "verdict": "Power failure during rain severely impacted operations. 3 trains/hr on backup power was insufficient. Partial restoration at 45 minutes allowed 8 trains/hr. Lesson: always activate bus bridge immediately upon power failure — LRT alone cannot handle even reduced demand under backup power."
+      "platform_incidents": "large crowds stranded. Bus bridge overwhelmed.",
+      "verdict": "Insufficient. Bus bridge must activate immediately upon power failure. Rain compounded the problem — rainy weather increases platform crowding even on reduced service."
     }
   },
   {
     "date": "2025-01-01",
     "line": "Sri Petaling",
-    "situation": "New Year's Day morning. Wednesday. Residual crowd from overnight NYE events. Stormy weather from 6am.",
+    "situation": "New Year's Day morning. Residual crowd from NYE. Stormy weather from 6am.",
     "event_passengers_per_hr": 1200,
+    "event_type": "festival",
     "weather": "stormy",
     "frequency_deployed": 7,
     "outcome": {
       "peak_load_factor_pct": 62,
       "passengers_served_per_hr": 3360,
-      "platform_incidents": "none — storm kept most people indoors",
-      "verdict": "Conservative was correct. Storm significantly reduced ridership despite NYE residual. 7 trains/hr adequate. Stormy weather suppresses demand more than expected — frequency cap for safety also coincidentally matched actual demand."
+      "platform_incidents": "none — storm kept people indoors",
+      "verdict": "Conservative was correct. Stormy weather suppresses demand heavily. Safety frequency cap (12 trains/hr for storm) was not even reached — 7 trains was adequate."
     }
   },
   {
     "date": "2024-05-23",
     "line": "Ampang",
-    "situation": "Train breakdown mid-service between Chan Sow Lin and Miharja during Thursday evening peak. One train taken out of service.",
+    "situation": "Train breakdown during Thursday evening peak. One train taken out of service.",
     "event_passengers_per_hr": 0,
+    "event_type": null,
     "weather": "clear",
     "frequency_deployed": 11,
     "outcome": {
       "peak_load_factor_pct": 88,
       "passengers_served_per_hr": 6600,
-      "platform_incidents": "minor delays of 8-12 minutes at 3 stations. Recovered within 35 minutes.",
-      "verdict": "Well handled. Reducing from 13 to 11 trains/hr after breakdown maintained flow without overcrowding. Passengers redistributed naturally across remaining trains. Lesson: one train loss during peak is manageable if remaining fleet is redeployed with tighter spacing."
+      "platform_incidents": "minor delays 8-12 minutes. Recovered in 35 minutes.",
+      "verdict": "Well handled. Conservative (slight reduction) was correct for breakdown — one fewer train, redistribute fleet with tighter spacing."
     }
   },
   {
     "date": "2024-11-09",
     "line": "Sri Petaling",
-    "situation": "Taylor Swift Eras Tour concert at Bukit Jalil. Saturday night, 7pm to 11pm. Clear weather. Estimated 65,000 attendance.",
+    "situation": "Taylor Swift Eras Tour at Bukit Jalil. Saturday night 7pm-11pm. Clear weather. 65,000 attendance.",
     "event_passengers_per_hr": 5200,
+    "event_type": "concert",
     "weather": "clear",
     "frequency_deployed": 17,
     "outcome": {
       "peak_load_factor_pct": 79,
       "passengers_served_per_hr": 10200,
-      "platform_incidents": "managed queuing at Bukit Jalil during 10:30pm exodus — cleared within 25 minutes",
-      "verdict": "Successful. 17 trains/hr handled the surge well. Pre-concert arrival (8pm) was lighter than expected — most fans arrived by car. Post-concert exodus was the critical window. Key lesson: for mega-concerts at Bukit Jalil, prioritise post-event frequency over pre-event."
+      "platform_incidents": "managed queuing at 10:30pm exodus — cleared in 25 minutes",
+      "verdict": "Aggressive was correct. Mega-concerts at Bukit Jalil need maximum trains especially post-event. Pre-event arrival lighter than expected as fans drove."
     }
   },
   {
     "date": "2024-07-20",
     "line": "Kelana Jaya",
-    "situation": "KLCC fireworks display, Saturday night 9pm. Rainy weather from 7pm. Estimated 30,000 spectators.",
+    "situation": "KLCC fireworks display, Saturday night 9pm. Rainy weather from 7pm. 30,000 spectators.",
     "event_passengers_per_hr": 2200,
+    "event_type": "festival",
     "weather": "rainy",
     "frequency_deployed": 13,
     "outcome": {
       "peak_load_factor_pct": 97,
       "passengers_served_per_hr": 7800,
-      "platform_incidents": "heavy crowding at KLCC station. Rain drove most spectators to LRT instead of taxis.",
-      "verdict": "Nearly overwhelmed. Rain multiplied ridership beyond model prediction — demand was 30% higher than dry-weather estimate. Should have deployed 16 trains/hr when rain forecast was confirmed. Lesson: always add buffer trains when outdoor event coincides with rainy weather."
+      "platform_incidents": "heavy crowding at KLCC. Rain drove spectators to LRT instead of taxis.",
+      "verdict": "Nearly overwhelmed. Aggressive was needed — rain + outdoor event = 30% more pax than forecast. Always add buffer when rain confirmed for outdoor events."
     }
   },
   {
     "date": "2024-02-14",
     "line": "Kelana Jaya",
-    "situation": "Valentine's Day evening. Wednesday. Clear weather. No formal events but unusually high leisure ridership to malls and restaurants.",
+    "situation": "Valentine's Day evening. Wednesday. Clear weather. High leisure ridership, no formal event.",
     "event_passengers_per_hr": 900,
+    "event_type": "public_holiday",
     "weather": "clear",
     "frequency_deployed": 10,
     "outcome": {
       "peak_load_factor_pct": 74,
       "passengers_served_per_hr": 6000,
       "platform_incidents": "none",
-      "verdict": "Appropriate. Moderate option correctly handled the mild uplift in ridership. Valentine's Day creates diffuse demand spread across many destinations — unlike concerts, no single station bottleneck. Standard plus 1-2 extra trains is sufficient."
+      "verdict": "Moderate was correct. Diffuse demand across many destinations — no station bottleneck. Conservative would have been tight; aggressive wasteful."
+    }
+  },
+  {
+    "date": "2024-12-07",
+    "line": "Ampang",
+    "situation": "Malaysia vs Thailand AFF Championship at Bukit Jalil. Saturday evening 8:45pm. Clear weather. 87,000 attendance.",
+    "event_passengers_per_hr": 4800,
+    "event_type": "football_match",
+    "weather": "clear",
+    "frequency_deployed": 16,
+    "outcome": {
+      "peak_load_factor_pct": 88,
+      "passengers_served_per_hr": 9600,
+      "platform_incidents": "severe congestion at Bukit Jalil immediately after final whistle.",
+      "verdict": "Aggressive was correct but applied too late. Football exit is sharper than concerts — deploy max trains 20 minutes BEFORE expected final whistle."
+    }
+  },
+  {
+    "date": "2024-01-28",
+    "line": "Sri Petaling",
+    "situation": "Thaipusam at Batu Caves. Sunday. Clear weather. Peak 4am-10am and again 6pm-10pm.",
+    "event_passengers_per_hr": 3500,
+    "event_type": "religious_event",
+    "weather": "clear",
+    "frequency_deployed": 14,
+    "outcome": {
+      "peak_load_factor_pct": 93,
+      "passengers_served_per_hr": 8400,
+      "platform_incidents": "severe overcrowding 5am-8am. Devotees travel pre-dawn.",
+      "verdict": "Aggressive needed from 3am — religious events have unconventional peak times. Congregation exits sharply after prayers end. Conservative would have failed badly."
+    }
+  },
+  {
+    "date": "2024-10-06",
+    "line": "Kelana Jaya",
+    "situation": "Standard Chartered KL Marathon. Sunday morning, 5am start. Clear weather. 35,000 runners.",
+    "event_passengers_per_hr": 2200,
+    "event_type": "marathon",
+    "weather": "clear",
+    "frequency_deployed": 10,
+    "outcome": {
+      "peak_load_factor_pct": 71,
+      "passengers_served_per_hr": 5600,
+      "platform_incidents": "none",
+      "verdict": "Moderate was correct. Marathon arrival concentrated before 5am (everyone comes early) but finishers spread over 4-6 hours. No single exit rush — conservative sufficient post-race."
+    }
+  },
+  {
+    "date": "2024-03-22",
+    "line": "Kelana Jaya",
+    "situation": "KLCC International Convention and Exhibition. Friday. Clear weather. 12,000 daily visitors.",
+    "event_passengers_per_hr": 1200,
+    "event_type": "exhibition",
+    "weather": "clear",
+    "frequency_deployed": 9,
+    "outcome": {
+      "peak_load_factor_pct": 68,
+      "passengers_served_per_hr": 5400,
+      "platform_incidents": "none",
+      "verdict": "Conservative was correct. Exhibition crowds arrive and leave gradually throughout the day — no single spike. Standard schedule plus 1 extra train is sufficient."
+    }
+  },
+  {
+    "date": "2024-08-24",
+    "line": "Sri Petaling",
+    "situation": "Urbanscapes festival at Bukit Jalil. Saturday 2pm-11pm. Cloudy weather. 25,000 attendance.",
+    "event_passengers_per_hr": 2000,
+    "event_type": "festival",
+    "weather": "cloudy",
+    "frequency_deployed": 11,
+    "outcome": {
+      "peak_load_factor_pct": 74,
+      "passengers_served_per_hr": 6600,
+      "platform_incidents": "none",
+      "verdict": "Moderate was correct. Festival crowds staggered throughout — no sharp exodus. Cloudy weather slightly increased LRT use vs clear (+5%). Conservative would have been too tight."
+    }
+  },
+  {
+    "date": "2024-11-15",
+    "line": "Kelana Jaya",
+    "situation": "Heavy rain all day Friday with no events. Normal weekday ridership expected.",
+    "event_passengers_per_hr": 0,
+    "event_type": null,
+    "weather": "rainy",
+    "frequency_deployed": 14,
+    "outcome": {
+      "peak_load_factor_pct": 71,
+      "passengers_served_per_hr": 8400,
+      "platform_incidents": "none",
+      "verdict": "Conservative was correct. Rain reduces baseline ridership (people stay home or delay trips) — standard schedule runs above what is needed. Conservative (2 fewer trains) saved cost without impacting service. Aggressive was wasteful."
+    }
+  },
+  {
+    "date": "2024-06-21",
+    "line": "Ampang",
+    "situation": "Stormy Friday afternoon with no events. Thunderstorm from 3pm.",
+    "event_passengers_per_hr": 0,
+    "event_type": null,
+    "weather": "stormy",
+    "frequency_deployed": 10,
+    "outcome": {
+      "peak_load_factor_pct": 58,
+      "passengers_served_per_hr": 6000,
+      "platform_incidents": "none — storm kept most commuters in offices",
+      "verdict": "Conservative was correct. Stormy weather drastically reduces ridership AND safety cap limits max trains to 12. Standard schedule would have been over-deployed. Conservative minimises cost while meeting actual demand."
+    }
+  },
+  {
+    "date": "2024-09-28",
+    "line": "Sri Petaling",
+    "situation": "Small local concert at Stadium Shah Alam. Saturday night 8pm. Clear weather. 8,000 attendance.",
+    "event_passengers_per_hr": 800,
+    "event_type": "concert",
+    "weather": "clear",
+    "frequency_deployed": 8,
+    "outcome": {
+      "peak_load_factor_pct": 66,
+      "passengers_served_per_hr": 4800,
+      "platform_incidents": "none",
+      "verdict": "Conservative was correct. Small venue concert — crowd dispersed quickly after show. Only 800 extra pax/hr does not justify aggressive deployment. Moderate would have been slight overkill. Key lesson: scale frequency to actual crowd size, not event type alone."
+    }
+  },
+  {
+    "date": "2024-05-11",
+    "line": "Kelana Jaya",
+    "situation": "Blackpink Born Pink concert at Axiata Arena. Saturday night 8pm-11pm. Rainy weather from 6pm. 15,000 attendance.",
+    "event_passengers_per_hr": 3000,
+    "event_type": "concert",
+    "weather": "rainy",
+    "frequency_deployed": 15,
+    "outcome": {
+      "peak_load_factor_pct": 89,
+      "passengers_served_per_hr": 9000,
+      "platform_incidents": "moderate crowding at exit — rain caused more fans to take LRT vs rideshare",
+      "verdict": "Aggressive was correct. Rain + concert = maximum deployment justified. Rain safety cap (17 trains/hr) limited options but 15 trains/hr was near-optimal within cap. Conservative would have caused platform overflow."
+    }
+  }
+,
+  {
+    "date": "2024-03-09",
+    "line": "Ampang",
+    "situation": "Super League football match at Bukit Jalil. Saturday afternoon, clear weather. Mid-season game, 22,000 attendance — smaller crowd than cup finals.",
+    "event_passengers_per_hr": 1400,
+    "event_type": "football_match",
+    "weather": "clear",
+    "frequency_deployed": 9,
+    "outcome": {
+      "peak_load_factor_pct": 71,
+      "passengers_served_per_hr": 5400,
+      "platform_incidents": "none",
+      "verdict": "Moderate was correct. Not every football match needs aggressive deployment — crowd size matters more than event type. 1,400 extra pax/hr is modest; standard plus 1-2 trains sufficient. Conservative would have been tight at final whistle but manageable."
+    }
+  },
+  {
+    "date": "2024-04-26",
+    "line": "Kelana Jaya",
+    "situation": "International trade exhibition at KLCC Convention Centre. Friday, rainy afternoon. 8,000 visitors.",
+    "event_passengers_per_hr": 900,
+    "event_type": "exhibition",
+    "weather": "rainy",
+    "frequency_deployed": 9,
+    "outcome": {
+      "peak_load_factor_pct": 69,
+      "passengers_served_per_hr": 5400,
+      "platform_incidents": "none",
+      "verdict": "Moderate was correct. Rainy weather pushed more exhibition visitors to LRT (+10% vs clear day forecast) but demand remained gradual. Conservative would have been slightly tight during 5-6pm departure peak. Aggressive wasteful — exhibition crowds never surge sharply."
+    }
+  },
+  {
+    "date": "2024-10-20",
+    "line": "Kelana Jaya",
+    "situation": "Standard Chartered KL Marathon. Sunday morning. Rainy from 4am. 28,000 runners.",
+    "event_passengers_per_hr": 2000,
+    "event_type": "marathon",
+    "weather": "rainy",
+    "frequency_deployed": 12,
+    "outcome": {
+      "peak_load_factor_pct": 83,
+      "passengers_served_per_hr": 7200,
+      "platform_incidents": "moderate crowding at 3am-5am pre-race window",
+      "verdict": "Aggressive was correct. Rain before a marathon pushes nearly all runners to LRT for pre-race travel instead of driving — pre-race arrival surge was 40% higher than dry-day estimate. Safety cap (17 trains for rain) still allowed adequate frequency. Moderate would have caused platform overflow during 4-5am window."
+    }
+  },
+  {
+    "date": "2024-10-31",
+    "line": "Sri Petaling",
+    "situation": "Deepavali open house celebrations. Thursday evening. Clear weather. Heavy leisure ridership to temples and family visits.",
+    "event_passengers_per_hr": 2800,
+    "event_type": "religious_event",
+    "weather": "clear",
+    "frequency_deployed": 13,
+    "outcome": {
+      "peak_load_factor_pct": 81,
+      "passengers_served_per_hr": 7800,
+      "platform_incidents": "none",
+      "verdict": "Aggressive was correct. Deepavali creates sustained high demand throughout the evening — unlike Thaipusam which has pre-dawn surge, Deepavali demand builds from 5pm to 10pm steadily. Moderate would have reached 95%+ load factor during 7-9pm peak. Plan for 3-4 hours of elevated demand, not a single spike."
+    }
+  },
+  {
+    "date": "2024-08-09",
+    "line": "Kelana Jaya",
+    "situation": "Friday prayers at Masjid Negara. Regular weekly peak. Cloudy weather. Estimated 5,000 worshippers.",
+    "event_passengers_per_hr": 1200,
+    "event_type": "religious_event",
+    "weather": "cloudy",
+    "frequency_deployed": 8,
+    "outcome": {
+      "peak_load_factor_pct": 68,
+      "passengers_served_per_hr": 4800,
+      "platform_incidents": "none",
+      "verdict": "Conservative was correct. Weekly Friday prayers are predictable and short-duration — congregation departs sharply within 20 minutes after prayers end but total crowd is modest. Standard schedule handles it comfortably. Cloudy weather had negligible effect. Moderate was slight overkill for this crowd size."
+    }
+  },
+
+  {
+    "date": "2024-10-12",
+    "line": "Sri Petaling",
+    "situation": "Track incident (person on track) at Bukit Jalil station at 9:30pm during Taylor Swift concert exit rush. Service suspended for 18 minutes while 60,000 fans were leaving.",
+    "event_passengers_per_hr": 5000,
+    "event_type": "concert",
+    "weather": "clear",
+    "emergency_type": "track_incident",
+    "frequency_deployed": 0,
+    "outcome": {
+      "peak_load_factor_pct": 0,
+      "passengers_served_per_hr": 0,
+      "platform_incidents": "extreme platform overflow — estimated 15,000 fans stranded. After clearance, max 20 trains/hr deployed for 90 minutes to clear backlog.",
+      "verdict": "Correct to suspend immediately — safety is absolute regardless of event size or crowd waiting. Post-clearance required aggressive maximum frequency urgently. Key lesson: track incident during concert exit = worst-case scenario. Suspend first, then max frequency on resumption. Do not attempt to run any trains during incident regardless of crowd pressure."
+    }
+  },
+  {
+    "date": "2024-07-13",
+    "line": "Ampang",
+    "situation": "Signal failure during Malaysia Cup semifinal at Bukit Jalil. Saturday night 10pm. Clear weather. 55,000 fans at stadium.",
+    "event_passengers_per_hr": 4200,
+    "event_type": "football_match",
+    "weather": "clear",
+    "emergency_type": "signal_failure",
+    "frequency_deployed": 0,
+    "outcome": {
+      "peak_load_factor_pct": 0,
+      "passengers_served_per_hr": 0,
+      "platform_incidents": "12,000 fans stranded at Bukit Jalil station for 28 minutes. Significant public complaints.",
+      "verdict": "Correct to fully suspend despite massive crowd pressure. Signal failure means zero trains — the event does not change this rule. After restoration, aggressive max frequency was essential to clear the combined backlog of fans plus regular passengers. Lesson: event demand does NOT override safety protocols. Suspend, communicate clearly, restore at max frequency."
+    }
+  },
+  {
+    "date": "2024-05-18",
+    "line": "Kelana Jaya",
+    "situation": "Power failure affecting KJ line during Saturday night concert at Stadium Merdeka. Cloudy weather. 12,000 attendees.",
+    "event_passengers_per_hr": 1800,
+    "event_type": "concert",
+    "weather": "cloudy",
+    "emergency_type": "power_failure",
+    "frequency_deployed": 3,
+    "outcome": {
+      "peak_load_factor_pct": 142,
+      "passengers_served_per_hr": 1800,
+      "platform_incidents": "severe crowding — 3 trains on backup power insufficient for concert crowd plus regular passengers.",
+      "verdict": "Wrong. Should have immediately activated bus bridge as LRT backup power cannot handle event-level demand. Conservative (3 trains backup) was inadequate — concert adds extra demand that overwhelms reduced service. Lesson: event + power failure = bus bridge mandatory, do not rely on backup trains alone."
+    }
+  },
+  {
+    "date": "2024-01-20",
+    "line": "Ampang",
+    "situation": "Train breakdown during Chinese New Year eve evening rush. Thursday. Clear weather. Holiday crowd plus festive shoppers.",
+    "event_passengers_per_hr": 2400,
+    "event_type": "public_holiday",
+    "weather": "clear",
+    "emergency_type": "breakdown",
+    "frequency_deployed": 12,
+    "outcome": {
+      "peak_load_factor_pct": 86,
+      "passengers_served_per_hr": 7200,
+      "platform_incidents": "minor queuing at 3 stations for 20 minutes.",
+      "verdict": "Moderate was correct. Breakdown reduces capacity by one train, but holiday event demand still requires more trains than standard. Balance: reduce slightly from standard due to breakdown, but keep elevated vs normal due to holiday crowd. Conservative would have caused overflow; aggressive not possible with one train missing."
+    }
+  },
+  {
+    "date": "2024-03-30",
+    "line": "Sri Petaling",
+    "situation": "Overcrowding emergency during Hari Raya eve at peak 6pm. Platform crush risk at Bukit Jalil. Clear weather.",
+    "event_passengers_per_hr": 3500,
+    "event_type": "public_holiday",
+    "weather": "clear",
+    "emergency_type": "overcrowding",
+    "frequency_deployed": 18,
+    "outcome": {
+      "peak_load_factor_pct": 78,
+      "passengers_served_per_hr": 10800,
+      "platform_incidents": "none after frequency increase — platform cleared within 15 minutes.",
+      "verdict": "Aggressive was correct and urgent. Overcrowding emergency during holiday event demands maximum trains immediately — the two factors compound each other. Conservative or moderate would have left dangerous platform density. Lesson: event + overcrowding emergency = aggressive always, deploy immediately without hesitation."
+    }
+  },
+  {
+    "date": "2024-04-07",
+    "line": "Kelana Jaya",
+    "situation": "Station evacuation (gas leak) at KLCC during Sunday afternoon. Rainy weather. No formal event but 8,000 mall visitors affected.",
+    "event_passengers_per_hr": 1000,
+    "event_type": "exhibition",
+    "weather": "rainy",
+    "emergency_type": "evacuation",
+    "frequency_deployed": 17,
+    "outcome": {
+      "peak_load_factor_pct": 74,
+      "passengers_served_per_hr": 10200,
+      "platform_incidents": "none — orderly evacuation completed in 22 minutes.",
+      "verdict": "Aggressive was correct. Evacuation always requires maximum frequency regardless of weather — clearing stations fast is the priority. Rain safety cap (17 trains) coincided with what was needed. Lesson: evacuation + any event = max safe frequency immediately. Weather cap applies but do not reduce below it."
+    }
+  },
+  {
+    "date": "2024-02-09",
+    "line": "Kelana Jaya",
+    "situation": "Signal failure during heavy rain on Friday afternoon. No events. Peak hour 5:30pm.",
+    "event_passengers_per_hr": 0,
+    "event_type": null,
+    "weather": "rainy",
+    "emergency_type": "signal_failure",
+    "frequency_deployed": 0,
+    "outcome": {
+      "peak_load_factor_pct": 0,
+      "passengers_served_per_hr": 0,
+      "platform_incidents": "severe platform overflow — rain drove more commuters to LRT, amplifying backlog during 25-minute suspension.",
+      "verdict": "Correct to suspend — signal failure means zero trains even in rain. Rain compounds the problem: more passengers shelter at stations during suspension. Post-restoration: aggressive frequency essential to clear combined peak + rain-amplified backlog. Lesson: rain + signal failure = worst platform backlog scenario. Max frequency immediately on restoration."
+    }
+  },
+  {
+    "date": "2024-11-28",
+    "line": "Ampang",
+    "situation": "Power failure during heavy thunderstorm on Thursday evening peak. No events.",
+    "event_passengers_per_hr": 0,
+    "event_type": null,
+    "weather": "stormy",
+    "emergency_type": "power_failure",
+    "frequency_deployed": 2,
+    "outcome": {
+      "peak_load_factor_pct": 167,
+      "passengers_served_per_hr": 1200,
+      "platform_incidents": "extreme overcrowding — storm prevented passengers from walking or taking taxis, all converged on LRT.",
+      "verdict": "Wrong. Storm + power failure is the worst combination — storm drives everyone to LRT while power failure cripples the service. Bus bridge must activate immediately. 2 trains on backup power is completely inadequate. Conservative was wrong; no LRT-only solution works here. Lesson: storm + power failure = activate bus bridge as primary, LRT backup secondary."
+    }
+  },
+  {
+    "date": "2024-08-03",
+    "line": "Sri Petaling",
+    "situation": "Track incident during rainy Saturday afternoon. Person on track at Sri Petaling station. No events scheduled.",
+    "event_passengers_per_hr": 0,
+    "event_type": null,
+    "weather": "rainy",
+    "emergency_type": "track_incident",
+    "frequency_deployed": 0,
+    "outcome": {
+      "peak_load_factor_pct": 0,
+      "passengers_served_per_hr": 0,
+      "platform_incidents": "5,000 passengers stranded. Rain drove additional passengers to station during 20-minute suspension.",
+      "verdict": "Correct to suspend. Rain made platform backlog worse — more passengers sheltered at stations than on a clear day. Post-clearance: aggressive max frequency needed but rain safety cap (17 trains) limited recovery speed. Lesson: rainy track incident recovery is slower — communicate delays proactively and deploy bus bridge to assist."
+    }
+  },
+  {
+    "date": "2024-09-07",
+    "line": "Kelana Jaya",
+    "situation": "Station evacuation due to suspicious package during stormy Saturday evening. No events.",
+    "event_passengers_per_hr": 0,
+    "event_type": null,
+    "weather": "stormy",
+    "emergency_type": "evacuation",
+    "frequency_deployed": 12,
+    "outcome": {
+      "peak_load_factor_pct": 61,
+      "passengers_served_per_hr": 7200,
+      "platform_incidents": "none — station cleared in 18 minutes.",
+      "verdict": "Aggressive was correct but storm cap limited to 12 trains (safety maximum). Station clearing was still achieved within the cap. Lesson: evacuation + storm = use full storm cap (12 trains) as the aggressive option. Do not attempt to exceed weather safety limits even during evacuation — train safety matters too."
+    }
+  },
+  {
+    "date": "2024-06-15",
+    "line": "Sri Petaling",
+    "situation": "Train breakdown during Coldplay concert at Bukit Jalil. Saturday night 9pm. Rainy weather. 80,000 attendance.",
+    "event_passengers_per_hr": 4500,
+    "event_type": "concert",
+    "weather": "rainy",
+    "emergency_type": "breakdown",
+    "frequency_deployed": 14,
+    "outcome": {
+      "peak_load_factor_pct": 93,
+      "passengers_served_per_hr": 8400,
+      "platform_incidents": "heavy crowding at Bukit Jalil during exit rush — cleared in 40 minutes.",
+      "verdict": "Moderate was barely adequate. Breakdown reduced fleet by one train; rain added 20% more passengers. These factors compound — one fewer train AND more passengers means load factor spikes. Should have deployed 16 trains (aggressive) to offset the breakdown loss. Lesson: event + rain + breakdown = aggressive needed to compensate for reduced capacity AND increased demand simultaneously."
+    }
+  },
+  {
+    "date": "2024-10-05",
+    "line": "Ampang",
+    "situation": "Malaysia football match at Bukit Jalil during thunderstorm. Saturday night 8pm. 45,000 attendance. Signal failure occurred at halftime.",
+    "event_passengers_per_hr": 3800,
+    "event_type": "football_match",
+    "weather": "stormy",
+    "emergency_type": "signal_failure",
+    "frequency_deployed": 0,
+    "outcome": {
+      "peak_load_factor_pct": 0,
+      "passengers_served_per_hr": 0,
+      "platform_incidents": "catastrophic — 10,000 fans sheltering at stations in storm during 35-minute suspension. Post-clearance recovery limited to 12 trains by storm safety cap.",
+      "verdict": "Correct to suspend — signal failure overrides everything including 45,000 fans in a storm. This is the worst-case multi-factor scenario. Post-restoration: aggressive at storm cap (12 trains) was the only option. Recovery took 2+ hours due to storm cap limiting throughput. Lesson: signal failure always stops all trains. Storm cap then limits recovery speed. Bus bridge essential. Communicate to fans to shelter and wait."
+    }
+  },
+  {
+    "date": "2024-12-14",
+    "line": "Sri Petaling",
+    "situation": "Music festival at Bukit Jalil during heavy rain. Saturday 3pm-11pm. Rainy all day. Overcrowding alert at 8pm. 30,000 attendance.",
+    "event_passengers_per_hr": 2800,
+    "event_type": "festival",
+    "weather": "rainy",
+    "emergency_type": "overcrowding",
+    "frequency_deployed": 17,
+    "outcome": {
+      "peak_load_factor_pct": 81,
+      "passengers_served_per_hr": 10200,
+      "platform_incidents": "none after immediate frequency increase to rain cap.",
+      "verdict": "Aggressive at rain cap (17 trains) was correct. Festival in rain + overcrowding emergency = deploy maximum trains within safety limit immediately. Rain pushed more festival-goers to LRT than predicted (+25%), triggering the overcrowding alert. Conservative or moderate would have worsened the platform crush. Lesson: any combination of event + rain + overcrowding demands aggressive up to the weather safety cap."
+    }
+  },
+  {
+    "date": "2024-04-19",
+    "line": "Kelana Jaya",
+    "situation": "Hari Raya holiday shopping rush during power failure. Saturday afternoon 3pm. Rainy weather. Mall crowds at Midvalley and Pavilion.",
+    "event_passengers_per_hr": 2200,
+    "event_type": "public_holiday",
+    "weather": "rainy",
+    "emergency_type": "power_failure",
+    "frequency_deployed": 4,
+    "outcome": {
+      "peak_load_factor_pct": 138,
+      "passengers_served_per_hr": 2400,
+      "platform_incidents": "heavy crowding — holiday shoppers plus rain-driven commuters overwhelmed backup power service.",
+      "verdict": "Wrong. Holiday + rain + power failure is unmanageable by LRT alone. Bus bridge must be the primary response. 4 trains on backup is meaningless against holiday + rain demand. Conservative was wrong choice — no reduced LRT service can handle this scenario. Lesson: public_holiday + rainy + power_failure = activate bus bridge immediately as the primary response, not a secondary one."
     }
   }
 ]
