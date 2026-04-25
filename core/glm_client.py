@@ -44,7 +44,6 @@ Event type rules — set "event_type" for each event:
 - "football_match": football, soccer, match, game, final, cup
 - "festival": festival, fair, carnival, bazaar, pasar malam
 - "marathon": marathon, run, race, cycling event
-- "public_holiday": public holiday, national day, celebration, parade
 - "exhibition": exhibition, convention, expo, conference, trade show
 - "religious_event": prayers, church, temple, mosque, thaipusam, wesak, deepavali mass gathering
 - "concert" is the default if event type is unclear
@@ -117,7 +116,6 @@ def _placeholder_extract(text: str) -> dict:
         ("football_match",  ["football", "soccer", "match", "final", "cup", "game"]),
         ("festival",        ["festival", "fair", "carnival", "bazaar", "pasar malam"]),
         ("marathon",        ["marathon", "run", "race", "cycling"]),
-        ("public_holiday",  ["holiday", "merdeka", "national day", "parade", "celebration"]),
         ("exhibition",      ["exhibition", "expo", "convention", "conference", "trade show"]),
         ("religious_event", ["thaipusam", "wesak", "deepavali", "prayers", "church", "temple"]),
     ]
