@@ -28,6 +28,7 @@ def init_db() -> None:
                 schedule_json     TEXT NOT NULL,
                 weather           TEXT,
                 events_json       TEXT,
+                emergency_type    TEXT,
                 total_std_cost    REAL,
                 total_extra_cost  REAL,
                 total_cost        REAL,
@@ -36,6 +37,11 @@ def init_db() -> None:
                 PRIMARY KEY (date, line)
             )
         """)
+        # Migrate existing tables that lack the emergency_type column
+        try:
+            conn.execute("ALTER TABLE saved_schedules ADD COLUMN emergency_type TEXT")
+        except Exception:
+            pass  # column already exists
 
 
 def save_schedule(
@@ -44,6 +50,7 @@ def save_schedule(
     schedule: list[dict],
     weather: str = "clear",
     events: list[dict] | None = None,
+    emergency_type: str | None = None,
     total_std_cost: float = 0,
     total_extra_cost: float = 0,
     total_cost: float = 0,
@@ -53,14 +60,15 @@ def save_schedule(
     with _connect() as conn:
         conn.execute("""
             INSERT OR REPLACE INTO saved_schedules
-            (date, line, schedule_json, weather, events_json,
+            (date, line, schedule_json, weather, events_json, emergency_type,
              total_std_cost, total_extra_cost, total_cost, saved_at, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             date, line,
             json.dumps(schedule),
             weather,
             json.dumps(events or []),
+            emergency_type,
             total_std_cost,
             total_extra_cost,
             total_cost,
@@ -103,7 +111,7 @@ def delete_schedule(date: str, line: str) -> None:
 
 def list_saved(line: str | None = None) -> list[dict]:
     """Return all saved records, optionally filtered by line."""
-    query = "SELECT date, line, weather, total_cost, saved_at, notes FROM saved_schedules"
+    query = "SELECT date, line, weather, events_json, emergency_type, total_cost, saved_at, notes FROM saved_schedules"
     params: tuple = ()
     if line:
         query += " WHERE line = ?"

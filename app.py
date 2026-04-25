@@ -1,6 +1,7 @@
 """Streamlit UI for LRT AI Operations decision-support.
 Run: streamlit run app.py"""
 
+import json
 from datetime import datetime, date as date_type, time
 from pathlib import Path
 
@@ -11,7 +12,7 @@ from core.calculator import WEATHER_MAX_FREQ, TRAIN_CAPACITY, compute_options, d
 from core.glm_client import extract_inputs_from_image, extract_inputs_from_text
 from core.recommender import (get_glm_recommendation, get_glm_recommendation_stream,
                               get_glm_daily_reasoning_stream, recommend_daily)
-from core.database import init_db, save_schedule, load_schedule, delete_schedule
+from core.database import init_db, save_schedule, load_schedule, delete_schedule, list_saved
 
 init_db()
 
@@ -68,10 +69,29 @@ def _apply_option_to_window(schedule, chosen, tune_s, tune_e, cost_per_hr, weath
 st.markdown('<a name="schedule-top"></a>', unsafe_allow_html=True)
 st.subheader("Full Day Schedule")
 
-sch_date = st.date_input("Date", value=date_type.today(), key="sch_date")
-sch_line = st.selectbox("LRT line", LINES, key="sch_line")
+_col_inputs, _col_history = st.columns(2)
+with _col_inputs:
+    sch_date = st.date_input("Date", value=date_type.today(), key="sch_date")
+    sch_line = st.selectbox("LRT line", LINES, key="sch_line")
 sch_weekday  = sch_date.weekday()
 sch_day_name = DAYS[sch_weekday]
+
+with _col_history:
+    _saved_list = list_saved(sch_line)
+    if _saved_list:
+        _lines = []
+        for r in _saved_list:
+            _d = date_type.fromisoformat(r["date"]).strftime("%d %b").lstrip("0")
+            _parts = [r["weather"]]
+            _events = json.loads(r.get("events_json") or "[]")
+            if _events:
+                _parts.append(", ".join(e["name"] for e in _events))
+            if r.get("emergency_type"):
+                _parts.append(r["emergency_type"].replace("_", " "))
+            _lines.append(f"- {_d} — {' · '.join(_parts)}")
+        st.info(f"📋 **Previously adjusted — {sch_line} Line**\n\n" + "\n".join(_lines))
+    else:
+        st.info(f"📋 **{sch_line} Line**\n\nNo previously adjusted dates.")
 
 # Auto-load schedule when date or line changes — prefer saved DB record if exists
 _key = f"{sch_date}_{sch_line}"
@@ -100,7 +120,8 @@ if st.session_state.get("_sch_key") != _key:
             "_upd_weather": _saved["weather"],
             "_analysis": None, "_chosen_option": "moderate",
             "_db_saved_at": _saved["saved_at"],
-            "_briefing_text": "",  # loaded from DB — skip briefing on reload
+            "_briefing_text": "",   # loaded from DB — skip briefing on reload
+            "_from_db": True,       # hide situation banner on reload
         })
     else:
         st.session_state.update({
@@ -131,9 +152,9 @@ if mode == "updated" and ev_active:
     title += f"  *(with {ev_active[0]['name']})*"
 st.markdown(title)
 
-if mode == "updated":
+if mode == "updated" and not st.session_state.get("_from_db"):
     st.success(
-        f"Adjusted **{tune_s:02d}:00–{tune_e:02d}:00** | "
+        f"Situation period **{tune_s:02d}:00–{tune_e:02d}:00** | "
         f"weather: {st.session_state.get('_upd_weather', '—')}"
         + (f" | event: {ev_active[0]['name']}" if ev_active else "")
         + ".  Press **Reset to standard** below to revert."
@@ -234,6 +255,7 @@ if mode == "updated":
                 schedule=schedule,
                 weather=st.session_state.get("_upd_weather", "clear"),
                 events=ev_active,
+                emergency_type=st.session_state.get("_a_em_type"),
                 total_std_cost=result["daily_standard_cost_rm"],
                 total_extra_cost=result["daily_extra_cost_rm"],
                 total_cost=result["daily_total_cost_rm"],
@@ -705,6 +727,7 @@ if analysis and analysis.get("options"):
                 "_tune_end":      a_te,
                 "_analysis":      None,
                 "_briefing_text": None,
+                "_from_db":       False,
             })
             st.rerun()
 
