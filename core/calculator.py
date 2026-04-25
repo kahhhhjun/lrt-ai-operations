@@ -115,9 +115,6 @@ _EVENT_PROFILES = {
     "marathon": {
         "pre_mult": 0.90, "during_mult": 0.20, "exit_mult": 0.60,
     },
-    "public_holiday": {
-        "pre_mult": 0.40, "during_mult": 0.50, "exit_mult": 0.40,
-    },
     "exhibition": {
         "pre_mult": 0.50, "during_mult": 0.40, "exit_mult": 0.60,
     },
@@ -252,6 +249,11 @@ def compute_options(inputs: dict) -> list[dict]:
     # Step 3: weather reduces baseline travel only (people stay home, unrelated to events)
     pax_mult = WEATHER_PAX_MULT.get(weather, 1.0)
     expected = int(baseline * pax_mult + event_pax)
+
+    # Step 3.5: overcrowding emergency inflates expected passengers by 150%
+    emergency_type = inputs.get("emergency_type") or ("overcrowding" if inputs.get("emergency") else None)
+    if emergency_type == "overcrowding":
+        expected = int(expected * 1.5)
 
     # Step 4: how many EXTRA trains needed on top of the standard schedule.
     # The standard schedule (current_frequency_per_hr) is already calibrated for normal demand —
@@ -408,13 +410,15 @@ def compute_daily_schedule(
                 hour_event_types.append(ev.get("event_type", "default"))
         _ev_type = hour_event_types[0] if hour_event_types else "default"
 
+        _is_em_active = emergency_type and emergency_hour is not None and emergency_hour <= hour < em_end
         inputs_hour = {
             "datetime":                  f"{date_str}T{hour:02d}:00",
             "weather":                   hour_weather,
             "events":                    [{"name": ", ".join(hour_event_names),
                                            "passengers_per_hr": hour_event_pax,
                                            "event_type": _ev_type}] if hour_event_pax else [],
-            "emergency":                 None,
+            "emergency":                 emergency_type if _is_em_active else None,
+            "emergency_type":            emergency_type if _is_em_active else None,
             "line":                      line,
             "current_frequency_per_hr":  std_freq,
             "train_capacity":            train_capacity,
@@ -442,6 +446,11 @@ def compute_daily_schedule(
                     rec_freq = max(1, std_freq - 2)
                 elif emergency_type == "evacuation":
                     rec_freq = min(max_freq, std_freq + 4)
+                elif emergency_type == "overcrowding":
+                    # Overcrowding: compute_options already inflated expected pax by 1.5x,
+                    # so rec_freq from moderate option already accounts for the surge.
+                    # No override needed — keep the computed rec_freq.
+                    pass
                 else:
                     rec_freq = max(1, std_freq - 2)
                 served  = rec_freq * train_capacity

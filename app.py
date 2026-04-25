@@ -392,11 +392,11 @@ if input_method == "Manual inputs":
         st.markdown("**Event**")
         ev_type = st.selectbox("Event type", [
             "none", "concert", "football_match", "festival", "marathon",
-            "public_holiday", "exhibition", "religious_event",
+            "exhibition", "religious_event",
         ], key="ev_type", format_func=lambda x: {
             "none": "None", "concert": "Concert",
             "football_match": "Football match", "festival": "Festival",
-            "marathon": "Marathon / run", "public_holiday": "Public holiday",
+            "marathon": "Marathon / run",
             "exhibition": "Exhibition / convention",
             "religious_event": "Religious event",
         }.get(x, x), label_visibility="collapsed")
@@ -486,7 +486,6 @@ if st.button("Analyse", type="primary", key="analyse_btn"):
         _ev_type_labels = {
             "concert": "Concert", "football_match": "Football match",
             "festival": "Festival", "marathon": "Marathon / run",
-            "public_holiday": "Public holiday",
             "exhibition": "Exhibition / convention",
             "religious_event": "Religious event",
         }
