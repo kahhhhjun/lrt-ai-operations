@@ -56,7 +56,7 @@
       "peak_load_factor_pct": 84,
       "passengers_served_per_hr": 8400,
       "platform_incidents": "minor crowding at Bukit Jalil during 9pm exodus",
-      "verdict": "Successful. Aggressive was right — mega-concert exit rush is sharp and concentrated. Post-event hour is most critical."
+      "verdict": "Successful for the arrival and exit windows, but frequency should not have been increased during the concert itself. Concert pattern: the hour BEFORE the concert (arrival surge) and the hour AFTER the concert (exit rush) require aggressive frequency — that is when everyone is on the train. During the concert itself, attendees are inside the venue, not on the platform — standard frequency with no increase is sufficient. The schedule should label those hours as 'concert' for visibility, but no extra trains are needed during the event. Only the first hour and last hour of the event window need frequency increases. Lesson: concerts = increase frequency ONLY for the hour before (arrival) and hour after (exit). During the event, keep standard frequency — label it but do not add trains."
     }
   },
   {
@@ -101,7 +101,7 @@
       "peak_load_factor_pct": 158,
       "passengers_served_per_hr": 4800,
       "platform_incidents": "severe overcrowding at KL Sentral and Dang Wangi. Complaints filed.",
-      "verdict": "Failed. 8 trains/hr grossly inadequate. Aggressive (max 20 trains/hr) was the only correct choice. Late-night events demand aggressive frequency regardless of cost."
+      "verdict": "Failed. 8 trains/hr grossly inadequate for the arrival and exit windows. Festival pattern = same as concert: the hour BEFORE the event (arrival surge) and the hour AFTER the event (exit rush) require aggressive frequency. During the event itself, attendees are at the venue — standard frequency with no increase is sufficient. The event hours should be labelled as 'festival' for visibility, but no extra trains are needed during the event. Only the first hour and last hour of the event window need frequency increases. 8 trains/hr was insufficient for both the arrival and exit peaks. Lesson: festivals = increase frequency ONLY for the hour before (arrival) and hour after (exit). During the event, keep standard frequency — label it but do not add trains."
     }
   },
   {
@@ -206,7 +206,7 @@
       "peak_load_factor_pct": 62,
       "passengers_served_per_hr": 3360,
       "platform_incidents": "none — storm kept people indoors",
-      "verdict": "Conservative was correct. Stormy weather suppresses demand heavily. Safety frequency cap (12 trains/hr for storm) was not even reached — 7 trains was adequate."
+      "verdict": "Conservative was correct. This was a post-festival exit window — normally the hour after a festival ends requires aggressive frequency for the exit rush. However, stormy weather suppressed demand so the exit surge never materialised. During the festival itself, no frequency increase is ever needed — attendees are at the venue, not on the train. The festival hours should be labelled but no extra trains added during the event. Lesson: festivals = increase frequency ONLY for the hour before (arrival) and hour after (exit). During the event, keep standard frequency — label it but do not add trains. Weather can suppress even the exit rush."
     }
   },
   {
@@ -236,7 +236,7 @@
       "peak_load_factor_pct": 79,
       "passengers_served_per_hr": 10200,
       "platform_incidents": "managed queuing at 10:30pm exodus — cleared in 25 minutes",
-      "verdict": "Aggressive was correct. Mega-concerts at Bukit Jalil need maximum trains especially post-event. Pre-event arrival lighter than expected as fans drove."
+      "verdict": "Aggressive was correct for the arrival and exit windows only. The pre-concert arrival hour (6-7pm) needed elevated frequency for the arrival surge. The post-concert exit hour (11pm-midnight) needed aggressive max frequency for the exit rush. During the concert itself (7-11pm), fans were inside the venue — standard frequency with no increase was sufficient. The schedule should show those hours as 'concert' for labelling, but no extra trains should run during the event. Only the first hour and last hour need frequency increases. Lesson: concerts = increase frequency ONLY for the hour before (arrival) and hour after (exit). During the event, keep standard frequency — label it but do not add trains."
     }
   },
   {
@@ -251,7 +251,7 @@
       "peak_load_factor_pct": 97,
       "passengers_served_per_hr": 7800,
       "platform_incidents": "heavy crowding at KLCC. Rain drove spectators to LRT instead of taxis.",
-      "verdict": "Nearly overwhelmed. Aggressive was needed — rain + outdoor event = 30% more pax than forecast. Always add buffer when rain confirmed for outdoor events."
+      "verdict": "Nearly overwhelmed. This festival had a sharp arrival and exit pattern — the hour before (arrival surge) and hour after (exit rush) needed aggressive frequency. During the event itself, standard frequency with no increase was sufficient as everyone was at the venue. The event hours should be labelled as 'festival' but no extra trains added during the event. Rain compounded the exit rush — spectators could not walk or take taxis, all converged on LRT for the exit. Lesson: festivals = increase frequency ONLY for the hour before (arrival) and hour after (exit). During the event, keep standard frequency — label it but do not add trains. Rain amplifies arrival and exit surges only."
     }
   },
   {
@@ -341,7 +341,7 @@
       "peak_load_factor_pct": 74,
       "passengers_served_per_hr": 6600,
       "platform_incidents": "none",
-      "verdict": "Moderate was correct. Festival crowds staggered throughout — no sharp exodus. Cloudy weather slightly increased LRT use vs clear (+5%). Conservative would have been too tight."
+      "verdict": "Moderate was correct for the arrival and exit windows but should not have been applied during the event itself. Festival pattern = same as concert: the hour before (arrival surge, 1-2pm) and the hour after (exit rush, 11pm-midnight) needed elevated frequency. During the event itself (2-11pm), attendees were inside the venue — standard frequency with no increase was sufficient. The event hours should be labelled as 'festival' for visibility, but no extra trains should run during the event. Only the first hour and last hour need frequency increases. Lesson: festivals = increase frequency ONLY for the hour before (arrival) and hour after (exit). During the event, keep standard frequency — label it but do not add trains."
     }
   },
   {
@@ -386,7 +386,7 @@
       "peak_load_factor_pct": 66,
       "passengers_served_per_hr": 4800,
       "platform_incidents": "none",
-      "verdict": "Conservative was correct. Small venue concert — crowd dispersed quickly after show. Only 800 extra pax/hr does not justify aggressive deployment. Moderate would have been slight overkill. Key lesson: scale frequency to actual crowd size, not event type alone."
+      "verdict": "Conservative was correct. Small venue concert — only the arrival hour and exit hour needed slightly elevated frequency. During the concert itself, standard frequency was sufficient as attendees were inside the venue. The concert hours should be labelled as 'concert' in the schedule but no extra trains added during the event. Key lesson: concerts = increase frequency ONLY for the hour before (arrival) and hour after (exit). During the event, keep standard frequency — label it but do not add trains. Scale the increase to crowd size for arrival/exit hours."
     }
   },
   {
@@ -401,7 +401,7 @@
       "peak_load_factor_pct": 89,
       "passengers_served_per_hr": 9000,
       "platform_incidents": "moderate crowding at exit — rain caused more fans to take LRT vs rideshare",
-      "verdict": "Aggressive was correct. Rain + concert = maximum deployment justified. Rain safety cap (17 trains/hr) limited options but 15 trains/hr was near-optimal within cap. Conservative would have caused platform overflow."
+      "verdict": "Aggressive was correct for the arrival and exit windows only. Rain + concert means the arrival hour and exit hour need maximum frequency — rain pushes more fans to LRT instead of driving. During the concert itself, fans were inside the venue — standard frequency with no increase was sufficient. The concert hours should be labelled as 'concert' but no extra trains added during the event. Only the first hour (arrival surge) and last hour (exit rush) need frequency increases. Lesson: concerts = increase frequency ONLY for the hour before (arrival) and hour after (exit). During the event, keep standard frequency — label it but do not add trains. Rain amplifies the arrival and exit surges only."
     }
   }
 ,
@@ -686,7 +686,7 @@
       "peak_load_factor_pct": 81,
       "passengers_served_per_hr": 10200,
       "platform_incidents": "none after immediate frequency increase to rain cap.",
-      "verdict": "Aggressive at rain cap (17 trains) was correct. Festival in rain + overcrowding emergency = deploy maximum trains within safety limit immediately. Rain pushed more festival-goers to LRT than predicted (+25%), triggering the overcrowding alert. Conservative or moderate would have worsened the platform crush. Lesson: any combination of event + rain + overcrowding demands aggressive up to the weather safety cap."
+      "verdict": "Aggressive at rain cap (17 trains) was correct for the exit window. The overcrowding alert at 8pm was triggered by the festival exit rush — attendees leaving in the hours around the event's end. During the festival itself (3-8pm), standard frequency with no increase was sufficient as attendees were inside the venue — those hours should be labelled as 'festival' but no extra trains added. Only the arrival hour before and exit hour after needed aggressive frequency. Rain pushed 25% more passengers for the exit. Lesson: festivals = increase frequency ONLY for the hour before (arrival) and hour after (exit). During the event, keep standard frequency — label it but do not add trains. Rain amplifies the exit surge."
     }
   },
   {
@@ -777,7 +777,7 @@
       "peak_load_factor_pct": 74,
       "passengers_served_per_hr": 6600,
       "platform_incidents": "none — crowd arrived and left gradually throughout the evening",
-      "verdict": "Correct choice. Festival crowds behave very differently from concerts — arrivals spread over 3-4 hours, multiple stages keep people at the venue longer, and departures are staggered rather than all at once. 11 trains/hr maintained comfortable load throughout. Lesson: festivals need consistent moderate frequency across the full event window rather than a sharp post-event spike."
+      "verdict": "Moderate was correct for the arrival and exit windows but should not have been applied during the event. Festival pattern = same as concert: the hour before (arrival surge, 1-2pm) and the hour after (exit rush, 11pm-midnight) needed elevated frequency. During the event itself (2-11pm), attendees were inside the venue — standard frequency with no increase was sufficient. The event hours should be labelled as 'festival' for visibility, but no extra trains should run during the event. Only the first hour and last hour need frequency increases. Lesson: festivals = increase frequency ONLY for the hour before (arrival) and hour after (exit). During the event, keep standard frequency — label it but do not add trains."
     }
   },
   {

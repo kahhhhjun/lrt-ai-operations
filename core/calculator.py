@@ -104,13 +104,13 @@ _SUNDAY_FREQ = {
 # exit_mult : fraction leaving all at once in the hour AFTER
 _EVENT_PROFILES = {
     "concert": {
-        "pre_mult": 0.70, "during_mult": 0.20, "exit_mult": 1.00,
+        "pre_mult": 0.70, "during_mult": 0.00, "exit_mult": 1.00,
     },
     "football_match": {
         "pre_mult": 0.80, "during_mult": 0.30, "exit_mult": 1.00,
     },
     "festival": {
-        "pre_mult": 0.50, "during_mult": 0.60, "exit_mult": 0.50,
+        "pre_mult": 0.70, "during_mult": 0.00, "exit_mult": 1.00,
     },
     "marathon": {
         "pre_mult": 0.90, "during_mult": 0.20, "exit_mult": 0.60,
@@ -399,11 +399,21 @@ def compute_daily_schedule(
         std_freq = default_frequency(hour, weekday)
 
         # Reuse options logic — treat standard freq as current
+        # Collect event types active this hour for profile lookup
+        hour_event_types = []
+        for ev in events:
+            ev_start = ev.get("start_hour", 0)
+            ev_end   = ev.get("end_hour", 0)
+            if (hour == ev_start - 1) or (ev_start <= hour < ev_end) or (hour == ev_end):
+                hour_event_types.append(ev.get("event_type", "default"))
+        _ev_type = hour_event_types[0] if hour_event_types else "default"
+
         inputs_hour = {
             "datetime":                  f"{date_str}T{hour:02d}:00",
             "weather":                   hour_weather,
             "events":                    [{"name": ", ".join(hour_event_names),
-                                           "passengers_per_hr": hour_event_pax}] if hour_event_pax else [],
+                                           "passengers_per_hr": hour_event_pax,
+                                           "event_type": _ev_type}] if hour_event_pax else [],
             "emergency":                 None,
             "line":                      line,
             "current_frequency_per_hr":  std_freq,
@@ -486,7 +496,7 @@ def compute_daily_schedule(
             "standard_load_factor_pct": std_load_factor,
             "load_factor_pct":          load_pct,
             "passengers_served_per_hr": passengers_served,
-            "has_event":                bool(hour_event_pax),
+            "has_event":                bool(hour_event_pax) or bool(hour_event_names),
             "is_event_tail":            is_tail,
             "event_names":              hour_event_names,
             "em_status":                em_status,

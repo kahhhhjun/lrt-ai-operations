@@ -121,7 +121,7 @@ for s in schedule:
     is_tail   = s.get("is_event_tail", False)
     em_status = s.get("em_status")
     freq_changed = mode == "updated" and s["recommended_frequency"] != s["standard_frequency"]
-    show_adj  = freq_changed or is_tail or bool(em_status)
+    show_adj  = freq_changed or is_tail or bool(em_status) or (mode == "updated" and s.get("has_event"))
     if show_adj:
         delta = s["extra_trains"]
         if delta > 0:   tc = f"{s['recommended_frequency']} (+{delta})"
@@ -172,9 +172,9 @@ def _style_rows(row):
         return ["background-color: #7b4a00; color: #ffffff; font-weight: bold"] * len(row)
     if em == "recovery2":
         return ["background-color: #4a4a00; color: #ffffff; font-weight: bold"] * len(row)
-    if mode == "updated" and s["recommended_frequency"] != s["standard_frequency"] and not s.get("em_status") and not s.get("is_event_tail"):
+    if mode == "updated" and s["recommended_frequency"] != s["standard_frequency"] and not s.get("em_status") and not s.get("is_event_tail") and not s.get("has_event"):
         return ["background-color: #1a3a5c; color: #ffffff; font-weight: bold"] * len(row)
-    if s.get("is_event_tail"):
+    if s.get("is_event_tail") or (mode == "updated" and s.get("has_event")):
         return ["background-color: #2a4a3c; color: #ffffff; font-weight: bold"] * len(row)
     return [""] * len(row)
 

@@ -32,7 +32,7 @@ Return ONLY a valid JSON object with exactly these fields:
 }
 
 Emergency type rules:
-- "track_incident": person on track, suicide attempt, body on track — SERVICE MUST BE HALTED
+- "track_incident": person on track, suicide, suicide attempt, someone died, death, body on track, person jumped, fatality, killed on track — ALWAYS use this type for ANY situation involving a person on the tracks or death on the tracks. SERVICE MUST BE HALTED IMMEDIATELY.
 - "breakdown": train malfunction, out of service, mechanical failure
 - "signal_failure": signal fault, signalling problem
 - "power_failure": power outage, electrical fault
@@ -73,7 +73,8 @@ def _placeholder_extract(text: str) -> dict:
         result["weather"] = "cloudy"
 
     _track_kw    = ["jump", "jumps", "jumped", "suicide", "person on track", "body on track",
-                    "track intrusion", "trespasser", "fell onto", "fallen onto"]
+                    "track intrusion", "trespasser", "fell onto", "fallen onto",
+                    "died", "death", "killed", "fatal", "fatality"]
     _breakdown_kw = ["breakdown", "malfunction", "out of service", "mechanical", "derail"]
     _signal_kw   = ["signal failure", "signal fault", "signalling", "signaling"]
     _power_kw    = ["power failure", "power outage", "blackout", "electrical fault"]
