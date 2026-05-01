@@ -327,7 +327,7 @@ def compute_options(inputs: dict) -> list[dict]:
         # When base hits the safety ceiling, shift the spread downward so all
         # three options are always meaningfully different for GLM to evaluate.
         base = std_freq + extra_needed
-        if base >= max_freq:
+        if base > max_freq:
             freq_map = {
                 "conservative": max(1, max_freq - 4),
                 "moderate":     max(1, max_freq - 2),

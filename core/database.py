@@ -37,11 +37,12 @@ def init_db() -> None:
                 PRIMARY KEY (date, line)
             )
         """)
-        # Migrate existing tables that lack the emergency_type column
-        try:
-            conn.execute("ALTER TABLE saved_schedules ADD COLUMN emergency_type TEXT")
-        except Exception:
-            pass  # column already exists
+        # Migrate existing tables that lack newer columns
+        for col, typedef in [("emergency_type", "TEXT"), ("tune_start", "INTEGER"), ("tune_end", "INTEGER")]:
+            try:
+                conn.execute(f"ALTER TABLE saved_schedules ADD COLUMN {col} {typedef}")
+            except Exception:
+                pass  # column already exists
 
 
 def save_schedule(
@@ -51,6 +52,8 @@ def save_schedule(
     weather: str = "clear",
     events: list[dict] | None = None,
     emergency_type: str | None = None,
+    tune_start: int = 6,
+    tune_end: int = 24,
     total_std_cost: float = 0,
     total_extra_cost: float = 0,
     total_cost: float = 0,
@@ -61,14 +64,17 @@ def save_schedule(
         conn.execute("""
             INSERT OR REPLACE INTO saved_schedules
             (date, line, schedule_json, weather, events_json, emergency_type,
+             tune_start, tune_end,
              total_std_cost, total_extra_cost, total_cost, saved_at, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             date, line,
             json.dumps(schedule),
             weather,
             json.dumps(events or []),
             emergency_type,
+            tune_start,
+            tune_end,
             total_std_cost,
             total_extra_cost,
             total_cost,
@@ -92,6 +98,9 @@ def load_schedule(date: str, line: str) -> dict | None:
         "schedule":         json.loads(row["schedule_json"]),
         "weather":          row["weather"],
         "events":           json.loads(row["events_json"]),
+        "emergency_type":   row["emergency_type"],
+        "tune_start":       row["tune_start"] or 6,
+        "tune_end":         row["tune_end"] or 24,
         "total_std_cost":   row["total_std_cost"],
         "total_extra_cost": row["total_extra_cost"],
         "total_cost":       row["total_cost"],

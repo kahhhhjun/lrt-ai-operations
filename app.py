@@ -46,8 +46,8 @@ def _apply_option_to_window(schedule, chosen, tune_s, tune_e, cost_per_hr, weath
     if delta == 0:
         return schedule
     for s in schedule:
-        in_window    = tune_s <= s["hour"] < tune_e
-        event_affected = s.get("has_event") or s.get("is_event_tail")
+        in_window      = tune_s <= s["hour"] < tune_e
+        event_affected = in_window and (s.get("has_event") or s.get("is_event_tail"))
         if not (in_window or event_affected):
             continue
         new_freq = max(1, min(s["recommended_frequency"] + delta, max_freq))
@@ -81,7 +81,7 @@ with _col_history:
     if _saved_list:
         _lines = []
         for r in _saved_list:
-            _d = date_type.fromisoformat(r["date"]).strftime("%d %b").lstrip("0")
+            _d = date_type.fromisoformat(r["date"]).strftime("%d %b %Y").lstrip("0")
             _parts = [r["weather"]]
             _events = json.loads(r.get("events_json") or "[]")
             if _events:
@@ -116,12 +116,14 @@ if st.session_state.get("_sch_key") != _key:
             "_sch_key": _key, "_sch_default": _def,
             "_sch_result": _saved_result, "_sch_mode": "updated",
             "_sch_events": _saved["events"],
-            "_tune_start": 6, "_tune_end": 24,
+            "_tune_start": _saved.get("tune_start", 6),
+            "_tune_end":   _saved.get("tune_end", 24),
             "_upd_weather": _saved["weather"],
+            "_a_em_type": _saved.get("emergency_type"),
             "_analysis": None, "_chosen_option": "moderate",
             "_db_saved_at": _saved["saved_at"],
-            "_briefing_text": "",   # loaded from DB — skip briefing on reload
-            "_from_db": True,       # hide situation banner on reload
+            "_briefing_text": "",  # loaded from DB — skip briefing on reload
+            "_from_db": True,
         })
     else:
         st.session_state.update({
@@ -152,11 +154,16 @@ if mode == "updated" and ev_active:
     title += f"  *(with {ev_active[0]['name']})*"
 st.markdown(title)
 
-if mode == "updated" and not st.session_state.get("_from_db"):
+if mode == "updated":
+    _banner_parts = [f"weather: {st.session_state.get('_upd_weather', '—')}"]
+    _saved_em = st.session_state.get("_a_em_type")
+    if _saved_em:
+        _banner_parts.append(f"emergency: {_saved_em.replace('_', ' ')}")
+    if ev_active:
+        _banner_parts.append(f"event: {ev_active[0]['name']}")
     st.success(
         f"Situation period **{tune_s:02d}:00–{tune_e:02d}:00** | "
-        f"weather: {st.session_state.get('_upd_weather', '—')}"
-        + (f" | event: {ev_active[0]['name']}" if ev_active else "")
+        + " | ".join(_banner_parts)
         + ".  Press **Reset to standard** below to revert."
     )
     st.caption("🟡 Highlighted rows = adjusted time window")
@@ -256,6 +263,8 @@ if mode == "updated":
                 weather=st.session_state.get("_upd_weather", "clear"),
                 events=ev_active,
                 emergency_type=st.session_state.get("_a_em_type"),
+                tune_start=st.session_state.get("_tune_start", 6),
+                tune_end=st.session_state.get("_tune_end", 24),
                 total_std_cost=result["daily_standard_cost_rm"],
                 total_extra_cost=result["daily_extra_cost_rm"],
                 total_cost=result["daily_total_cost_rm"],
@@ -353,6 +362,13 @@ st.caption(
     f"Weather / emergency / event occurs between **{tune_start:02d}:00 – {tune_end:02d}:00**. "
     "The rest of the day stays on the standard timetable."
 )
+
+# If sliders changed since last Analyse, invalidate the analysis so Apply can't use stale window
+if st.session_state.get("_analysis") and (
+    tune_start != st.session_state.get("_a_tune_s") or
+    tune_end   != st.session_state.get("_a_tune_e")
+):
+    st.session_state["_analysis"] = None
 
 # Step 2 — situation input
 st.markdown("**Step 2 — Describe the situation**")
