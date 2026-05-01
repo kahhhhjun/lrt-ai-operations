@@ -6,7 +6,6 @@ Public functions:
 - extract_inputs_from_text(text) → dict of extracted operational factors
 """
 
-import base64
 import json
 import os
 
@@ -15,10 +14,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# TODO: confirm exact endpoint + model name from Z.AI docs once you have the key.
-GLM_ENDPOINT = os.getenv("GLM_ENDPOINT", "https://api.z.ai/api/paas/v4/chat/completions")
-GLM_MODEL = os.getenv("GLM_MODEL", "glm-4")
-GLM_API_KEY = os.getenv("GLM_API_KEY")
+GLM_ENDPOINT    = os.getenv("GLM_ENDPOINT", "https://api.z.ai/api/anthropic/v1/messages")
+GLM_MODEL       = os.getenv("GLM_MODEL", "glm-5.1")        # main model: reasoning & briefing
+GLM_MODEL_FAST  = os.getenv("GLM_MODEL_FAST", "glm-5-turbo")  # fast model: text extraction
+GLM_API_KEY     = os.getenv("GLM_API_KEY")
 
 _EXTRACT_SYSTEM = """You are a data extraction assistant for a Malaysian LRT operations system.
 Read the situation description and extract operational factors.
@@ -142,7 +141,7 @@ def _placeholder_extract(text: str) -> dict:
     return result
 
 
-def call_glm(prompt: str, system: str | None = None, temperature: float = 0.3) -> str:
+def call_glm(prompt: str, system: str | None = None, temperature: float = 0.3, model: str | None = None) -> str:
     if not GLM_API_KEY:
         return (
             "[PLACEHOLDER — set GLM_API_KEY in .env for real GLM responses]\n\n"
@@ -152,23 +151,28 @@ def call_glm(prompt: str, system: str | None = None, temperature: float = 0.3) -
             "Confidence: medium."
         )
 
-    messages = []
+    body = {
+        "model":       model or GLM_MODEL,
+        "max_tokens":  4096,
+        "messages":    [{"role": "user", "content": prompt}],
+        "temperature": temperature,
+    }
     if system:
-        messages.append({"role": "system", "content": system})
-    messages.append({"role": "user", "content": prompt})
+        body["system"] = system
 
     try:
         resp = requests.post(
             GLM_ENDPOINT,
             headers={
-                "Authorization": f"Bearer {GLM_API_KEY}",
-                "Content-Type": "application/json",
+                "x-api-key":         GLM_API_KEY,
+                "anthropic-version": "2023-06-01",
+                "Content-Type":      "application/json",
             },
-            json={"model": GLM_MODEL, "messages": messages, "temperature": temperature},
+            json=body,
             timeout=60,
         )
         resp.raise_for_status()
-        return resp.json()["choices"][0]["message"]["content"]
+        return resp.json()["content"][0]["text"]
     except requests.exceptions.Timeout:
         raise TimeoutError("GLM API timed out. The server took too long to respond.")
     except requests.exceptions.ConnectionError:
@@ -190,19 +194,25 @@ def call_glm_stream(prompt: str, system: str | None = None, temperature: float =
             yield char
         return
 
-    messages = []
+    body = {
+        "model":      GLM_MODEL,
+        "max_tokens": 4096,
+        "messages":   [{"role": "user", "content": prompt}],
+        "temperature": temperature,
+        "stream":     True,
+    }
     if system:
-        messages.append({"role": "system", "content": system})
-    messages.append({"role": "user", "content": prompt})
+        body["system"] = system
 
     try:
         resp = requests.post(
             GLM_ENDPOINT,
             headers={
-                "Authorization": f"Bearer {GLM_API_KEY}",
-                "Content-Type": "application/json",
+                "x-api-key":         GLM_API_KEY,
+                "anthropic-version": "2023-06-01",
+                "Content-Type":      "application/json",
             },
-            json={"model": GLM_MODEL, "messages": messages, "temperature": temperature, "stream": True},
+            json=body,
             timeout=60,
             stream=True,
         )
@@ -215,98 +225,34 @@ def call_glm_stream(prompt: str, system: str | None = None, temperature: float =
                 if not decoded.startswith("data: "):
                     continue
                 data = decoded[6:]
-                if data.strip() == "[DONE]":
-                    break
+                if data.strip() in ("[DONE]", ""):
+                    continue
                 try:
                     chunk = json.loads(data)
-                    delta = chunk["choices"][0]["delta"].get("content", "")
-                    if delta:
-                        yield delta
+                    # Anthropic SSE: event type is content_block_delta
+                    if chunk.get("type") == "content_block_delta":
+                        delta = chunk.get("delta", {}).get("text", "")
+                        if delta:
+                            yield delta
                 except Exception:
                     pass
         except requests.exceptions.ChunkedEncodingError:
-            return  # stream ended prematurely — yield what we have and stop cleanly
+            return
     except requests.exceptions.Timeout:
         raise TimeoutError("GLM API timed out. The server took too long to respond.")
     except requests.exceptions.ConnectionError:
         raise ConnectionError("Cannot reach GLM API. Check your internet connection and endpoint URL.")
 
 
-OCR_API_KEY = os.getenv("OCR_API_KEY")
-
-
-def _compress_image(image_bytes: bytes, max_px: int = 1200, quality: int = 82) -> tuple[bytes, str]:
-    """Resize + JPEG-compress to keep payload under OCR.space's 1 MB free-tier limit."""
-    from PIL import Image
-    import io
-    img = Image.open(io.BytesIO(image_bytes))
-    if img.mode in ("RGBA", "P", "LA"):
-        img = img.convert("RGB")
-    if max(img.size) > max_px:
-        img.thumbnail((max_px, max_px), Image.LANCZOS)
-    buf = io.BytesIO()
-    img.save(buf, format="JPEG", quality=quality)
-    return buf.getvalue(), "image/jpeg"
-
-
-def extract_inputs_from_image(image_bytes: bytes, mime_type: str = "image/jpeg") -> dict:
-    """OCR the image via OCR.space, then extract operational factors with GLM text extraction."""
-    if not OCR_API_KEY:
-        raise RuntimeError("OCR_API_KEY not set in .env — cannot read image.")
-
-    # Step 1: compress before upload so we stay under OCR.space's 1 MB free-tier limit
-    image_bytes, mime_type = _compress_image(image_bytes)
-
-    b64      = base64.b64encode(image_bytes).decode("utf-8")
-    data_url = f"data:{mime_type};base64,{b64}"
-
-    try:
-        ocr_resp = requests.post(
-            "https://api.ocr.space/parse/image",
-            data={
-                "apikey":            OCR_API_KEY,
-                "base64Image":       data_url,
-                "language":          "eng",
-                "isOverlayRequired": False,
-                "detectOrientation": True,
-                "scale":             True,
-            },
-            timeout=30,
-        )
-        ocr_resp.raise_for_status()
-        ocr_result = ocr_resp.json()
-    except requests.exceptions.Timeout:
-        raise TimeoutError("OCR.space timed out reading the image.")
-    except requests.exceptions.ConnectionError:
-        raise ConnectionError("Cannot reach OCR.space API.")
-
-    if ocr_result.get("IsErroredOnProcessing"):
-        msgs = ocr_result.get("ErrorMessage") or ["OCR failed"]
-        raise RuntimeError(f"OCR.space error: {msgs[0]}")
-
-    parsed_text = " ".join(
-        page.get("ParsedText", "")
-        for page in ocr_result.get("ParsedResults", [])
-    ).strip()
-
-    if not parsed_text:
-        raise RuntimeError("OCR found no readable text in the image.")
-
-    # Step 2: feed the extracted text into GLM for structured extraction
-    # Fall back to keyword extraction on the OCR text if GLM times out
-    try:
-        return extract_inputs_from_text(parsed_text)
-    except (TimeoutError, ConnectionError):
-        return _placeholder_extract(parsed_text)
 
 
 def extract_inputs_from_text(text: str) -> dict:
-    """Uses GLM to parse a free-text situation description into structured inputs."""
+    """Uses GLM (fast model) to parse a free-text situation description into structured inputs."""
     if not GLM_API_KEY:
         return _placeholder_extract(text)
 
     try:
-        response = call_glm(text, system=_EXTRACT_SYSTEM, temperature=0.1)
+        response = call_glm(text, system=_EXTRACT_SYSTEM, temperature=0.1, model=GLM_MODEL_FAST)
         start = response.find("{")
         end   = response.rfind("}") + 1
         return json.loads(response[start:end])
