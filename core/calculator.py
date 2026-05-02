@@ -12,6 +12,7 @@ from datetime import datetime
 TRAIN_CAPACITY = 800          # normal comfort capacity per train
 TRAIN_CAPACITY_MAX = 900      # absolute max (crush load)
 TARGET_LOAD_FACTOR = 0.75     # aim for 75% full — leave headroom for comfort
+CARBON_TAX_PER_TRAIN_PER_HOUR = 4.50  # carbon tax per train per hour
 
 
 
@@ -208,6 +209,7 @@ def _option_metrics(inputs: dict, freq: int, expected: int, max_freq: int) -> di
     new_served  = min(expected, new_capacity)  # 0 if suspended
 
     cost_delta = (freq - curr_freq) * cost_per_hr
+    carbon_tax_delta = (freq - curr_freq) * CARBON_TAX_PER_TRAIN_PER_HOUR
 
     passengers_served        = new_served
     passengers_served_delta  = new_served - curr_served
@@ -230,6 +232,7 @@ def _option_metrics(inputs: dict, freq: int, expected: int, max_freq: int) -> di
         "load_factor_pct":               load_after,
         "congestion_change_pct":         congestion_change,
         "cost_delta_rm":                 round(cost_delta, 2),
+        "carbon_tax_delta_rm":           round(carbon_tax_delta, 2),
         "time_saved_min_per_passenger":  time_saved,
     }
 
@@ -492,6 +495,12 @@ def compute_daily_schedule(
         std_cost       = std_freq * cost_per_train_hr
         extra_cost     = extra_trains * cost_per_train_hr
         total_cost     = std_cost + extra_cost
+
+        # Carbon tax calculations
+        std_carbon_tax       = std_freq * CARBON_TAX_PER_TRAIN_PER_HOUR
+        extra_carbon_tax     = extra_trains * CARBON_TAX_PER_TRAIN_PER_HOUR
+        total_carbon_tax     = std_carbon_tax + extra_carbon_tax
+
         end_hour  = hour + 1
         time_slot = f"{hour:02d}:00–{end_hour:02d}:00"
         headway_std    = get_standard_headway(hour, weekday)
@@ -512,6 +521,9 @@ def compute_daily_schedule(
             "standard_cost_rm":         std_cost,
             "extra_cost_rm":            extra_cost,
             "total_cost_rm":            total_cost,
+            "standard_carbon_tax_rm":   std_carbon_tax,
+            "extra_carbon_tax_rm":      extra_carbon_tax,
+            "total_carbon_tax_rm":      total_carbon_tax,
             "standard_load_factor_pct": std_load_factor,
             "load_factor_pct":          load_pct,
             "passengers_served_per_hr": passengers_served,

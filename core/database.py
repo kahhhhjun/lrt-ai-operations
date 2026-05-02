@@ -33,13 +33,17 @@ def init_db() -> None:
                 total_std_cost    REAL,
                 total_extra_cost  REAL,
                 total_cost        REAL,
+                total_std_carbon_tax    REAL,
+                total_extra_carbon_tax  REAL,
+                total_carbon_tax        REAL,
                 saved_at          TEXT,
                 notes             TEXT,
                 PRIMARY KEY (date, line)
             )
         """)
         # Migrate existing tables that lack newer columns
-        for col, typedef in [("emergency_type", "TEXT"), ("tune_start", "INTEGER"), ("tune_end", "INTEGER")]:
+        for col, typedef in [("emergency_type", "TEXT"), ("tune_start", "INTEGER"), ("tune_end", "INTEGER"),
+                            ("total_std_carbon_tax", "REAL"), ("total_extra_carbon_tax", "REAL"), ("total_carbon_tax", "REAL")]:
             try:
                 conn.execute(f"ALTER TABLE saved_schedules ADD COLUMN {col} {typedef}")
             except Exception:
@@ -58,6 +62,9 @@ def save_schedule(
     total_std_cost: float = 0,
     total_extra_cost: float = 0,
     total_cost: float = 0,
+    total_std_carbon_tax: float = 0,
+    total_extra_carbon_tax: float = 0,
+    total_carbon_tax: float = 0,
     notes: str = "",
 ) -> None:
     """Insert or replace a saved schedule for (date, line)."""
@@ -66,8 +73,10 @@ def save_schedule(
             INSERT OR REPLACE INTO saved_schedules
             (date, line, schedule_json, weather, events_json, emergency_type,
              tune_start, tune_end,
-             total_std_cost, total_extra_cost, total_cost, saved_at, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             total_std_cost, total_extra_cost, total_cost,
+             total_std_carbon_tax, total_extra_carbon_tax, total_carbon_tax,
+             saved_at, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             date, line,
             json.dumps(schedule),
@@ -79,6 +88,9 @@ def save_schedule(
             total_std_cost,
             total_extra_cost,
             total_cost,
+            total_std_carbon_tax,
+            total_extra_carbon_tax,
+            total_carbon_tax,
             datetime.now().strftime("%Y-%m-%d %H:%M"),
             notes,
         ))
@@ -105,6 +117,9 @@ def load_schedule(date: str, line: str) -> dict | None:
         "total_std_cost":   row["total_std_cost"],
         "total_extra_cost": row["total_extra_cost"],
         "total_cost":       row["total_cost"],
+        "total_std_carbon_tax":   row.get("total_std_carbon_tax", 0),
+        "total_extra_carbon_tax": row.get("total_extra_carbon_tax", 0),
+        "total_carbon_tax":       row.get("total_carbon_tax", 0),
         "saved_at":         row["saved_at"],
         "notes":            row["notes"],
     }

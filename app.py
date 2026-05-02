@@ -117,6 +117,9 @@ if st.session_state.get("_sch_key") != _key:
             "daily_standard_cost_rm": _saved["total_std_cost"],
             "daily_extra_cost_rm":    _saved["total_extra_cost"],
             "daily_total_cost_rm":    _saved["total_cost"],
+            "daily_standard_carbon_tax_rm": _saved.get("total_std_carbon_tax", 0),
+            "daily_extra_carbon_tax_rm":    _saved.get("total_extra_carbon_tax", 0),
+            "daily_total_carbon_tax_rm":    _saved.get("total_carbon_tax", 0),
         }
         st.session_state.update({
             "_sch_key": _key, "_sch_default": _def,
@@ -210,7 +213,9 @@ for s in schedule:
             "Expected Pax/hr":  f"{s['expected_passengers_per_hr']:,}",
             "Frequency":        f"every {s['headway_rec_min']} min",
             "Trains/hr":        tc,
-            "Cost (RM/hr)":     f"RM {s['total_cost_rm']:,.0f}",
+            "Operational Cost (RM/hr)":     f"RM {s['total_cost_rm']:,.0f}",
+            "Carbon Tax (RM/hr)":          f"RM {s['total_carbon_tax_rm']:,.2f}",
+            "Total Cost (RM/hr)":           f"RM {s['total_cost_rm'] + s['total_carbon_tax_rm']:,.2f}",
             "Load factor":      f"{s['load_factor_pct']}%",
             "Status":           status,
         })
@@ -220,7 +225,9 @@ for s in schedule:
             "Expected Pax/hr":  f"{s['expected_passengers_per_hr']:,}",
             "Frequency":        f"every {s['headway_std_min']} min",
             "Trains/hr":        str(s["standard_frequency"]),
-            "Cost (RM/hr)":     f"RM {s['standard_cost_rm']:,.0f}",
+            "Operational Cost (RM/hr)":     f"RM {s['standard_cost_rm']:,.0f}",
+            "Carbon Tax (RM/hr)":          f"RM {s['standard_carbon_tax_rm']:,.2f}",
+            "Total Cost (RM/hr)":           f"RM {s['standard_cost_rm'] + s['standard_carbon_tax_rm']:,.2f}",
             "Load factor":      f"{s['standard_load_factor_pct']}%",
             "Status":           "Standard",
         })
@@ -253,7 +260,9 @@ st.dataframe(
         "Expected Pax/hr":  st.column_config.TextColumn("Expected Pax/hr",  help="Estimated total passengers arriving at the station per hour, including event surge and weather effects."),
         "Frequency":        st.column_config.TextColumn("Frequency",        help="How often a train arrives — shorter interval means more trains."),
         "Trains/hr":        st.column_config.TextColumn("Trains/hr",        help="Number of trains per hour. Bracket shows change vs standard schedule: (+2) = 2 extra trains, (−1) = 1 fewer train."),
-        "Cost (RM/hr)":     st.column_config.TextColumn("Cost (RM/hr)",     help="Total operating cost for this hour based on trains deployed × RM 350 per train-hour."),
+        "Operational Cost (RM/hr)":     st.column_config.TextColumn("Operational Cost (RM/hr)",     help="Total operating cost for this hour based on trains deployed × RM 350 per train-hour."),
+        "Carbon Tax (RM/hr)":          st.column_config.TextColumn("Carbon Tax (RM/hr)",          help="Carbon tax for this hour based on trains deployed × RM 4.50 per train-hour."),
+        "Total Cost (RM/hr)":           st.column_config.TextColumn("Total Cost (RM/hr)",           help="Total cost including operational cost and carbon tax."),
         "Load factor":      st.column_config.TextColumn("Load factor",      help="How full the trains are. 75% = comfortable target. 100% = completely full. Above 100% = passengers left behind on platform."),
         "Status":           st.column_config.TextColumn("Status",           help="Standard = no change. Increased/Reduced = frequency adjusted. Event rows show the event name. Emergency rows show the incident type."),
     }
@@ -280,6 +289,9 @@ if mode == "updated":
                 total_std_cost=result["daily_standard_cost_rm"],
                 total_extra_cost=result["daily_extra_cost_rm"],
                 total_cost=result["daily_total_cost_rm"],
+                total_std_carbon_tax=result["daily_standard_carbon_tax_rm"],
+                total_extra_carbon_tax=result["daily_extra_carbon_tax_rm"],
+                total_carbon_tax=result["daily_total_carbon_tax_rm"],
             )
             st.session_state["_db_saved_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
             st.success("Schedule saved!")
@@ -305,12 +317,26 @@ std_total = result["daily_standard_cost_rm"]
 extra_win = sum(s["extra_cost_rm"] for s in schedule) if mode == "updated" else 0
 total_day = std_total + extra_win
 
-st.markdown("### Daily cost")
-m1, m2, m3 = st.columns(3)
-m1.metric(f"Standard {sch_day_name} cost", f"RM {std_total:,.0f}")
-m2.metric("Extra cost (adjusted hours)", f"RM {extra_win:,.0f}",
+std_carbon = result["daily_standard_carbon_tax_rm"]
+extra_carbon = sum(s["extra_carbon_tax_rm"] for s in schedule) if mode == "updated" else 0
+total_carbon = std_carbon + extra_carbon
+
+st.markdown("### Daily cost breakdown")
+c1, c2, c3 = st.columns(3)
+c1.metric(f"Standard operational cost", f"RM {std_total:,.0f}")
+c2.metric(f"Extra operational cost", f"RM {extra_win:,.0f}",
           delta=extra_win if mode == "updated" else None, delta_color="inverse")
-m3.metric("Total cost this day", f"RM {total_day:,.0f}")
+c3.metric(f"Total operational cost", f"RM {total_day:,.0f}")
+
+ct1, ct2, ct3 = st.columns(3)
+ct1.metric(f"Standard carbon tax", f"RM {std_carbon:,.2f}")
+ct2.metric(f"Extra carbon tax", f"RM {extra_carbon:,.2f}",
+          delta=extra_carbon if mode == "updated" else None, delta_color="inverse")
+ct3.metric(f"Total carbon tax", f"RM {total_carbon:,.2f}")
+
+st.markdown("### Daily total cost")
+grand_total = total_day + total_carbon
+st.metric(f"Total cost (operational + carbon tax)", f"RM {grand_total:,.2f}")
 
 # ── GLM cost justification (Option 1) ────────────────────────────────────────
 if mode == "updated" and extra_win != 0:
@@ -340,7 +366,7 @@ if mode == "updated" and extra_win != 0:
 with st.expander("📊 Weekly cost overview"):
     from datetime import timedelta
     _week_monday = sch_date - timedelta(days=sch_date.weekday())
-    weekly_rows, weekly_net_total = [], 0
+    weekly_rows, weekly_net_total, weekly_carbon_total, weekly_std_total, weekly_extra_total, weekly_std_carbon_total, weekly_extra_carbon_total, weekly_grand_total = [], 0, 0, 0, 0, 0, 0, 0
     for i, day_name in enumerate(DAYS):
         _day_date = _week_monday + timedelta(days=i)
         _day_type = "Weekend" if i >= 5 else "Weekday"
@@ -348,6 +374,9 @@ with st.expander("📊 Weekly cost overview"):
             _std  = std_total
             _extra = extra_win
             _net  = total_day
+            _std_carbon  = std_carbon
+            _extra_carbon = extra_carbon
+            _net_carbon  = total_carbon
             tag   = f"{_day_type} (Adjusted)" if mode == "updated" else _day_type
         else:
             _saved_rec = load_schedule(_day_date.isoformat(), sch_line)
@@ -355,6 +384,9 @@ with st.expander("📊 Weekly cost overview"):
                 _std   = _saved_rec["total_std_cost"]
                 _extra = _saved_rec["total_extra_cost"]
                 _net   = _saved_rec["total_cost"]
+                _std_carbon   = _saved_rec.get("total_std_carbon_tax", 0)
+                _extra_carbon = _saved_rec.get("total_extra_carbon_tax", 0)
+                _net_carbon   = _saved_rec.get("total_carbon_tax", 0)
                 tag    = f"{_day_type} (Adjusted)"
             else:
                 dr    = recommend_daily(date_str=_REF_DATES[day_name], line=sch_line,
@@ -362,20 +394,40 @@ with st.expander("📊 Weekly cost overview"):
                 _std  = dr["daily_standard_cost_rm"]
                 _extra = 0
                 _net  = _std
+                _std_carbon  = dr["daily_standard_carbon_tax_rm"]
+                _extra_carbon = 0
+                _net_carbon  = _std_carbon
                 tag   = _day_type
         weekly_net_total += _net
+        weekly_carbon_total += _net_carbon
+        weekly_std_total += _std
+        weekly_extra_total += _extra
+        weekly_std_carbon_total += _std_carbon
+        weekly_extra_carbon_total += _extra_carbon
+        _grand_total = _net + _net_carbon
+        weekly_grand_total += _grand_total
         _extra_str = f"+RM {_extra:,.0f}" if _extra > 0 else (f"−RM {abs(_extra):,.0f}" if _extra < 0 else "–")
+        _extra_carbon_str = f"+RM {_extra_carbon:,.2f}" if _extra_carbon > 0 else (f"−RM {abs(_extra_carbon):,.2f}" if _extra_carbon < 0 else "–")
         weekly_rows.append({
-            "Day":           f"{day_name} ({_day_date.strftime('%d %b')})",
-            "Type":          tag,
-            "Standard Cost": f"RM {_std:,.0f}",
-            "Extra Cost":    _extra_str,
-            "Net Cost":      f"RM {_net:,.0f}",
+            "Day":                    f"{day_name} ({_day_date.strftime('%d %b')})",
+            "Type":                   tag,
+            "Standard Operational Cost": f"RM {_std:,.0f}",
+            "Extra Operational Cost":    _extra_str,
+            "Net Operational Cost":      f"RM {_net:,.0f}",
+            "Standard Carbon Tax":      f"RM {_std_carbon:,.2f}",
+            "Extra Carbon Tax":         _extra_carbon_str,
+            "Net Carbon Tax":           f"RM {_net_carbon:,.2f}",
+            "Total Cost":               f"RM {_grand_total:,.2f}",
         })
     weekly_rows.append({
         "Day": "WEEKLY TOTAL", "Type": "",
-        "Standard Cost": "", "Extra Cost": "",
-        "Net Cost": f"RM {weekly_net_total:,.0f}",
+        "Standard Operational Cost": f"RM {weekly_std_total:,.0f}",
+        "Extra Operational Cost":    f"RM {weekly_extra_total:,.0f}",
+        "Net Operational Cost":      f"RM {weekly_net_total:,.0f}",
+        "Standard Carbon Tax":      f"RM {weekly_std_carbon_total:,.2f}",
+        "Extra Carbon Tax":         f"RM {weekly_extra_carbon_total:,.2f}",
+        "Net Carbon Tax":           f"RM {weekly_carbon_total:,.2f}",
+        "Total Cost":               f"RM {weekly_grand_total:,.2f}",
     })
     st.dataframe(pd.DataFrame(weekly_rows), use_container_width=True, hide_index=True)
 

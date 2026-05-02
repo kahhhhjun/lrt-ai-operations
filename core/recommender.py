@@ -465,6 +465,10 @@ def recommend_daily(
     daily_extra_cost = sum(s["extra_cost_rm"]    for s in schedule)
     daily_total_cost = sum(s["total_cost_rm"]    for s in schedule)
 
+    daily_std_carbon_tax   = sum(s["standard_carbon_tax_rm"] for s in schedule)
+    daily_extra_carbon_tax = sum(s["extra_carbon_tax_rm"]    for s in schedule)
+    daily_total_carbon_tax = sum(s["total_carbon_tax_rm"]    for s in schedule)
+
     has_adjustments = bool(events or weather != "clear" or emergency_type)
 
     return {
@@ -482,4 +486,7 @@ def recommend_daily(
         "daily_standard_cost_rm": daily_std_cost,
         "daily_extra_cost_rm":    daily_extra_cost,
         "daily_total_cost_rm":    daily_total_cost,
+        "daily_standard_carbon_tax_rm": daily_std_carbon_tax,
+        "daily_extra_carbon_tax_rm": daily_extra_carbon_tax,
+        "daily_total_carbon_tax_rm": daily_total_carbon_tax,
     }
