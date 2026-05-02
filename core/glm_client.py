@@ -18,6 +18,37 @@ GLM_ENDPOINT      = os.getenv("GLM_ENDPOINT", "https://api.z.ai/api/anthropic/v1
 GLM_MODEL         = os.getenv("GLM_MODEL", "glm-5.1")         # main model: reasoning & briefing
 GLM_MODEL_FAST    = os.getenv("GLM_MODEL_FAST", "glm-5-turbo") # fast model: text extraction
 GLM_API_KEY       = os.getenv("GLM_API_KEY")
+HF_API_KEY        = os.getenv("HF_API_KEY")
+_HF_DETR_URL      = "https://router.huggingface.co/hf-inference/models/facebook/detr-resnet-50"
+
+
+def count_people_in_image(image_bytes: bytes) -> int:
+    """Send CCTV image to HF DETR model and count detected people. Returns head count."""
+    if not HF_API_KEY:
+        raise RuntimeError("HF_API_KEY not set in .env — cannot run crowd detection.")
+    try:
+        resp = requests.post(
+            _HF_DETR_URL,
+            headers={
+                "Authorization": f"Bearer {HF_API_KEY.strip()}",
+                "Content-Type": "image/jpeg",
+            },
+            data=image_bytes,
+            timeout=30,
+        )
+        resp.raise_for_status()
+        detections = resp.json()
+        if isinstance(detections, dict) and "error" in detections:
+            raise RuntimeError(f"HF model error: {detections['error']}")
+        count = sum(
+            1 for d in detections
+            if d.get("label", "").lower() == "person" and d.get("score", 0) >= 0.5
+        )
+        return count
+    except requests.exceptions.Timeout:
+        raise TimeoutError("HF API timed out. The model may still be loading — try again in 20 seconds.")
+    except requests.exceptions.ConnectionError:
+        raise ConnectionError("Cannot reach Hugging Face API.")
 
 _EXTRACT_SYSTEM = """You are a data extraction assistant for a Malaysian LRT operations system.
 Read the situation description and extract operational factors.

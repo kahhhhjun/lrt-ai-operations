@@ -159,16 +159,50 @@ def _build_options_prompt(inputs: dict, options: list[dict]) -> str:
     if not history_text:
         history_text = "\n  No historical data available."
 
+    # Build CCTV live reading block if this analysis came from a CCTV image
+    cctv_crowd = inputs.get("cctv_crowd_count")
+    cctv_std   = inputs.get("cctv_std_baseline")
+    if cctv_crowd is not None:
+        cctv_pax = inputs.get("cctv_pax_override", expected)
+        if cctv_std and cctv_std > 0:
+            pct_of_std = round(cctv_pax / cctv_std * 100)
+            comparison = (
+                "far below normal — platform is much quieter than the standard schedule expects" if pct_of_std < 40 else
+                "below normal — platform is quieter than expected" if pct_of_std < 75 else
+                "close to normal" if pct_of_std < 125 else
+                "above normal — platform is busier than the standard schedule expects"
+            )
+            cctv_block = (
+                f"\nCCTV LIVE PLATFORM READING:"
+                f"\n  People detected on platform : {cctv_crowd}"
+                f"\n  Estimated pax/hr (CCTV)     : {cctv_pax:,}/hr"
+                f"\n  Normal baseline for this hour: {cctv_std:,}/hr"
+                f"\n  CCTV vs baseline             : {pct_of_std}% of normal — {comparison}"
+                f"\n  → The expected passengers figure has been REPLACED with the CCTV reading."
+                f"\n    Base your frequency reasoning on the CCTV pax, not the standard baseline."
+                f"\n    If CCTV pax < baseline: fewer trains needed, reducing frequency saves cost."
+                f"\n    If CCTV pax > baseline: more trains needed, increase frequency to avoid crowding.\n"
+            )
+        else:
+            cctv_block = (
+                f"\nCCTV LIVE PLATFORM READING:"
+                f"\n  People detected on platform: {cctv_crowd}"
+                f"\n  Estimated pax/hr (CCTV)    : {cctv_pax:,}/hr"
+                f"\n  → Expected passengers replaced with CCTV reading. Reason from this figure.\n"
+            )
+    else:
+        cctv_block = ""
+
     return f"""SITUATION SUMMARY:
   Line    : {inputs.get('line', 'Unknown')}
   Time    : {dt.strftime('%A, %d %b %Y')} at {dt.strftime('%I:%M %p')} ({day_label})
   Weather : {weather}
   Events  :{events_text}
   Emergency:{emergency_text}
-
+{cctv_block}
 CURRENT STATE:
   Running frequency : {curr_freq} trains/hr (1 train every {round(60/max(curr_freq,1),1)} min)
-  Expected passengers: {expected:,}/hr
+  Expected passengers: {expected:,}/hr  ← {'CCTV live reading' if cctv_crowd is not None else 'standard estimate'}
   Current capacity   : {curr_cap:,} pax/hr ({curr_freq} trains × {capacity} seats)
   Current load factor: {curr_load}% — {load_status}
 
@@ -399,6 +433,8 @@ def get_glm_daily_reasoning_stream(
     emergency_type: str | None = None,
     emergency_hour: int | None = None,
     emergency_duration: int = 1,
+    cctv_crowd_count: int | None = None,
+    cctv_pax_override=None,
 ):
     """Generator: yields GLM shift briefing as text chunks for st.write_stream."""
     if not GLM_API_KEY:
@@ -429,6 +465,21 @@ def get_glm_daily_reasoning_stream(
         )
     else:
         emergency_text = "  None"
+
+    if cctv_crowd_count is not None:
+        _pax_vals = list(cctv_pax_override.values()) if isinstance(cctv_pax_override, dict) else []
+        _pax_summary = (
+            ", ".join(f"{p:,}" for p in _pax_vals) if _pax_vals else "see schedule"
+        )
+        cctv_text = (
+            f"  People detected on platform: {cctv_crowd_count}\n"
+            f"  Estimated pax/hr by hour   : {_pax_summary}\n"
+            f"  → Expected passengers in affected hours have been REPLACED with CCTV live readings.\n"
+            f"    Frequency adjustments below reflect this lower/higher actual demand."
+        )
+    else:
+        cctv_text = "  None"
+
     prompt = f"""DAILY SCHEDULE BRIEFING REQUEST:
 Date      : {dt.strftime('%A, %d %b %Y')} ({day_label})
 Line      : {line}
@@ -436,6 +487,8 @@ Weather   : {weather}
 EMERGENCY : {emergency_text}
 EVENTS    :
 {events_text}
+CCTV LIVE READING:
+{cctv_text}
 SCHEDULE ADJUSTMENTS:
 {affected_text}
 Write a shift briefing for the duty manager covering what to action, when, and why."""
@@ -453,31 +506,36 @@ def recommend_daily(
     emergency_hour: int | None = None,
     emergency_duration: int = 1,
     pax_factors: dict | None = None,
+    cctv_pax_override=None,
+    cctv_crowd_count: int | None = None,
 ) -> dict:
     schedule = compute_daily_schedule(date_str, line, weather, events, cost_per_train_hr,
                                       weather_window=weather_window,
                                       emergency_type=emergency_type,
                                       emergency_hour=emergency_hour,
                                       emergency_duration=emergency_duration,
-                                      pax_factors=pax_factors or {})
+                                      pax_factors=pax_factors or {},
+                                      cctv_pax_override=cctv_pax_override)
 
     daily_std_cost   = sum(s["standard_cost_rm"] for s in schedule)
     daily_extra_cost = sum(s["extra_cost_rm"]    for s in schedule)
     daily_total_cost = sum(s["total_cost_rm"]    for s in schedule)
 
-    has_adjustments = bool(events or weather != "clear" or emergency_type)
+    has_adjustments = bool(events or weather != "clear" or emergency_type or cctv_pax_override)
 
     return {
         "schedule":               schedule,
         "has_adjustments":        has_adjustments,
         "daily_briefing_params":  {         # app.py streams this on demand
-            "date_str":          date_str,
-            "line":              line,
-            "weather":           weather,
-            "events":            events,
-            "emergency_type":    emergency_type,
-            "emergency_hour":    emergency_hour,
+            "date_str":           date_str,
+            "line":               line,
+            "weather":            weather,
+            "events":             events,
+            "emergency_type":     emergency_type,
+            "emergency_hour":     emergency_hour,
             "emergency_duration": emergency_duration,
+            "cctv_crowd_count":   cctv_crowd_count,
+            "cctv_pax_override":  cctv_pax_override,
         },
         "daily_standard_cost_rm": daily_std_cost,
         "daily_extra_cost_rm":    daily_extra_cost,

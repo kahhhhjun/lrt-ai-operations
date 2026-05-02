@@ -8,8 +8,8 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
-from core.calculator import WEATHER_MAX_FREQ, TRAIN_CAPACITY, compute_options, default_frequency as _dfreq
-from core.glm_client import extract_inputs_from_text, extract_inputs_from_image, get_glm_pax_factors, get_glm_cost_justification_stream
+from core.calculator import WEATHER_MAX_FREQ, TRAIN_CAPACITY, compute_options, default_frequency as _dfreq, get_baseline_pax as _baseline_pax
+from core.glm_client import extract_inputs_from_text, extract_inputs_from_image, get_glm_pax_factors, get_glm_cost_justification_stream, count_people_in_image
 from core.recommender import (get_glm_recommendation, get_glm_recommendation_stream,
                               get_glm_daily_reasoning_stream, recommend_daily)
 from core.database import init_db, save_schedule, load_schedule, delete_schedule, list_saved
@@ -177,8 +177,13 @@ if mode == "updated":
         + ".  Press **Reset to standard** below to revert."
     )
     st.caption("🟡 Highlighted rows = adjusted time window")
+    _cached_cctv_msg = st.session_state.get("_cctv_detection_msg")
+    if _cached_cctv_msg:
+        st.success(_cached_cctv_msg)
 else:
     st.caption("Standard timetable. Use the panel below to adjust specific hours.")
+
+_cctv_hours = set((st.session_state.get("_a_cctv_pax_override") or {}).keys())
 
 rows = []
 for s in schedule:
@@ -205,9 +210,12 @@ for s in schedule:
             status = "Increased"
         else:
             status = "Adjusted"
+        _pax_label = f"{s['expected_passengers_per_hr']:,}"
+        if s["hour"] in _cctv_hours:
+            _pax_label += " (updated)"
         rows.append({
             "Time":             s["time_slot"],
-            "Expected Pax/hr":  f"{s['expected_passengers_per_hr']:,}",
+            "Expected Pax/hr":  _pax_label,
             "Frequency":        f"every {s['headway_rec_min']} min",
             "Trains/hr":        tc,
             "Cost (RM/hr)":     f"RM {s['total_cost_rm']:,.0f}",
@@ -215,9 +223,12 @@ for s in schedule:
             "Status":           status,
         })
     else:
+        _pax_label = f"{s['expected_passengers_per_hr']:,}"
+        if s["hour"] in _cctv_hours:
+            _pax_label += " (updated)"
         rows.append({
             "Time":             s["time_slot"],
-            "Expected Pax/hr":  f"{s['expected_passengers_per_hr']:,}",
+            "Expected Pax/hr":  _pax_label,
             "Frequency":        f"every {s['headway_std_min']} min",
             "Trains/hr":        str(s["standard_frequency"]),
             "Cost (RM/hr)":     f"RM {s['standard_cost_rm']:,.0f}",
@@ -293,10 +304,14 @@ if mode == "updated":
                 "_sch_events":   [],
                 "_tune_start":   6,
                 "_tune_end":     24,
-                "_analysis":          None,
-                "_db_saved_at":       None,
-                "_briefing_text":     None,
-                "_cost_justify_text": None,
+                "_analysis":            None,
+                "_db_saved_at":         None,
+                "_briefing_text":       None,
+                "_cost_justify_text":   None,
+                "_cctv_detection_msg":  None,
+                "_cctv_pax_override":   None,
+                "_cctv_crowd_count":    None,
+                "_a_cctv_pax_override": None,
             })
             st.rerun()
 
@@ -399,6 +414,8 @@ if mode == "updated" and result.get("has_adjustments"):
                     emergency_type=bp.get("emergency_type"),
                     emergency_hour=bp.get("emergency_hour"),
                     emergency_duration=bp.get("emergency_duration", 1),
+                    cctv_crowd_count=bp.get("cctv_crowd_count"),
+                    cctv_pax_override=bp.get("cctv_pax_override"),
                 ))
             briefing_status.update(label="Shift briefing ready", state="complete", expanded=True)
             st.session_state["_briefing_text"] = briefing_text
@@ -445,7 +462,7 @@ elif st.session_state.get("_analysis") and (
 # Step 2 — situation input
 st.markdown("**Step 2 — Describe the situation**")
 input_method = st.radio(
-    "", ["Manual inputs", "Describe in text (GLM extracts)", "Upload image (OCR reads)"],
+    "", ["Manual inputs", "Describe in text (GLM extracts)", "Upload image (OCR reads)", "CCTV crowd detection"],
     horizontal=True, key="input_method", label_visibility="collapsed",
 )
 
@@ -502,13 +519,22 @@ elif input_method == "Describe in text (GLM extracts)":
     )
     sch_cost = 350
 
-else:  # Upload image
+elif input_method == "Upload image (OCR reads)":
     uploaded_file = st.file_uploader(
         "Upload an image of the event (e.g. concert poster)",
         type=["jpg", "jpeg", "png", "webp"], key="uploaded_image",
     )
     if uploaded_file:
         st.image(uploaded_file, caption=uploaded_file.name, width=300)
+    sch_cost = 350
+
+else:  # CCTV crowd detection
+    st.caption("Upload a CCTV screenshot of the platform. The model will count the number of people and estimate crowd density.")
+    cctv_file = st.file_uploader(
+        "Upload CCTV image", type=["jpg", "jpeg", "png"], key="cctv_image",
+    )
+    if cctv_file:
+        st.image(cctv_file, caption="CCTV snapshot", width=400)
     sch_cost = 350
 
 # Step 3 — Analyse
@@ -589,6 +615,42 @@ if st.button("Analyse", type="primary", key="analyse_btn"):
         if a_ev_raw:
             st.caption("ℹ️ Crowd estimated at 5,000 pax/hr. Use text input if you need a specific number.")
 
+    elif input_method == "CCTV crowd detection":
+        cctv_file = st.session_state.get("cctv_image")
+        if not cctv_file:
+            st.warning("Please upload a CCTV image first.")
+            st.stop()
+        with st.spinner("Counting people on platform..."):
+            try:
+                _crowd_count = count_people_in_image(cctv_file.getvalue())
+            except TimeoutError as _ex:
+                st.warning(str(_ex))
+                st.stop()
+            except Exception as _ex:
+                st.error(f"Crowd detection failed: {_ex}")
+                st.stop()
+        # Build per-hour pax map for the selected window
+        def _cctv_mult_for(wd, h):
+            return 250 if (wd < 5 and ((7 <= h < 9) or (17 <= h < 19))) else 150
+        _cctv_weekday = sch_date.weekday()
+        _cctv_pax_by_hour = {
+            h: _crowd_count * _cctv_mult_for(_cctv_weekday, h)
+            for h in range(tune_start, tune_end)
+        }
+        a_weather = st.session_state.get("sch_weather", "clear")
+        a_ev_raw  = []  # not an event — CCTV is live crowd measurement
+        a_line    = sch_line
+        st.session_state["_cctv_pax_override"]   = _cctv_pax_by_hour
+        st.session_state["_cctv_crowd_count"]    = _crowd_count
+        # Show breakdown for each hour in the window
+        _breakdown = "  \n".join(
+            f"{h:02d}:00–{h+1:02d}:00 → {_crowd_count} × {_cctv_mult_for(_cctv_weekday, h)} = **{_cctv_pax_by_hour[h]:,} pax/hr**"
+            for h in range(tune_start, tune_end)
+        )
+        _cctv_msg = f"CCTV detected **{_crowd_count} people** on platform\n\n{_breakdown}"
+        st.session_state["_cctv_detection_msg"] = _cctv_msg
+        st.success(_cctv_msg)
+
     else:  # Manual inputs
         _ev_type_labels = {
             "concert": "Concert", "football_match": "Football match",
@@ -607,8 +669,9 @@ if st.button("Analyse", type="primary", key="analyse_btn"):
         st.info(f"Manual inputs — weather: **{a_weather}** | event: {_ev_name if a_ev_raw else 'none'} | pax/hr: {_ev_pax if a_ev_raw else 0}")
 
     # Pull emergency fields from extraction (text/image) or manual selector
-    a_emergency      = extracted.get("emergency")      if input_method != "Manual inputs" else None
-    a_emergency_type = extracted.get("emergency_type") if input_method != "Manual inputs" else None
+    _text_based = input_method in ("Describe in text (GLM extracts)", "Upload image (OCR reads)")
+    a_emergency      = extracted.get("emergency")      if _text_based else None
+    a_emergency_type = extracted.get("emergency_type") if _text_based else None
     # Manual emergency override
     if input_method == "Manual inputs":
         _em_sel = st.session_state.get("em_type", "None")
@@ -648,6 +711,15 @@ if st.button("Analyse", type="primary", key="analyse_btn"):
         **_pax_factors,
     }
 
+    # Wire CCTV pax override — bypasses baseline calculation in compute_options
+    # The override is a {hour: pax} dict; extract the representative hour's value for the single-hour analysis
+    if input_method == "CCTV crowd detection":
+        _cctv_dict = st.session_state.get("_cctv_pax_override") or {}
+        if isinstance(_cctv_dict, dict) and _cctv_dict:
+            inputs["cctv_pax_override"]  = _cctv_dict.get(rep_hour, next(iter(_cctv_dict.values())))
+            inputs["cctv_crowd_count"]   = st.session_state.get("_cctv_crowd_count", 0)
+            inputs["cctv_std_baseline"]  = _baseline_pax(rep_hour, sch_date.weekday())
+
     # Phase 1: instant math — compute 3 options without GLM
     options = compute_options(inputs)
 
@@ -668,6 +740,7 @@ if st.button("Analyse", type="primary", key="analyse_btn"):
         "_a_em_type":     a_emergency_type,
         "_a_em_dur":      a_emergency_dur,
         "_pax_factors":   _pax_factors,
+        "_a_cctv_pax_override": st.session_state.get("_cctv_pax_override") if input_method == "CCTV crowd detection" else None,
     })
     st.rerun()  # shows 3 cards immediately; Phase 2 triggers on this render
 
@@ -683,6 +756,9 @@ if analysis and analysis.get("options"):
 
     st.markdown("---")
     st.markdown("**Step 4 — Three scheduling options**")
+    _cached_cctv_msg = st.session_state.get("_cctv_detection_msg")
+    if _cached_cctv_msg:
+        st.success(_cached_cctv_msg)
 
     # ── Phase 1 result: 3 cards appear instantly (pure math, no GLM wait) ────
     reasoning_done = analysis.get("explanation") is not None
@@ -801,6 +877,8 @@ if analysis and analysis.get("options"):
             a_em_type    = st.session_state.get("_a_em_type")
             a_em_dur     = max(1, a_te - a_ts)
             a_pax_factors = st.session_state.get("_pax_factors", {})
+            a_cctv_pax_override  = st.session_state.get("_a_cctv_pax_override")
+            a_cctv_crowd_count   = st.session_state.get("_cctv_crowd_count")
 
             events_daily = [
                 {"name": ev["name"], "start_hour": a_ts,
@@ -822,6 +900,8 @@ if analysis and analysis.get("options"):
                         emergency_hour=a_ts,
                         emergency_duration=a_em_dur,
                         pax_factors=a_pax_factors,
+                        cctv_pax_override=a_cctv_pax_override,
+                        cctv_crowd_count=a_cctv_crowd_count,
                     )
                 except Exception as _ex:
                     st.error(f"Error applying schedule: {_ex}")

@@ -6,6 +6,7 @@
   - Bad weather also caps max frequency (trains slow down for safety)
 """
 
+import math
 from datetime import datetime
 
 # ── Constants from assumptions ────────────────────────────────────────────────
@@ -145,6 +146,10 @@ def _baseline_pax(hour: int, weekday: int) -> int:
     return _WEEKDAY_BASELINE.get(hour, 0)
 
 
+def get_baseline_pax(hour: int, weekday: int) -> int:
+    return _baseline_pax(hour, weekday)
+
+
 # Weekday trains/hr derived from actual ridership data (all lines, Mon–Fri)
 # Formula: ceil(expected_pax / (800 capacity × 0.75 load factor))
 _WEEKDAY_FREQ = {
@@ -241,11 +246,14 @@ def compute_options(inputs: dict) -> list[dict]:
     weather  = inputs.get("weather", "clear")
     events   = inputs.get("events", [])
 
-    # Step 1: baseline passengers from time of day
-    baseline = _baseline_pax(hour, weekday)
-
-    # Step 2: event passengers — rain pushes attendees to take LRT instead of driving
-    raw_event_pax = sum(e.get("passengers_per_hr", 0) for e in events)
+    # Step 1: baseline passengers — use CCTV override if available, else standard baseline
+    if "cctv_pax_override" in inputs:
+        baseline = inputs["cctv_pax_override"]
+        raw_event_pax = 0
+        expected = baseline
+    else:
+        baseline = _baseline_pax(hour, weekday)
+        raw_event_pax = sum(e.get("passengers_per_hr", 0) for e in events)
     # Only apply GLM weather multipliers when weather is actually bad (not clear)
     if weather == "clear":
         _event_mult = 1.0
@@ -253,10 +261,10 @@ def compute_options(inputs: dict) -> list[dict]:
     else:
         _event_mult = inputs.get("weather_event_mult", WEATHER_EVENT_MULT.get(weather, 1.0))
         pax_mult    = inputs.get("weather_pax_mult",   WEATHER_PAX_MULT.get(weather, 1.0))
-    event_pax = int(raw_event_pax * _event_mult)
-
-    # Step 3: weather reduces baseline travel only (people stay home, unrelated to events)
-    expected = int(baseline * pax_mult + event_pax)
+    if "cctv_pax_override" not in inputs:
+        event_pax = int(raw_event_pax * _event_mult)
+        # Step 3: weather reduces baseline travel only
+        expected = int(baseline * pax_mult + event_pax)
 
     # Step 3.5: emergency inflates expected passengers (stranded/surge)
     emergency_type = inputs.get("emergency_type") or ("overcrowding" if inputs.get("emergency") else None)
@@ -331,10 +339,15 @@ def compute_options(inputs: dict) -> list[dict]:
                 "aggressive":   min(target + 3, max_freq),
             }
     else:
-        # Three options always spread around the optimal frequency.
-        # When base hits the safety ceiling, shift the spread downward so all
-        # three options are always meaningfully different for GLM to evaluate.
-        base = std_freq + extra_needed
+        if "cctv_pax_override" in inputs:
+            # CCTV: compute optimal frequency purely from detected pax — can go below standard.
+            # Floor at std_freq // 2 to avoid gutting service entirely.
+            optimal = math.ceil(expected / (capacity * TARGET_LOAD_FACTOR))
+            base    = max(optimal, max(1, std_freq // 2))
+        else:
+            # Normal: anchor on std_freq + extra (only ever adds trains above standard).
+            base = std_freq + extra_needed
+
         if base > max_freq:
             freq_map = {
                 "conservative": max(1, max_freq - 4),
@@ -366,6 +379,7 @@ def compute_daily_schedule(
     emergency_hour: int | None = None,
     emergency_duration: int = 1,
     pax_factors: dict | None = None,
+    cctv_pax_override: int | None = None,
 ) -> list[dict]:
     """
     Compute full day schedule from 06:00 to 24:00 (18 slots).
@@ -420,6 +434,17 @@ def compute_daily_schedule(
         _ev_type = hour_event_types[0] if hour_event_types else "default"
 
         _is_em_active = emergency_type and emergency_hour is not None and emergency_hour <= hour < em_end
+        _in_cctv_window = cctv_pax_override is not None and (
+            weather_window is None or weather_window[0] <= hour < weather_window[1]
+        )
+        # Resolve per-hour CCTV value: override can be a {hour: pax} dict or a flat int
+        if _in_cctv_window:
+            if isinstance(cctv_pax_override, dict):
+                _cctv_val = cctv_pax_override.get(hour)
+            else:
+                _cctv_val = cctv_pax_override
+        else:
+            _cctv_val = None
         inputs_hour = {
             "datetime":                  f"{date_str}T{hour:02d}:00",
             "weather":                   hour_weather,
@@ -433,6 +458,7 @@ def compute_daily_schedule(
             "train_capacity":            train_capacity,
             "running_cost_per_train_hr": cost_per_train_hr,
             **(pax_factors or {}),
+            **( {"cctv_pax_override": _cctv_val} if _cctv_val is not None else {} ),
         }
         options      = compute_options(inputs_hour)
         moderate_opt = next(o for o in options if o["label"] == "moderate")
