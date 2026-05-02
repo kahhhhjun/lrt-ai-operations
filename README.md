@@ -55,11 +55,8 @@ LRT duty managers in Malaysia face a recurring challenge: weather changes, live 
 
 | Emergency Type | System Response |
 |---|---|
-| Track incident (person on track) | **Full suspension (0 trains).** Absolute safety override — no exceptions. Max-frequency recovery after clearance. |
 | Signal failure | Full service halt. No trains until the fault is cleared. |
 | Power failure | Reduced service on backup power. |
-| Train breakdown | Minor reduction — one fewer train per hour. |
-| Evacuation (fire / bomb threat) | Maximum frequency — clear all stations as fast as possible. |
 | Overcrowding / stampede risk | Urgent frequency increase flagged immediately. |
 
 > Safety overrides are **hard-coded in the math layer** and cannot be overridden by GLM, regardless of its reasoning.
@@ -78,9 +75,7 @@ RAILMIND never leaves a duty manager without an answer, even when external APIs 
 
 ## Demo
 
-> **Live deployment:** [Hosted on Streamlit Cloud](https://share.streamlit.io) *(link in repo About section)*
->
-> **Presentation & walkthrough video:** [Google Drive](https://drive.google.com/drive/folders/1kCi2BLf8Ktk48mooGZPc5qrzqo6rzX7O?usp=sharing)
+> **Live deployment:** [Hosted on Streamlit Cloud](https://lrt-ai-operations-asaqmnlv7yfpy76tddwbdi.streamlit.app/) *(link in repo About section)*
 
 ---
 
