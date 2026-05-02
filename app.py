@@ -5,6 +5,7 @@ import json
 from datetime import datetime, date as date_type, time
 from pathlib import Path
 
+import altair as alt
 import pandas as pd
 import streamlit as st
 
@@ -278,6 +279,71 @@ st.dataframe(
         "Status":           st.column_config.TextColumn("Status",           help="Standard = no change. Increased/Reduced = frequency adjusted. Event rows show the event name. Emergency rows show the incident type."),
     }
 )
+
+# ── Schedule visualisation ────────────────────────────────────────────────────
+with st.expander("📈 Schedule visualisation", expanded=False):
+    _viz_df = pd.DataFrame([{
+        "Hour":            f"{s['hour']:02d}:00",
+        "Expected Pax":    s["expected_passengers_per_hr"],
+        "Load Factor":     s["load_factor_pct"] if mode == "updated" else s["standard_load_factor_pct"],
+        "Standard Trains": s["standard_frequency"],
+        "Adjusted Trains": s["recommended_frequency"],
+    } for s in schedule])
+
+    # Chart 1 — Hourly pax vs train capacity
+    st.markdown("**Hourly expected passengers vs train capacity**")
+    _pax_bars = alt.Chart(_viz_df).mark_bar(color="#4a90d9", opacity=0.85).encode(
+        x=alt.X("Hour:O", title="Hour", sort=None),
+        y=alt.Y("Expected Pax:Q", title="Pax / hr"),
+        tooltip=["Hour", "Expected Pax"],
+    )
+    _cap_rule = alt.Chart(pd.DataFrame({"y": [TRAIN_CAPACITY]})).mark_rule(
+        color="red", strokeDash=[5, 3], strokeWidth=2
+    ).encode(y=alt.Y("y:Q", title="Pax / hr"))
+    st.altair_chart((_pax_bars + _cap_rule).properties(height=220), use_container_width=True)
+    st.caption("🔴 Red line = single train capacity (800 pax). Bars above the line = overcrowded.")
+
+    # Chart 2 — Load factor with green / orange / red zones
+    st.markdown("**Load factor per hour**")
+    _lf_chart = alt.Chart(_viz_df).mark_bar(opacity=0.9).encode(
+        x=alt.X("Hour:O", title="Hour", sort=None),
+        y=alt.Y("Load Factor:Q", title="Load factor (%)"),
+        color=alt.condition(
+            alt.datum["Load Factor"] > 100,
+            alt.value("#e74c3c"),
+            alt.condition(alt.datum["Load Factor"] > 75, alt.value("#f39c12"), alt.value("#27ae60"))
+        ),
+        tooltip=["Hour", "Load Factor"],
+    )
+    _rule_75  = alt.Chart(pd.DataFrame({"y": [75]})).mark_rule(
+        color="#27ae60", strokeDash=[5, 3], strokeWidth=1
+    ).encode(y="y:Q")
+    _rule_100 = alt.Chart(pd.DataFrame({"y": [100]})).mark_rule(
+        color="#e74c3c", strokeDash=[5, 3], strokeWidth=1
+    ).encode(y="y:Q")
+    st.altair_chart((_lf_chart + _rule_75 + _rule_100).properties(height=220), use_container_width=True)
+    st.caption("🟢 < 75% comfortable  · 🟠 75–100% full  · 🔴 > 100% overcrowded")
+
+    # Chart 3 — Standard vs adjusted frequency (only when schedule has been adjusted)
+    if mode == "updated":
+        st.markdown("**Standard vs adjusted trains per hour**")
+        _freq_long = _viz_df.melt(
+            id_vars=["Hour"],
+            value_vars=["Standard Trains", "Adjusted Trains"],
+            var_name="Type", value_name="Trains/hr",
+        )
+        _freq_chart = alt.Chart(_freq_long).mark_bar().encode(
+            x=alt.X("Hour:O", title="Hour", sort=None),
+            y=alt.Y("Trains/hr:Q", title="Trains per hour"),
+            color=alt.Color("Type:N", scale=alt.Scale(
+                domain=["Standard Trains", "Adjusted Trains"],
+                range=["#636363", "#4a90d9"],
+            )),
+            xOffset="Type:N",
+            tooltip=["Hour", "Type", "Trains/hr"],
+        )
+        st.altair_chart(_freq_chart.properties(height=220), use_container_width=True)
+        st.caption("Grey = standard schedule  · Blue = adjusted schedule")
 
 if mode == "updated":
     st.markdown("---")
