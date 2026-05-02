@@ -244,6 +244,66 @@ def call_glm_stream(prompt: str, system: str | None = None, temperature: float =
         raise ConnectionError("Cannot reach GLM API. Check your internet connection and endpoint URL.")
 
 
+_PAX_FACTOR_SYSTEM = """You are a ridership analyst for Malaysian LRT operations.
+Given the weather and emergency situation, predict how they affect passenger numbers.
+Return ONLY a valid JSON object with exactly these fields:
+{
+  "weather_pax_mult": float between 0.5 and 1.0 (effect on baseline ridership — 1.0 = no change, 0.7 = 30% fewer passengers),
+  "weather_event_mult": float between 0.8 and 1.5 (effect on event passengers — rain pushes more people onto LRT),
+  "emergency_pax_mult": float between 1.0 and 2.0 (how much emergency inflates stranded/surge passengers — 1.0 = no extra, 1.5 = 50% more)
+}
+
+Guidelines:
+- Clear weather: weather_pax_mult=1.0, weather_event_mult=1.0
+- Cloudy: weather_pax_mult=0.95, weather_event_mult=1.05
+- Rainy: weather_pax_mult=0.85-0.90, weather_event_mult=1.15-1.25
+- Stormy: weather_pax_mult=0.65-0.75, weather_event_mult=0.80-0.90 (fewer attend outdoor events)
+- No emergency: emergency_pax_mult=1.0
+- Overcrowding: emergency_pax_mult=1.4-1.6 (platform crush, more people piling up)
+- Evacuation: emergency_pax_mult=1.3-1.5 (people rushing to exit)
+- Breakdown/signal_failure/power_failure: emergency_pax_mult=1.1-1.3 (passengers stranded, backlog builds)
+- track_incident: emergency_pax_mult=1.2-1.4 (full suspension causes large backlog)
+Adjust based on severity. Return ONLY the JSON. No explanation."""
+
+
+def get_glm_pax_factors(
+    weather: str,
+    emergency_type: str | None,
+    hour: int,
+    line: str,
+) -> dict:
+    """Ask GLM to predict weather/emergency multipliers for passenger calculation.
+    Falls back to hardcoded defaults if GLM is unavailable."""
+    _DEFAULTS = {
+        "weather_pax_mult":   {"clear": 1.00, "cloudy": 0.95, "rainy": 0.88, "stormy": 0.70}.get(weather, 1.0),
+        "weather_event_mult": {"clear": 1.00, "cloudy": 1.05, "rainy": 1.20, "stormy": 0.85}.get(weather, 1.0),
+        "emergency_pax_mult": 1.0,
+    }
+    if not GLM_API_KEY:
+        return _DEFAULTS
+
+    prompt = (
+        f"Weather: {weather}\n"
+        f"Emergency: {emergency_type or 'none'}\n"
+        f"Time: {hour:02d}:00\n"
+        f"Line: {line}\n"
+        "Predict the ridership multipliers."
+    )
+    try:
+        response = call_glm(prompt, system=_PAX_FACTOR_SYSTEM, temperature=0.1, model=GLM_MODEL_FAST)
+        start = response.find("{")
+        end   = response.rfind("}") + 1
+        result = json.loads(response[start:end])
+        # Clamp values to safe ranges
+        return {
+            "weather_pax_mult":   max(0.5, min(1.0,  result.get("weather_pax_mult",   _DEFAULTS["weather_pax_mult"]))),
+            "weather_event_mult": max(0.8, min(1.5,  result.get("weather_event_mult", _DEFAULTS["weather_event_mult"]))),
+            "emergency_pax_mult": max(1.0, min(2.0,  result.get("emergency_pax_mult", _DEFAULTS["emergency_pax_mult"]))),
+        }
+    except Exception:
+        return _DEFAULTS
+
+
 
 
 def extract_inputs_from_text(text: str) -> dict:

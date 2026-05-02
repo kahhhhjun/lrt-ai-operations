@@ -9,7 +9,7 @@ import pandas as pd
 import streamlit as st
 
 from core.calculator import WEATHER_MAX_FREQ, TRAIN_CAPACITY, compute_options, default_frequency as _dfreq
-from core.glm_client import extract_inputs_from_text
+from core.glm_client import extract_inputs_from_text, get_glm_pax_factors
 from core.recommender import (get_glm_recommendation, get_glm_recommendation_stream,
                               get_glm_daily_reasoning_stream, recommend_daily)
 from core.database import init_db, save_schedule, load_schedule, delete_schedule, list_saved
@@ -514,6 +514,9 @@ if st.button("Analyse", type="primary", key="analyse_btn"):
     elif a_emergency:
         st.warning(f"⚠️ Emergency detected: *{a_emergency}*")
 
+    # GLM-predicted pax multipliers (fast model, one call per Analyse)
+    _pax_factors = get_glm_pax_factors(a_weather, a_emergency_type, rep_hour, sch_line)
+
     inputs = {
         "datetime":                 datetime.combine(sch_date, time(hour=rep_hour)).isoformat(timespec="minutes"),
         "weather":                  a_weather,
@@ -524,6 +527,7 @@ if st.button("Analyse", type="primary", key="analyse_btn"):
         "current_frequency_per_hr": _dfreq(rep_hour, sch_date.weekday()),
         "train_capacity":           TRAIN_CAPACITY,
         "running_cost_per_train_hr": int(sch_cost),
+        **_pax_factors,
     }
 
     # Phase 1: instant math — compute 3 options without GLM
@@ -545,6 +549,7 @@ if st.button("Analyse", type="primary", key="analyse_btn"):
         "_a_line":        a_line,
         "_a_em_type":     a_emergency_type,
         "_a_em_dur":      a_emergency_dur,
+        "_pax_factors":   _pax_factors,
     })
     st.rerun()  # shows 3 cards immediately; Phase 2 triggers on this render
 
@@ -670,13 +675,14 @@ if analysis and analysis.get("options"):
         reset_btn = False
 
         if apply_btn:
-            a_weather = st.session_state.get("_a_weather", "clear")
-            a_cost    = st.session_state.get("_a_cost", 350)
-            a_ev_raw  = st.session_state.get("_a_ev_raw", [])
-            a_ts      = st.session_state.get("_a_tune_s", 6)
-            a_te      = st.session_state.get("_a_tune_e", 23)
-            a_em_type = st.session_state.get("_a_em_type")
-            a_em_dur  = max(1, a_te - a_ts)
+            a_weather    = st.session_state.get("_a_weather", "clear")
+            a_cost       = st.session_state.get("_a_cost", 350)
+            a_ev_raw     = st.session_state.get("_a_ev_raw", [])
+            a_ts         = st.session_state.get("_a_tune_s", 6)
+            a_te         = st.session_state.get("_a_tune_e", 23)
+            a_em_type    = st.session_state.get("_a_em_type")
+            a_em_dur     = max(1, a_te - a_ts)
+            a_pax_factors = st.session_state.get("_pax_factors", {})
 
             events_daily = [
                 {"name": ev["name"], "start_hour": a_ts,
@@ -697,6 +703,7 @@ if analysis and analysis.get("options"):
                         emergency_type=a_em_type,
                         emergency_hour=a_ts,
                         emergency_duration=a_em_dur,
+                        pax_factors=a_pax_factors,
                     )
                 except Exception as _ex:
                     st.error(f"Error applying schedule: {_ex}")

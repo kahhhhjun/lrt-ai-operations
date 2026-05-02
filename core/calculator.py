@@ -244,23 +244,30 @@ def compute_options(inputs: dict) -> list[dict]:
 
     # Step 2: event passengers — rain pushes attendees to take LRT instead of driving
     raw_event_pax = sum(e.get("passengers_per_hr", 0) for e in events)
-    event_pax = int(raw_event_pax * WEATHER_EVENT_MULT.get(weather, 1.0))
+    # Only apply GLM weather multipliers when weather is actually bad (not clear)
+    if weather == "clear":
+        _event_mult = 1.0
+        pax_mult    = 1.0
+    else:
+        _event_mult = inputs.get("weather_event_mult", WEATHER_EVENT_MULT.get(weather, 1.0))
+        pax_mult    = inputs.get("weather_pax_mult",   WEATHER_PAX_MULT.get(weather, 1.0))
+    event_pax = int(raw_event_pax * _event_mult)
 
     # Step 3: weather reduces baseline travel only (people stay home, unrelated to events)
-    pax_mult = WEATHER_PAX_MULT.get(weather, 1.0)
     expected = int(baseline * pax_mult + event_pax)
 
-    # Step 3.5: overcrowding emergency inflates expected passengers by 150%
+    # Step 3.5: emergency inflates expected passengers (stranded/surge)
     emergency_type = inputs.get("emergency_type") or ("overcrowding" if inputs.get("emergency") else None)
+    _em_pax_mult = inputs.get("emergency_pax_mult", 1.0)
     if emergency_type == "overcrowding":
-        expected = int(expected * 1.5)
+        expected = int(expected * max(1.5, _em_pax_mult))
+    elif emergency_type and _em_pax_mult > 1.0:
+        expected = int(expected * _em_pax_mult)
 
     # Step 4: how many EXTRA trains needed on top of the standard schedule.
-    # The standard schedule (current_frequency_per_hr) is already calibrated for normal demand —
-    # we only compute the surplus demand that exceeds what it comfortably handles.
     capacity        = inputs.get("train_capacity", TRAIN_CAPACITY)
     std_freq        = inputs["current_frequency_per_hr"]
-    std_comfortable = std_freq * capacity * TARGET_LOAD_FACTOR   # pax the standard schedule serves comfortably
+    std_comfortable = std_freq * capacity * TARGET_LOAD_FACTOR
     extra_demand    = max(0, expected - std_comfortable)
     extra_needed    = round(extra_demand / (capacity * TARGET_LOAD_FACTOR))
 
@@ -268,7 +275,6 @@ def compute_options(inputs: dict) -> list[dict]:
     max_freq = WEATHER_MAX_FREQ.get(weather, 20)
 
     # Step 6: build freq_map relative to the standard schedule
-    emergency_type = inputs.get("emergency_type") or ("overcrowding" if inputs.get("emergency") else None)
 
     if emergency_type == "track_incident":
         # Service suspended. Options = resumption strategy after clearance.
@@ -357,6 +363,7 @@ def compute_daily_schedule(
     emergency_type: str | None = None,
     emergency_hour: int | None = None,
     emergency_duration: int = 1,
+    pax_factors: dict | None = None,
 ) -> list[dict]:
     """
     Compute full day schedule from 06:00 to 24:00 (18 slots).
@@ -423,6 +430,7 @@ def compute_daily_schedule(
             "current_frequency_per_hr":  std_freq,
             "train_capacity":            train_capacity,
             "running_cost_per_train_hr": cost_per_train_hr,
+            **(pax_factors or {}),
         }
         options      = compute_options(inputs_hour)
         moderate_opt = next(o for o in options if o["label"] == "moderate")

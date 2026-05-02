@@ -74,7 +74,21 @@ Your task:
 4. Explain why the other two are insufficient or wasteful.
 5. End with one clear action sentence for the duty manager.
 
-Write your reasoning as plain paragraphs. Do NOT use JSON, bullet points, or markdown headers.
+Format your response using these exact markdown sections:
+**Situation**
+Describe what is driving this decision — the key factor(s) and their operational impact.
+
+**Option Analysis**
+- **Conservative:** explain load factor, headway, cost delta, and whether the risk is acceptable
+- **Moderate:** explain load factor, headway, cost delta, and whether it meets demand
+- **Aggressive:** explain load factor, headway, cost delta, and whether the extra cost is justified
+
+**Recommendation**
+Explain which option is best and why the other two fall short.
+
+**Action**
+A clear instruction for the duty manager on what to do immediately.
+
 On the very last line write exactly one of these (nothing else on that line):
 RECOMMENDATION: conservative
 RECOMMENDATION: moderate
@@ -290,13 +304,20 @@ You will receive:
 - The event(s) happening and their time window
 - The hour-by-hour recommended changes versus the standard schedule
 
-Your job:
-1. Explain WHY the adjustments are needed — cite the event, expected passenger surge, and any weather impact
-2. Highlight the CRITICAL hours the duty manager must prepare for (typically 1 hour before and after peak)
-3. Flag any risks (e.g., post-event exodus, weather compounding crowd)
-4. Give a concise shift briefing the duty manager can hand over to the next shift
+Format your response using these exact markdown sections:
+**Why adjustments are needed**
+Explain the event/weather/emergency and its expected passenger impact in enough detail for the duty manager to understand the full picture.
 
-Keep the response practical, under 220 words, written for an operations staff member (not a technical audience)."""
+**Critical hours**
+Bullet list of the key hours the duty manager must prepare for, with a clear reason and what action is needed for each.
+
+**Risks**
+Bullet list of potential risks — what could go wrong, compounding factors, and what to watch out for.
+
+**Shift handover**
+A clear paragraph the duty manager can read to the next shift covering what happened, what was deployed, and what to watch for.
+
+Keep the total response under 400 words. Written for operations staff, not a technical audience."""
 
 
 def _get_glm_daily_reasoning(
@@ -431,12 +452,14 @@ def recommend_daily(
     emergency_type: str | None = None,
     emergency_hour: int | None = None,
     emergency_duration: int = 1,
+    pax_factors: dict | None = None,
 ) -> dict:
     schedule = compute_daily_schedule(date_str, line, weather, events, cost_per_train_hr,
                                       weather_window=weather_window,
                                       emergency_type=emergency_type,
                                       emergency_hour=emergency_hour,
-                                      emergency_duration=emergency_duration)
+                                      emergency_duration=emergency_duration,
+                                      pax_factors=pax_factors or {})
 
     daily_std_cost   = sum(s["standard_cost_rm"] for s in schedule)
     daily_extra_cost = sum(s["extra_cost_rm"]    for s in schedule)
