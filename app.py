@@ -9,7 +9,7 @@ import pandas as pd
 import streamlit as st
 
 from core.calculator import WEATHER_MAX_FREQ, TRAIN_CAPACITY, compute_options, default_frequency as _dfreq
-from core.glm_client import extract_inputs_from_text, get_glm_pax_factors, get_glm_cost_justification_stream
+from core.glm_client import extract_inputs_from_text, extract_inputs_from_image, get_glm_pax_factors, get_glm_cost_justification_stream
 from core.recommender import (get_glm_recommendation, get_glm_recommendation_stream,
                               get_glm_daily_reasoning_stream, recommend_daily)
 from core.database import init_db, save_schedule, load_schedule, delete_schedule, list_saved
@@ -71,6 +71,12 @@ st.subheader("Full Day Schedule")
 
 _col_inputs, _col_history = st.columns(2)
 with _col_inputs:
+    if st.session_state.get("_img_date"):
+        try:
+            st.session_state["sch_date"] = date_type.fromisoformat(st.session_state.pop("_img_date"))
+            st.session_state["_preserve_analysis"] = True
+        except Exception:
+            st.session_state.pop("_img_date", None)
     sch_date = st.date_input("Date", value=date_type.today(), key="sch_date")
     sch_line = st.selectbox("LRT line", LINES, key="sch_line")
 sch_weekday  = sch_date.weekday()
@@ -132,7 +138,8 @@ if st.session_state.get("_sch_key") != _key:
             "_sch_key": _key, "_sch_default": _def, "_sch_result": _def,
             "_sch_mode": "default", "_sch_events": [],
             "_tune_start": 6, "_tune_end": 24,
-            "_analysis": None, "_chosen_option": "moderate",
+            "_analysis": st.session_state.get("_analysis") if st.session_state.pop("_preserve_analysis", False) else None,
+            "_chosen_option": "moderate",
             "_db_saved_at": None,
             "_weekly_anomaly_text": None,
         })
@@ -412,6 +419,11 @@ st.markdown("### Adjust schedule")
 st.markdown("**Step 1 — Select time window to adjust**")
 tw1, tw2 = st.columns(2)
 with tw1:
+    # Apply auto-set times from image extraction (must happen before slider is created)
+    if st.session_state.get("_img_tune_start") is not None:
+        st.session_state["tune_start"] = st.session_state.pop("_img_tune_start")
+        st.session_state["tune_end"]   = st.session_state.pop("_img_tune_end")
+        st.session_state["_img_time_applied"] = True  # flag to skip invalidation
     tune_start = st.slider("Situation starts at", 6, 23, 6,  format="%d:00", key="tune_start")
 with tw2:
     tune_end   = st.slider("Situation ends at",   7, 24, 24, format="%d:00", key="tune_end")
@@ -421,7 +433,10 @@ st.caption(
 )
 
 # If sliders changed since last Analyse, invalidate the analysis so Apply can't use stale window
-if st.session_state.get("_analysis") and (
+# Skip if the slider change came from image auto-set (not user interaction)
+if st.session_state.pop("_img_time_applied", False):
+    pass  # image auto-set the sliders — keep the analysis
+elif st.session_state.get("_analysis") and (
     tune_start != st.session_state.get("_a_tune_s") or
     tune_end   != st.session_state.get("_a_tune_e")
 ):
@@ -430,7 +445,7 @@ if st.session_state.get("_analysis") and (
 # Step 2 — situation input
 st.markdown("**Step 2 — Describe the situation**")
 input_method = st.radio(
-    "", ["Manual inputs", "Describe in text (GLM extracts)"],
+    "", ["Manual inputs", "Describe in text (GLM extracts)", "Upload image (OCR reads)"],
     horizontal=True, key="input_method", label_visibility="collapsed",
 )
 
@@ -487,6 +502,15 @@ elif input_method == "Describe in text (GLM extracts)":
     )
     sch_cost = 350
 
+else:  # Upload image
+    uploaded_file = st.file_uploader(
+        "Upload an image of the event (e.g. concert poster)",
+        type=["jpg", "jpeg", "png", "webp"], key="uploaded_image",
+    )
+    if uploaded_file:
+        st.image(uploaded_file, caption=uploaded_file.name, width=300)
+    sch_cost = 350
+
 # Step 3 — Analyse
 st.markdown("**Step 3 — Analyse options**")
 
@@ -527,6 +551,43 @@ if st.button("Analyse", type="primary", key="analyse_btn"):
         a_ev_raw  = extracted.get("events", [])
         a_line    = extracted.get("line") or sch_line
         st.info(f"GLM extracted — weather: **{a_weather}** | events: {[e['name'] for e in a_ev_raw] or ['none']}")
+
+    elif input_method == "Upload image (OCR reads)":
+        uploaded_file = st.session_state.get("uploaded_image")
+        if not uploaded_file:
+            st.warning("Please upload an image first.")
+            st.stop()
+        with st.spinner("OCR reading image, GLM extracting details..."):
+            try:
+                extracted = extract_inputs_from_image(uploaded_file.getvalue(), uploaded_file.type or "image/jpeg")
+            except Exception as _ex:
+                st.error(f"Could not read image: {_ex}")
+                st.stop()
+        a_weather = extracted.get("weather", "clear")
+        a_ev_raw  = extracted.get("events", [])
+        a_line    = extracted.get("line") or sch_line
+        _img_start = extracted.get("event_start_hour")
+        _img_end   = extracted.get("event_end_hour")
+        _img_date  = extracted.get("event_date")
+        _end_defaulted = extracted.get("end_time_defaulted", False)
+        if _img_start is not None and _img_end is not None:
+            st.session_state["_img_tune_start"] = _img_start
+            st.session_state["_img_tune_end"]   = _img_end
+        _info = f"OCR + GLM — weather: **{a_weather}** | events: {[e['name'] for e in a_ev_raw] or ['none']}"
+        if _img_start is not None:
+            _time_label = f"**{_img_start:02d}:00–{_img_end:02d}:00**"
+            if _end_defaulted:
+                _time_label += " *(end time not found — defaulted to +3 hrs)*"
+            _info += f" | time: {_time_label} (auto-set)"
+        if _img_date:
+            st.session_state["_img_date"] = _img_date
+            _info += f" | date: **{date_type.fromisoformat(_img_date).strftime('%d %b %Y')}** (auto-set)"
+        st.info(_info)
+        # Always use estimated crowd size for image uploads (posters don't have exact pax numbers)
+        for _ev in a_ev_raw:
+            _ev["passengers_per_hr"] = 5000
+        if a_ev_raw:
+            st.caption("ℹ️ Crowd estimated at 5,000 pax/hr. Use text input if you need a specific number.")
 
     else:  # Manual inputs
         _ev_type_labels = {
@@ -601,8 +662,8 @@ if st.button("Analyse", type="primary", key="analyse_btn"):
         "_a_weather":     a_weather,
         "_a_cost":        int(sch_cost),
         "_a_ev_raw":      a_ev_raw,
-        "_a_tune_s":      tune_start,
-        "_a_tune_e":      tune_end,
+        "_a_tune_s":      st.session_state.get("_img_tune_start", tune_start),
+        "_a_tune_e":      st.session_state.get("_img_tune_end", tune_end),
         "_a_line":        a_line,
         "_a_em_type":     a_emergency_type,
         "_a_em_dur":      a_emergency_dur,
@@ -621,7 +682,7 @@ if analysis and analysis.get("options"):
     glm_pick = analysis.get("chosen_option", "moderate")
 
     st.markdown("---")
-    st.markdown("**Step 4 — Three scheduling options (calculated)**")
+    st.markdown("**Step 4 — Three scheduling options**")
 
     # ── Phase 1 result: 3 cards appear instantly (pure math, no GLM wait) ────
     reasoning_done = analysis.get("explanation") is not None

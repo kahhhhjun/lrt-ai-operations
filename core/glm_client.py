@@ -14,10 +14,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-GLM_ENDPOINT    = os.getenv("GLM_ENDPOINT", "https://api.z.ai/api/anthropic/v1/messages")
-GLM_MODEL       = os.getenv("GLM_MODEL", "glm-5.1")        # main model: reasoning & briefing
-GLM_MODEL_FAST  = os.getenv("GLM_MODEL_FAST", "glm-5-turbo")  # fast model: text extraction
-GLM_API_KEY     = os.getenv("GLM_API_KEY")
+GLM_ENDPOINT      = os.getenv("GLM_ENDPOINT", "https://api.z.ai/api/anthropic/v1/messages")
+GLM_MODEL         = os.getenv("GLM_MODEL", "glm-5.1")         # main model: reasoning & briefing
+GLM_MODEL_FAST    = os.getenv("GLM_MODEL_FAST", "glm-5-turbo") # fast model: text extraction
+GLM_API_KEY       = os.getenv("GLM_API_KEY")
 
 _EXTRACT_SYSTEM = """You are a data extraction assistant for a Malaysian LRT operations system.
 Read the situation description and extract operational factors.
@@ -304,6 +304,122 @@ def get_glm_pax_factors(
     except Exception:
         return _DEFAULTS
 
+OCR_API_KEY = os.getenv("OCR_API_KEY")
+
+_TIME_EXTRACT_SYSTEM = """You are a date and time extraction assistant.
+Given text from an event poster or flyer, extract the event date, start time and end time.
+Return ONLY a valid JSON object:
+{
+  "event_date": "YYYY-MM-DD" or null,
+  "event_start_hour": integer 0-23 or null,
+  "event_end_hour": integer 0-23 or null
+}
+Rules:
+- Convert 12-hour to 24-hour format (8PM = 20, 11PM = 23, 8AM = 8)
+- If only start time found, set end = start + 3 (typical event duration)
+- For date, convert any format to YYYY-MM-DD (e.g. "16 May 2026" = "2026-05-16")
+- If year is missing, assume current year
+- If no time found, set both hours to null
+- If no date found, set date to null
+Return ONLY the JSON. No explanation."""
+
+
+def extract_event_time(ocr_text: str) -> tuple[int | None, int | None, str | None, bool]:
+    """Extract event date and start/end hours from OCR text.
+    Returns (start_hour, end_hour, date_str, end_was_defaulted)."""
+    if not GLM_API_KEY:
+        return None, None, None, False
+    try:
+        response = call_glm(ocr_text, system=_TIME_EXTRACT_SYSTEM, temperature=0.1, model=GLM_MODEL_FAST)
+        start = response.find("{")
+        end   = response.rfind("}") + 1
+        data  = json.loads(response[start:end])
+        s     = data.get("event_start_hour")
+        e     = data.get("event_end_hour")
+        d     = data.get("event_date")
+        end_defaulted = False
+        if isinstance(s, int) and 0 <= s <= 23:
+            if not (isinstance(e, int) and 0 <= e <= 23):
+                e = min(s + 3, 24)
+                end_defaulted = True
+        else:
+            s, e = None, None
+        return s, e, d if isinstance(d, str) and len(d) == 10 else None, end_defaulted
+    except Exception:
+        return None, None, None, False
+
+
+def extract_inputs_from_image(image_bytes: bytes, mime_type: str = "image/jpeg"):
+    """OCR.space reads text from image → GLM extracts structured operational factors."""
+    import base64
+
+    if not OCR_API_KEY:
+        raise RuntimeError("OCR_API_KEY not set in .env — cannot read image.")
+
+    # Compress image to stay under OCR.space 1MB free-tier limit
+    try:
+        from PIL import Image
+        import io
+        img = Image.open(io.BytesIO(image_bytes))
+        if img.mode in ("RGBA", "P", "LA"):
+            img = img.convert("RGB")
+        if max(img.size) > 1200:
+            img.thumbnail((1200, 1200), Image.LANCZOS)
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=82)
+        image_bytes = buf.getvalue()
+        mime_type = "image/jpeg"
+    except Exception:
+        pass
+
+    b64      = base64.b64encode(image_bytes).decode("utf-8")
+    data_url = f"data:{mime_type};base64,{b64}"
+
+    try:
+        import requests as _req
+        ocr_resp = _req.post(
+            "https://api.ocr.space/parse/image",
+            data={
+                "apikey":            OCR_API_KEY,
+                "base64Image":       data_url,
+                "language":          "eng",
+                "isOverlayRequired": False,
+                "detectOrientation": True,
+                "scale":             True,
+            },
+            timeout=30,
+        )
+        ocr_resp.raise_for_status()
+        ocr_result = ocr_resp.json()
+    except Exception as e:
+        raise RuntimeError(f"OCR.space failed: {e}")
+
+    if ocr_result.get("IsErroredOnProcessing"):
+        msgs = ocr_result.get("ErrorMessage") or ["OCR failed"]
+        raise RuntimeError(f"OCR.space error: {msgs[0]}")
+
+    parsed_text = " ".join(
+        page.get("ParsedText", "")
+        for page in ocr_result.get("ParsedResults", [])
+    ).strip()
+
+    if not parsed_text:
+        raise RuntimeError("OCR found no readable text in the image.")
+
+    # Feed extracted text into GLM for structured extraction
+    try:
+        result = extract_inputs_from_text(parsed_text)
+    except (TimeoutError, ConnectionError):
+        result = _placeholder_extract(parsed_text)
+
+    # Extract event time separately (image-only feature)
+    start_hour, end_hour, event_date, end_defaulted = extract_event_time(parsed_text)
+    result["event_start_hour"]  = start_hour
+    result["event_end_hour"]    = end_hour
+    result["event_date"]        = event_date
+    result["end_time_defaulted"] = end_defaulted
+
+    return result
 
 
 _COST_JUSTIFY_SYSTEM = """You are a senior operations analyst for Malaysian LRT (Kelana Jaya, Ampang, Sri Petaling lines).
