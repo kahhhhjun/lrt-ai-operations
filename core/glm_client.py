@@ -245,25 +245,26 @@ def call_glm_stream(prompt: str, system: str | None = None, temperature: float =
 
 
 _PAX_FACTOR_SYSTEM = """You are a ridership analyst for Malaysian LRT operations.
-Given the weather and emergency situation, predict how they affect passenger numbers.
+Given the weather and emergency situation, predict how they affect LRT passenger numbers.
+Bad weather increases LRT ridership because people switch from driving/walking to taking the train.
 Return ONLY a valid JSON object with exactly these fields:
 {
-  "weather_pax_mult": float between 0.5 and 1.0 (effect on baseline ridership — 1.0 = no change, 0.7 = 30% fewer passengers),
-  "weather_event_mult": float between 0.8 and 1.5 (effect on event passengers — rain pushes more people onto LRT),
-  "emergency_pax_mult": float between 1.0 and 2.0 (how much emergency inflates stranded/surge passengers — 1.0 = no extra, 1.5 = 50% more)
+  "weather_pax_mult": float >= 1.0 (rain/stormy = more people take LRT instead of driving — always >= 1.0),
+  "weather_event_mult": float >= 1.0 (rain pushes event-goers onto LRT instead of driving — always >= 1.0),
+  "emergency_pax_mult": float between 1.0 and 2.0 (how much emergency inflates stranded/surge passengers)
 }
 
 Guidelines:
 - Clear weather: weather_pax_mult=1.0, weather_event_mult=1.0
-- Cloudy: weather_pax_mult=0.95, weather_event_mult=1.05
-- Rainy: weather_pax_mult=0.85-0.90, weather_event_mult=1.15-1.25
-- Stormy: weather_pax_mult=0.65-0.75, weather_event_mult=0.80-0.90 (fewer attend outdoor events)
+- Cloudy: weather_pax_mult=1.05, weather_event_mult=1.05
+- Rainy: weather_pax_mult=1.10-1.20, weather_event_mult=1.15-1.25 (significant modal shift to LRT)
+- Stormy: weather_pax_mult=1.03-1.08, weather_event_mult=1.05-1.10 (some modal shift, slightly less than rainy)
 - No emergency: emergency_pax_mult=1.0
-- Overcrowding: emergency_pax_mult=1.4-1.6 (platform crush, more people piling up)
-- Evacuation: emergency_pax_mult=1.3-1.5 (people rushing to exit)
-- Breakdown/signal_failure/power_failure: emergency_pax_mult=1.1-1.3 (passengers stranded, backlog builds)
-- track_incident: emergency_pax_mult=1.2-1.4 (full suspension causes large backlog)
-Adjust based on severity. Return ONLY the JSON. No explanation."""
+- Overcrowding: emergency_pax_mult=1.4-1.6
+- Evacuation: emergency_pax_mult=1.3-1.5
+- Breakdown/signal_failure/power_failure: emergency_pax_mult=1.1-1.3
+- track_incident: emergency_pax_mult=1.2-1.4
+Return ONLY the JSON. No explanation."""
 
 
 def get_glm_pax_factors(
@@ -275,8 +276,8 @@ def get_glm_pax_factors(
     """Ask GLM to predict weather/emergency multipliers for passenger calculation.
     Falls back to hardcoded defaults if GLM is unavailable."""
     _DEFAULTS = {
-        "weather_pax_mult":   {"clear": 1.00, "cloudy": 0.95, "rainy": 0.88, "stormy": 0.70}.get(weather, 1.0),
-        "weather_event_mult": {"clear": 1.00, "cloudy": 1.05, "rainy": 1.20, "stormy": 0.85}.get(weather, 1.0),
+        "weather_pax_mult":   {"clear": 1.00, "cloudy": 1.05, "rainy": 1.15, "stormy": 1.05}.get(weather, 1.0),
+        "weather_event_mult": {"clear": 1.00, "cloudy": 1.05, "rainy": 1.20, "stormy": 1.08}.get(weather, 1.0),
         "emergency_pax_mult": 1.0,
     }
     if not GLM_API_KEY:
@@ -294,15 +295,90 @@ def get_glm_pax_factors(
         start = response.find("{")
         end   = response.rfind("}") + 1
         result = json.loads(response[start:end])
-        # Clamp values to safe ranges
+        # Clamp to safe ranges — weather multipliers always >= 1.0
         return {
-            "weather_pax_mult":   max(0.5, min(1.0,  result.get("weather_pax_mult",   _DEFAULTS["weather_pax_mult"]))),
-            "weather_event_mult": max(0.8, min(1.5,  result.get("weather_event_mult", _DEFAULTS["weather_event_mult"]))),
+            "weather_pax_mult":   max(1.0, min(1.5,  result.get("weather_pax_mult",   _DEFAULTS["weather_pax_mult"]))),
+            "weather_event_mult": max(1.0, min(1.5,  result.get("weather_event_mult", _DEFAULTS["weather_event_mult"]))),
             "emergency_pax_mult": max(1.0, min(2.0,  result.get("emergency_pax_mult", _DEFAULTS["emergency_pax_mult"]))),
         }
     except Exception:
         return _DEFAULTS
 
+
+_COST_JUSTIFY_SYSTEM = """You are a senior operations analyst for Malaysian LRT (Kelana Jaya, Ampang, Sri Petaling lines).
+Given a schedule adjustment and its cost impact, write a concise cost justification using your knowledge of:
+- How events (concerts, festivals, football matches) drive ridership surges in Malaysia
+- How weather affects LRT demand (rain increases ridership as people avoid driving)
+- How emergencies (signal failures, overcrowding) require costly but necessary frequency changes
+- The public service obligation of LRT — safety and accessibility outweigh short-term cost savings
+Reason from the situation, not just the numbers. Be practical and direct. Under 100 words. Plain text, no markdown."""
+
+_WEEKLY_ANOMALY_SYSTEM = """You are a cost analyst for Malaysian LRT operations.
+Given the weekly cost breakdown, identify any anomalies or noteworthy patterns.
+Flag days where cost is significantly above or below the weekly average, explain why if obvious, and give one overall recommendation.
+Use bullet points. Under 100 words."""
+
+
+def get_glm_cost_justification_stream(
+    line: str,
+    date_str: str,
+    std_cost: float,
+    extra_cost: float,
+    net_cost: float,
+    events: list[dict],
+    emergency_type: str | None,
+    weather: str,
+    expected_extra_pax: int = 0,
+):
+    """Stream GLM cost justification for today's adjusted schedule."""
+    if not GLM_API_KEY:
+        yield (
+            f"Extra cost of RM {extra_cost:,.0f} deployed for {emergency_type or (events[0]['name'] if events else weather)} situation. "
+            f"Net cost RM {net_cost:,.0f} vs standard RM {std_cost:,.0f}."
+        )
+        return
+
+    event_text = ", ".join(e["name"] for e in events) if events else "none"
+    situation = []
+    if emergency_type:
+        situation.append(f"{emergency_type.replace('_', ' ')} emergency")
+    if events:
+        situation.append(f"{event_text} event")
+    if weather != "clear":
+        situation.append(f"{weather} weather")
+    situation_str = " + ".join(situation) if situation else "standard operations"
+
+    prompt = (
+        f"Line: {line} | Date: {date_str}\n"
+        f"Situation: {situation_str}\n"
+        f"Standard daily cost: RM {std_cost:,.0f}\n"
+        f"Cost adjustment: RM {extra_cost:+,.0f}\n"
+        f"Net cost: RM {net_cost:,.0f}\n\n"
+        f"Based on your knowledge of this type of situation ({situation_str}), "
+        f"is this cost adjustment justified? Give a brief verdict."
+    )
+    yield from call_glm_stream(prompt, system=_COST_JUSTIFY_SYSTEM, temperature=0.3)
+
+
+def get_glm_weekly_anomalies(weekly_data: list[dict]) -> str:
+    """Ask GLM to flag cost anomalies in the weekly overview. Returns plain text."""
+    if not GLM_API_KEY:
+        return "Connect GLM API to get weekly cost analysis."
+
+    rows_text = "\n".join(
+        f"  {r['Day']} ({r['Type']}): std=RM {r['std']:,.0f}, extra=RM {r['extra']:+,.0f}, net=RM {r['net']:,.0f}"
+        for r in weekly_data
+    )
+    net_values = [r["net"] for r in weekly_data]
+    avg = sum(net_values) / len(net_values) if net_values else 0
+    prompt = (
+        f"Weekly cost breakdown (average net: RM {avg:,.0f}/day):\n{rows_text}\n"
+        "Identify anomalies and give one recommendation."
+    )
+    try:
+        return call_glm(prompt, system=_WEEKLY_ANOMALY_SYSTEM, temperature=0.3, model=GLM_MODEL_FAST)
+    except Exception:
+        return "Could not retrieve weekly analysis."
 
 
 

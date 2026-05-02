@@ -15,12 +15,14 @@ TARGET_LOAD_FACTOR = 0.75     # aim for 75% full — leave headroom for comfort
 
 
 
-# Weather — effect on BASELINE demand (bad weather → people stay home / make fewer trips)
+# Weather — effect on BASELINE LRT demand
+# Rain/cloudy → more people switch from driving/walking to LRT (modal shift)
+# Stormy → severe enough that people cancel trips entirely
 WEATHER_PAX_MULT = {
     "clear":  1.00,
-    "cloudy": 0.95,
-    "rainy":  0.88,
-    "stormy": 0.70,
+    "cloudy": 1.05,
+    "rainy":  1.15,
+    "stormy": 1.05,
 }
 
 # Weather — effect on EVENT passenger load at station.

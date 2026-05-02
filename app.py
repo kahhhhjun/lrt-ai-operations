@@ -9,7 +9,7 @@ import pandas as pd
 import streamlit as st
 
 from core.calculator import WEATHER_MAX_FREQ, TRAIN_CAPACITY, compute_options, default_frequency as _dfreq
-from core.glm_client import extract_inputs_from_text, get_glm_pax_factors
+from core.glm_client import extract_inputs_from_text, get_glm_pax_factors, get_glm_cost_justification_stream
 from core.recommender import (get_glm_recommendation, get_glm_recommendation_stream,
                               get_glm_daily_reasoning_stream, recommend_daily)
 from core.database import init_db, save_schedule, load_schedule, delete_schedule, list_saved
@@ -122,7 +122,9 @@ if st.session_state.get("_sch_key") != _key:
             "_a_em_type": _saved.get("emergency_type"),
             "_analysis": None, "_chosen_option": "moderate",
             "_db_saved_at": _saved["saved_at"],
-            "_briefing_text": "",  # loaded from DB — skip briefing on reload
+            "_briefing_text":      "",   # loaded from DB — skip briefing on reload
+            "_cost_justify_text":  "",
+            "_weekly_anomaly_text": None,
             "_from_db": True,
         })
     else:
@@ -132,6 +134,7 @@ if st.session_state.get("_sch_key") != _key:
             "_tune_start": 6, "_tune_end": 24,
             "_analysis": None, "_chosen_option": "moderate",
             "_db_saved_at": None,
+            "_weekly_anomaly_text": None,
         })
 
 
@@ -228,8 +231,10 @@ def _style_rows(row):
         return ["background-color: #4a4a00; color: #ffffff; font-weight: bold"] * len(row)
     if mode == "updated" and s["recommended_frequency"] != s["standard_frequency"] and not s.get("em_status") and not s.get("is_event_tail") and not s.get("has_event"):
         return ["background-color: #1a3a5c; color: #ffffff; font-weight: bold"] * len(row)
-    if s.get("is_event_tail") or (mode == "updated" and s.get("has_event")):
+    if mode == "updated" and s.get("has_event") and not s.get("is_event_tail"):
         return ["background-color: #2a4a3c; color: #ffffff; font-weight: bold"] * len(row)
+    if s.get("is_event_tail"):
+        return ["background-color: #4a3a00; color: #ffffff; font-weight: bold"] * len(row)
     return [""] * len(row)
 
 st.dataframe(
@@ -281,9 +286,10 @@ if mode == "updated":
                 "_sch_events":   [],
                 "_tune_start":   6,
                 "_tune_end":     24,
-                "_analysis":     None,
-                "_db_saved_at":  None,
-                "_briefing_text": None,
+                "_analysis":          None,
+                "_db_saved_at":       None,
+                "_briefing_text":     None,
+                "_cost_justify_text": None,
             })
             st.rerun()
 
@@ -299,22 +305,73 @@ m2.metric("Extra cost (adjusted hours)", f"RM {extra_win:,.0f}",
           delta=extra_win if mode == "updated" else None, delta_color="inverse")
 m3.metric("Total cost this day", f"RM {total_day:,.0f}")
 
+# ── GLM cost justification (Option 1) ────────────────────────────────────────
+if mode == "updated" and extra_win != 0:
+    _cost_cache = st.session_state.get("_cost_justify_text")
+    if _cost_cache:
+        st.caption(f"💰 {_cost_cache}")
+    elif _cost_cache is None:
+        _extra_pax = sum(
+            s.get("expected_passengers_per_hr", 0) - s.get("expected_passengers_per_hr", 0)
+            for s in schedule if s.get("has_event")
+        )
+        try:
+            with st.spinner("GLM analysing cost..."):
+                _justify_text = "".join(get_glm_cost_justification_stream(
+                    line=sch_line, date_str=sch_date.isoformat(),
+                    std_cost=std_total, extra_cost=extra_win, net_cost=total_day,
+                    events=ev_active, emergency_type=st.session_state.get("_a_em_type"),
+                    weather=st.session_state.get("_upd_weather", "clear"),
+                    expected_extra_pax=_extra_pax,
+                ))
+            st.caption(f"💰 {_justify_text}")
+            st.session_state["_cost_justify_text"] = _justify_text
+        except Exception:
+            st.session_state["_cost_justify_text"] = ""
+
 # ── Weekly cost overview ──────────────────────────────────────────────────────
-with st.expander("📊 Weekly cost overview (standard schedule, no events)"):
-    st.caption("Standard operating cost per day for this line — same every week.")
-    weekly_rows, weekly_total = [], 0
-    for day_name in DAYS:
-        dr = recommend_daily(date_str=_REF_DATES[day_name], line=sch_line,
-                             weather="clear", events=[], cost_per_train_hr=350)
-        c = dr["daily_standard_cost_rm"]
-        weekly_total += c
+with st.expander("📊 Weekly cost overview"):
+    from datetime import timedelta
+    _week_monday = sch_date - timedelta(days=sch_date.weekday())
+    weekly_rows, weekly_net_total = [], 0
+    for i, day_name in enumerate(DAYS):
+        _day_date = _week_monday + timedelta(days=i)
+        _day_type = "Weekend" if i >= 5 else "Weekday"
+        if _day_date == sch_date:
+            _std  = std_total
+            _extra = extra_win
+            _net  = total_day
+            tag   = f"{_day_type} (Adjusted)" if mode == "updated" else _day_type
+        else:
+            _saved_rec = load_schedule(_day_date.isoformat(), sch_line)
+            if _saved_rec:
+                _std   = _saved_rec["total_std_cost"]
+                _extra = _saved_rec["total_extra_cost"]
+                _net   = _saved_rec["total_cost"]
+                tag    = f"{_day_type} (Adjusted)"
+            else:
+                dr    = recommend_daily(date_str=_REF_DATES[day_name], line=sch_line,
+                                        weather="clear", events=[], cost_per_train_hr=350)
+                _std  = dr["daily_standard_cost_rm"]
+                _extra = 0
+                _net  = _std
+                tag   = _day_type
+        weekly_net_total += _net
+        _extra_str = f"+RM {_extra:,.0f}" if _extra > 0 else (f"−RM {abs(_extra):,.0f}" if _extra < 0 else "–")
         weekly_rows.append({
-            "Day":      day_name,
-            "Type":     "Weekend" if DAYS.index(day_name) >= 5 else "Weekday",
-            "Cost/day": f"RM {c:,.0f}",
+            "Day":           f"{day_name} ({_day_date.strftime('%d %b')})",
+            "Type":          tag,
+            "Standard Cost": f"RM {_std:,.0f}",
+            "Extra Cost":    _extra_str,
+            "Net Cost":      f"RM {_net:,.0f}",
         })
-    weekly_rows.append({"Day": "WEEKLY TOTAL", "Type": "", "Cost/day": f"RM {weekly_total:,.0f}"})
+    weekly_rows.append({
+        "Day": "WEEKLY TOTAL", "Type": "",
+        "Standard Cost": "", "Extra Cost": "",
+        "Net Cost": f"RM {weekly_net_total:,.0f}",
+    })
     st.dataframe(pd.DataFrame(weekly_rows), use_container_width=True, hide_index=True)
+
 
 # ── GLM shift briefing (streamed once per update; skipped on page reload) ─────
 if mode == "updated" and result.get("has_adjustments"):
@@ -720,9 +777,10 @@ if analysis and analysis.get("options"):
                 "_upd_weather":   a_weather,
                 "_tune_start":    a_ts,
                 "_tune_end":      a_te,
-                "_analysis":      None,
-                "_briefing_text": None,
-                "_from_db":       False,
+                "_analysis":          None,
+                "_briefing_text":     None,
+                "_cost_justify_text": None,
+                "_from_db":           False,
             })
             st.rerun()
 
