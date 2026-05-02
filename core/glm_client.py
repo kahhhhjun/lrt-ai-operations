@@ -305,6 +305,7 @@ def get_glm_pax_factors(
         return _DEFAULTS
 
 
+
 _COST_JUSTIFY_SYSTEM = """You are a senior operations analyst for Malaysian LRT (Kelana Jaya, Ampang, Sri Petaling lines).
 Given a schedule adjustment and its cost impact, write a concise cost justification using your knowledge of:
 - How events (concerts, festivals, football matches) drive ridership surges in Malaysia
