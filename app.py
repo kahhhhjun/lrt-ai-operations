@@ -223,8 +223,8 @@ for s in schedule:
             "Frequency":        f"every {s['headway_rec_min']} min",
             "Trains/hr":        tc,
             "Operational Cost (RM/hr)":     f"RM {s['total_cost_rm']:,.0f}",
-            "Carbon Tax (RM/hr)":          f"RM {s['total_carbon_tax_rm']:,.2f}",
-            "Total Cost (RM/hr)":           f"RM {s['total_cost_rm'] + s['total_carbon_tax_rm']:,.2f}",
+            "Carbon Tax (RM/hr)":          f"RM {s.get('total_carbon_tax_rm', 0):,.2f}",
+            "Total Cost (RM/hr)":           f"RM {s['total_cost_rm'] + s.get('total_carbon_tax_rm', 0):,.2f}",
             "Load factor":      f"{s['load_factor_pct']}%",
             "Status":           status,
         })
@@ -238,8 +238,8 @@ for s in schedule:
             "Frequency":        f"every {s['headway_std_min']} min",
             "Trains/hr":        str(s["standard_frequency"]),
             "Operational Cost (RM/hr)":     f"RM {s['standard_cost_rm']:,.0f}",
-            "Carbon Tax (RM/hr)":          f"RM {s['standard_carbon_tax_rm']:,.2f}",
-            "Total Cost (RM/hr)":           f"RM {s['standard_cost_rm'] + s['standard_carbon_tax_rm']:,.2f}",
+            "Carbon Tax (RM/hr)":          f"RM {s.get('standard_carbon_tax_rm', 0):,.2f}",
+            "Total Cost (RM/hr)":           f"RM {s['standard_cost_rm'] + s.get('standard_carbon_tax_rm', 0):,.2f}",
             "Load factor":      f"{s['standard_load_factor_pct']}%",
             "Status":           "Standard",
         })
@@ -305,15 +305,17 @@ with st.expander("📈 Schedule visualisation", expanded=False):
 
     # Chart 2 — Load factor with green / orange / red zones
     st.markdown("**Load factor per hour**")
+    _viz_df["Zone"] = _viz_df["Load Factor"].apply(
+        lambda x: "Overcrowded (>100%)" if x > 100 else "Full (75–100%)" if x > 75 else "Comfortable (<75%)"
+    )
     _lf_chart = alt.Chart(_viz_df).mark_bar(opacity=0.9).encode(
         x=alt.X("Hour:O", title="Hour", sort=None),
         y=alt.Y("Load Factor:Q", title="Load factor (%)"),
-        color=alt.condition(
-            alt.datum["Load Factor"] > 100,
-            alt.value("#e74c3c"),
-            alt.condition(alt.datum["Load Factor"] > 75, alt.value("#f39c12"), alt.value("#27ae60"))
-        ),
-        tooltip=["Hour", "Load Factor"],
+        color=alt.Color("Zone:N", scale=alt.Scale(
+            domain=["Comfortable (<75%)", "Full (75–100%)", "Overcrowded (>100%)"],
+            range=["#27ae60", "#f39c12", "#e74c3c"],
+        ), legend=None),
+        tooltip=["Hour", "Load Factor", "Zone"],
     )
     _rule_75  = alt.Chart(pd.DataFrame({"y": [75]})).mark_rule(
         color="#27ae60", strokeDash=[5, 3], strokeWidth=1
@@ -338,12 +340,16 @@ with st.expander("📈 Schedule visualisation", expanded=False):
             color=alt.Color("Type:N", scale=alt.Scale(
                 domain=["Standard Trains", "Adjusted Trains"],
                 range=["#636363", "#4a90d9"],
-            )),
+            ), legend=None),
             xOffset="Type:N",
             tooltip=["Hour", "Type", "Trains/hr"],
         )
         st.altair_chart(_freq_chart.properties(height=220), use_container_width=True)
-        st.caption("Grey = standard schedule  · Blue = adjusted schedule")
+        st.markdown(
+            '<span style="color:#636363">●</span> Standard schedule &nbsp;·&nbsp; '
+            '<span style="color:#4a90d9">●</span> Adjusted schedule',
+            unsafe_allow_html=True,
+        )
 
 if mode == "updated":
     st.markdown("---")
@@ -399,7 +405,7 @@ extra_win = sum(s["extra_cost_rm"] for s in schedule) if mode == "updated" else 
 total_day = std_total + extra_win
 
 std_carbon = result["daily_standard_carbon_tax_rm"]
-extra_carbon = sum(s["extra_carbon_tax_rm"] for s in schedule) if mode == "updated" else 0
+extra_carbon = sum(s.get("extra_carbon_tax_rm", 0) for s in schedule) if mode == "updated" else 0
 total_carbon = std_carbon + extra_carbon
 
 st.markdown("### Daily cost breakdown")
@@ -448,6 +454,7 @@ with st.expander("📊 Weekly cost overview"):
     from datetime import timedelta
     _week_monday = sch_date - timedelta(days=sch_date.weekday())
     weekly_rows, weekly_net_total, weekly_carbon_total, weekly_std_total, weekly_extra_total, weekly_std_carbon_total, weekly_extra_carbon_total, weekly_grand_total = [], 0, 0, 0, 0, 0, 0, 0
+    _weekly_chart_rows = []
     for i, day_name in enumerate(DAYS):
         _day_date = _week_monday + timedelta(days=i)
         _day_type = "Weekend" if i >= 5 else "Weekday"
@@ -487,6 +494,9 @@ with st.expander("📊 Weekly cost overview"):
         weekly_extra_carbon_total += _extra_carbon
         _grand_total = _net + _net_carbon
         weekly_grand_total += _grand_total
+        _day_label = f"{day_name[:3]} ({_day_date.strftime('%d %b')})"
+        _weekly_chart_rows.append({"Day": _day_label, "Cost Type": "Standard", "Cost (RM)": _std, "Adjusted": "Yes" if _extra > 0 else "No"})
+        _weekly_chart_rows.append({"Day": _day_label, "Cost Type": "Extra",    "Cost (RM)": _extra, "Adjusted": "Yes" if _extra > 0 else "No"})
         _extra_str = f"+RM {_extra:,.0f}" if _extra > 0 else (f"−RM {abs(_extra):,.0f}" if _extra < 0 else "–")
         _extra_carbon_str = f"+RM {_extra_carbon:,.2f}" if _extra_carbon > 0 else (f"−RM {abs(_extra_carbon):,.2f}" if _extra_carbon < 0 else "–")
         weekly_rows.append({
@@ -511,6 +521,24 @@ with st.expander("📊 Weekly cost overview"):
         "Total Cost":               f"RM {weekly_grand_total:,.2f}",
     })
     st.dataframe(pd.DataFrame(weekly_rows), use_container_width=True, hide_index=True)
+
+    _chart_df = pd.DataFrame(_weekly_chart_rows)
+    _day_order = [f"{d[:3]} ({(_week_monday + timedelta(days=i)).strftime('%d %b')})" for i, d in enumerate(DAYS)]
+    _weekly_chart = alt.Chart(_chart_df).mark_bar().encode(
+        x=alt.X("Day:O", title="Day", sort=_day_order),
+        y=alt.Y("Cost (RM):Q", title="Cost (RM)", stack="zero"),
+        color=alt.Color("Cost Type:N", scale=alt.Scale(
+            domain=["Standard", "Extra"],
+            range=["#636363", "#4a90d9"],
+        ), legend=None),
+        tooltip=["Day", "Cost Type", alt.Tooltip("Cost (RM):Q", format=",.0f")],
+    ).properties(height=220)
+    st.altair_chart(_weekly_chart, use_container_width=True)
+    st.markdown(
+        '<span style="color:#636363">●</span> Standard cost &nbsp;·&nbsp; '
+        '<span style="color:#4a90d9">●</span> Extra cost (adjusted days)',
+        unsafe_allow_html=True,
+    )
 
 
 # ── GLM shift briefing (streamed once per update; skipped on page reload) ─────
@@ -585,17 +613,13 @@ input_method = st.radio(
 )
 
 _EMERGENCY_OPTIONS = [
-    "None", "track_incident", "signal_failure", "power_failure",
-    "breakdown", "evacuation", "overcrowding",
+    "None", "signal_failure", "power_failure", "overcrowding",
 ]
 _EMERGENCY_LABELS = {
-    "None": "None",
-    "track_incident":  "Track incident (person/suicide on track)",
-    "signal_failure":  "Signal failure",
-    "power_failure":   "Power failure",
-    "breakdown":       "Train breakdown",
-    "evacuation":      "Evacuation (fire / bomb threat)",
-    "overcrowding":    "Overcrowding / stampede risk",
+    "None":           "None",
+    "signal_failure": "Signal failure",
+    "power_failure":  "Power failure",
+    "overcrowding":   "Overcrowding / stampede risk",
 }
 
 sch_cost = 350  # fixed running cost — not exposed in UI
@@ -800,11 +824,8 @@ if st.button("Analyse", type="primary", key="analyse_btn"):
 
     # Show emergency banner immediately so duty manager sees it before GLM finishes
     _EMERGENCY_LABELS = {
-        "track_incident":  ("🚨 TRACK INCIDENT — Service suspended. Maximum frequency required on resumption.", "error"),
         "signal_failure":  ("⚠️ SIGNAL FAILURE — Reduce frequency for safety.", "warning"),
         "power_failure":   ("⚠️ POWER FAILURE — Service disrupted. Reduce frequency.", "warning"),
-        "breakdown":       ("🔧 TRAIN BREAKDOWN — One train out of service.", "warning"),
-        "evacuation":      ("🚨 EVACUATION — Maximum frequency to clear stations.", "error"),
         "overcrowding":    ("⚠️ OVERCROWDING EMERGENCY — Add trains urgently.", "warning"),
     }
     if a_emergency_type and a_emergency_type in _EMERGENCY_LABELS:

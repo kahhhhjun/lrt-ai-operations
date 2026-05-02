@@ -117,9 +117,9 @@ def load_schedule(date: str, line: str) -> dict | None:
         "total_std_cost":   row["total_std_cost"],
         "total_extra_cost": row["total_extra_cost"],
         "total_cost":       row["total_cost"],
-        "total_std_carbon_tax":   row.get("total_std_carbon_tax", 0),
-        "total_extra_carbon_tax": row.get("total_extra_carbon_tax", 0),
-        "total_carbon_tax":       row.get("total_carbon_tax", 0),
+        "total_std_carbon_tax":   row["total_std_carbon_tax"] or 0,
+        "total_extra_carbon_tax": row["total_extra_carbon_tax"] or 0,
+        "total_carbon_tax":       row["total_carbon_tax"] or 0,
         "saved_at":         row["saved_at"],
         "notes":            row["notes"],
     }

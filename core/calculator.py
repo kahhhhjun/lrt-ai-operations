@@ -289,14 +289,7 @@ def compute_options(inputs: dict) -> list[dict]:
 
     # Step 6: build freq_map relative to the standard schedule
 
-    if emergency_type == "track_incident":
-        # Service suspended. Options = resumption strategy after clearance.
-        freq_map = {
-            "conservative": 0,                  # remain suspended, wait for full all-clear
-            "moderate":     min(5, max_freq),   # cautious resumption at reduced speed
-            "aggressive":   max_freq,            # immediate full resumption to clear backlog
-        }
-    elif emergency_type == "signal_failure":
+    if emergency_type == "signal_failure":
         # Signal failure — immediate full stop, trains cannot navigate safely
         freq_map = {
             "conservative": 0,
@@ -311,20 +304,6 @@ def compute_options(inputs: dict) -> list[dict]:
             "conservative": max(1, reduce_to - 1),
             "moderate":     reduce_to,
             "aggressive":   min(reduce_to + 1, max_freq),
-        }
-    elif emergency_type == "breakdown":
-        # One train lost — operate slightly below standard
-        freq_map = {
-            "conservative": max(1, std_freq - 2),
-            "moderate":     max(1, std_freq - 1),
-            "aggressive":   std_freq,
-        }
-    elif emergency_type == "evacuation":
-        # Clear stations fast — push well above standard
-        freq_map = {
-            "conservative": max(1, max_freq - 4),
-            "moderate":     max(1, max_freq - 2),
-            "aggressive":   max_freq,
         }
     elif emergency_type:
         # overcrowding or generic — urgently add trains above standard + event demand
@@ -475,16 +454,10 @@ def compute_daily_schedule(
         if emergency_type and emergency_hour is not None:
             if emergency_hour <= hour < em_end:
                 em_status = "active"
-                if emergency_type == "track_incident":
-                    rec_freq = 0
-                elif emergency_type == "signal_failure":
+                if emergency_type == "signal_failure":
                     rec_freq = 0
                 elif emergency_type == "power_failure":
                     rec_freq = max(1, std_freq - 4)
-                elif emergency_type == "breakdown":
-                    rec_freq = max(1, std_freq - 2)
-                elif emergency_type == "evacuation":
-                    rec_freq = min(max_freq, std_freq + 4)
                 elif emergency_type == "overcrowding":
                     # Overcrowding: compute_options already inflated expected pax by 1.5x,
                     # so rec_freq from moderate option already accounts for the surge.

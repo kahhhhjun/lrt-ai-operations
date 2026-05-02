@@ -61,10 +61,7 @@ Key facts:
 - The goal is NOT to maximise revenue — this is a public service.
 - EMERGENCY TYPES:
   * signal_failure: ALL trains must stop immediately — no exceptions. Signals protect against collisions.
-  * track_incident: ABSOLUTE HIGHEST PRIORITY EMERGENCY. Someone has died, committed suicide, or is on the track. ALL trains must STOP IMMEDIATELY — zero trains, no exceptions, no compromise. This overrides EVERYTHING: events, weather, cost, passenger demand, crowd size. NOTHING justifies running even a single train while a person is on the track or has died on the track. The conservative option (0 trains, full suspension) is the ONLY acceptable choice during the active incident. The next hour AFTER clearance is the RECOVERY phase — deploy maximum frequency to clear the backlog. Two-phase response: Phase 1 = suspend completely (conservative only), Phase 2 = max frequency recovery (aggressive). Moderate and aggressive during the active incident are DANGEROUS and NEGLIGENT.
   * power_failure: reduce frequency, run on backup power only.
-  * breakdown: one fewer train — slight reduction.
-  * evacuation (fire/bomb): maximum frequency to clear stations rapidly.
   * overcrowding: add trains urgently.
 
 Your task:

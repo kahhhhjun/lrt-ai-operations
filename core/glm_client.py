@@ -56,17 +56,14 @@ Return ONLY a valid JSON object with exactly these fields:
 {
   "weather": "clear", "cloudy", "rainy", or "stormy",
   "emergency": a short string describing the emergency, or null,
-  "emergency_type": "track_incident", "breakdown", "signal_failure", "power_failure", "evacuation", "overcrowding", or null,
+  "emergency_type": "signal_failure", "power_failure", "overcrowding", or null,
   "line": one of ["Kelana Jaya", "Ampang", "Sri Petaling"] or null,
   "events": [{"name": string, "passengers_per_hr": integer, "event_type": string}]
 }
 
 Emergency type rules:
-- "track_incident": person on track, suicide, suicide attempt, someone died, death, body on track, person jumped, fatality, killed on track — ALWAYS use this type for ANY situation involving a person on the tracks or death on the tracks. SERVICE MUST BE HALTED IMMEDIATELY.
-- "breakdown": train malfunction, out of service, mechanical failure
 - "signal_failure": signal fault, signalling problem
 - "power_failure": power outage, electrical fault
-- "evacuation": fire, bomb threat, security alert
 - "overcrowding": crowd crush, platform full, stampede risk
 
 Event type rules — set "event_type" for each event:
@@ -101,37 +98,23 @@ def _placeholder_extract(text: str) -> dict:
     elif any(w in t for w in ["cloud", "cloudy", "overcast"]):
         result["weather"] = "cloudy"
 
-    _track_kw    = ["jump", "jumps", "jumped", "suicide", "person on track", "body on track",
-                    "track intrusion", "trespasser", "fell onto", "fallen onto",
-                    "died", "death", "killed", "fatal", "fatality"]
-    _breakdown_kw = ["breakdown", "malfunction", "out of service", "mechanical", "derail"]
-    _signal_kw   = ["signal failure", "signal fault", "signalling", "signaling"]
-    _power_kw    = ["power failure", "power outage", "blackout", "electrical fault"]
-    _evac_kw     = ["evacuation", "fire", "bomb", "security alert", "suspicious"]
-    _crowd_kw    = ["overcrowding", "crowd crush", "stampede", "platform full"]
-    _generic_kw  = ["emergency", "accident", "incident", "failure", "alert"]
+    _signal_kw  = ["signal failure", "signal fault", "signalling", "signaling"]
+    _power_kw   = ["power failure", "power outage", "blackout", "electrical fault"]
+    _crowd_kw   = ["overcrowding", "crowd crush", "stampede", "platform full"]
+    _generic_kw = ["emergency", "accident", "incident", "failure", "alert"]
 
-    if any(w in t for w in _track_kw):
-        result["emergency"]      = "person on track — service suspended"
-        result["emergency_type"] = "track_incident"
-    elif any(w in t for w in _breakdown_kw):
-        result["emergency"]      = "train breakdown"
-        result["emergency_type"] = "breakdown"
-    elif any(w in t for w in _signal_kw):
+    if any(w in t for w in _signal_kw):
         result["emergency"]      = "signal failure"
         result["emergency_type"] = "signal_failure"
     elif any(w in t for w in _power_kw):
         result["emergency"]      = "power failure"
         result["emergency_type"] = "power_failure"
-    elif any(w in t for w in _evac_kw):
-        result["emergency"]      = "evacuation in progress"
-        result["emergency_type"] = "evacuation"
     elif any(w in t for w in _crowd_kw):
         result["emergency"]      = "overcrowding emergency"
         result["emergency_type"] = "overcrowding"
     elif any(w in t for w in _generic_kw):
         result["emergency"]      = "emergency situation detected"
-        result["emergency_type"] = "overcrowding"  # default: treat as needing more trains
+        result["emergency_type"] = "overcrowding"
 
     if result["emergency"]:
         result.setdefault("emergency_type", "overcrowding")
@@ -292,9 +275,7 @@ Guidelines:
 - Stormy: weather_pax_mult=1.03-1.08, weather_event_mult=1.05-1.10 (some modal shift, slightly less than rainy)
 - No emergency: emergency_pax_mult=1.0
 - Overcrowding: emergency_pax_mult=1.4-1.6
-- Evacuation: emergency_pax_mult=1.3-1.5
-- Breakdown/signal_failure/power_failure: emergency_pax_mult=1.1-1.3
-- track_incident: emergency_pax_mult=1.2-1.4
+- Signal failure / power failure: emergency_pax_mult=1.1-1.3
 Return ONLY the JSON. No explanation."""
 
 
