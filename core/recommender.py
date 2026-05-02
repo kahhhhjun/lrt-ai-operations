@@ -517,9 +517,14 @@ def recommend_daily(
                                       pax_factors=pax_factors or {},
                                       cctv_pax_override=cctv_pax_override)
 
+    from core.calculator import CARBON_TAX_PER_TRAIN_PER_HOUR
     daily_std_cost   = sum(s["standard_cost_rm"] for s in schedule)
     daily_extra_cost = sum(s["extra_cost_rm"]    for s in schedule)
     daily_total_cost = sum(s["total_cost_rm"]    for s in schedule)
+
+    daily_std_carbon_tax   = sum(s["standard_frequency"] * CARBON_TAX_PER_TRAIN_PER_HOUR for s in schedule)
+    daily_extra_carbon_tax = sum(s["extra_trains"]        * CARBON_TAX_PER_TRAIN_PER_HOUR for s in schedule)
+    daily_total_carbon_tax = daily_std_carbon_tax + daily_extra_carbon_tax
 
     has_adjustments = bool(events or weather != "clear" or emergency_type or cctv_pax_override)
 
